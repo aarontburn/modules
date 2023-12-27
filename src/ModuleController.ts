@@ -34,24 +34,26 @@ export class ModuleController {
                 map.set(module.getModuleName(), module.getHtmlPath());
             });
             this.window.webContents.send('load-modules', map);
-            this.window.webContents.send('swap-modules-renderer', HomeModule.MODULE_NAME);
+            this.swapLayouts(HomeModule.MODULE_NAME);
+
         });
 
-        this.ipc.handle("alert-main-swap-modules", (_, moduleName: string) => {
-            console.log("heree")
-            const module: Module = this.modulesByName.get(moduleName);
-            if (!module.isInitialized()) {
-                module.initialize();
-            }
-
-            this.window.webContents.send('swap-modules-renderer', moduleName);
-        });
+        this.ipc.handle("alert-main-swap-modules", (_, moduleName: string) =>
+            this.swapLayouts(moduleName));
     }
 
     public stop(): void {
         this.activeModules.forEach((module: Module) => {
             module.stop();
         });
+    }
+
+    private swapLayouts(moduleName: string): void {
+        const module: Module = this.modulesByName.get(moduleName);
+        if (!module.isInitialized()) {
+            module.initialize();
+        }
+        this.window.webContents.send('swap-modules-renderer', moduleName);
     }
 
 

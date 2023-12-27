@@ -11,11 +11,29 @@ export class HomeModule extends Module {
 
     public constructor() {
         super(HomeModule.MODULE_NAME, HomeModule.HTML_PATH);
+
     }
 
     public initialize(): void {
         super.initialize();
-        console.log("init");
+        // window.document.getElementById("standard-time")
+
+        // Start clock
+        setTimeout(() => this.start(), 1000 - new Date().getMilliseconds());
+    }
+
+    private start() {
+        setInterval(this.updateDateAndTime, 1000);
+        console.log("starting timer");
+    }
+
+    public updateDateAndTime() {
+        const date: Date = new Date();
+
+
+
+        // window.document.getElementById("standard-time").innerHTML = date.getTime().toString();
+
     }
 
     public registerSettings(): Setting<unknown>[] {
