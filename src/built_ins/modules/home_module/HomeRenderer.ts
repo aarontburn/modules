@@ -1,14 +1,19 @@
-console.log(document)
+const parentRenderer: Window = window.parent;
 
-const button: HTMLElement = document.getElementById("test-button");
-button.addEventListener("click", () => {
-    window.ipc.send("home-process", "test")
-})
+const fullDate: HTMLElement = document.getElementById("full-date");
+const abbreviatedDate: HTMLElement = document.getElementById("abbreviated-date");
 
-window.ipc.on("home-renderer", (_, eventType: string, data: any[]) => {
+const standardTime: HTMLElement = document.getElementById("standard-time");
+const militaryTime: HTMLElement = document.getElementById("military-time");
+
+parentRenderer.ipc.on("home-renderer", (_, eventType: string, data: any[]) => {
+    data = data[0]; // Data is wrapped in an extra array.
     switch(eventType) {
         case "update-clock": {
-            console.log(data)
+            fullDate.innerHTML = data[0];
+            abbreviatedDate.innerHTML = data[1];
+            standardTime.innerHTML = data[2];
+            militaryTime.innerHTML = data[3];
             break;
         }
     }

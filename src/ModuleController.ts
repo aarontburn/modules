@@ -35,17 +35,19 @@ export class ModuleController implements IPCSource {
         this.createAndShow();
         this.attachIpcHandler();
 
+        this.window.webContents.send("home-renderer", "test");
+
     }
 
     private attachIpcHandler(): void {
-        IPCHandler.createHandler(this.getIpcSource(), (_, eventType: string, data: object[]) => {
+        IPCHandler.createHandler(this, (_, eventType: string, data: object[]) => {
             switch (eventType) {
                 case "renderer-init": {
                     const map: Map<string, string> = new Map<string, string>();
                     this.activeModules.forEach((module: Module) => {
                         map.set(module.getModuleName(), module.getHtmlPath());
                     });
-                    IPCHandler.fireEvent(this.getIpcSource(), 'load-modules', map);
+                    IPCHandler.fireEvent(this, 'load-modules', map);
                     this.swapLayouts(HomeModule.MODULE_NAME);
                     break;
                 }
@@ -54,14 +56,14 @@ export class ModuleController implements IPCSource {
                     break;
                 }
                 case "test": {
-                    console.log("test recieved")
+                    console.log("test recieved in main")
                     break;
                 }
             }
         });
 
         this.activeModules.forEach((module: Module) => {
-            this.ipc.on(module.getIpcSource(), (_, eventType: string, data: any[]) => {
+            this.ipc.on(module.getIpcSource() + "-process", (_, eventType: string, data: any[]) => {
                 this.modulesByName.get(module.getModuleName()).recieveIpcEvent(eventType, data);
             })
         });
@@ -80,7 +82,7 @@ export class ModuleController implements IPCSource {
             module.initialize();
         }
         module.onGuiShown();
-        IPCHandler.fireEvent(this.getIpcSource(), 'swap-modules-renderer', moduleName);
+        IPCHandler.fireEvent(this, 'swap-modules-renderer', moduleName);
     }
 
 
@@ -90,6 +92,7 @@ export class ModuleController implements IPCSource {
             width: WINDOW_DIMENSION.getWidth(),
             webPreferences: {
                 nodeIntegrationInSubFrames: true,
+                backgroundThrottling: false,
                 preload: path.join(__dirname, "preload.js"),
             },
         });

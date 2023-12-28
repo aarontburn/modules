@@ -18,20 +18,19 @@ export class IPCHandler {
         }
     }
 
-    public static fireEvent(target: string, eventType: string, ...data: any): void {
+    public static fireEvent(target: IPCSource, eventType: string, ...data: any[]): void {
         this.checkInit()
-        this.window.webContents.send(target + "-renderer", eventType, data);
+        this.window.webContents.send(target.getIpcSource() + "-renderer", eventType, data);
     }
 
     public static createHandler(
-        source: string,
+        source: IPCSource,
         func: (event: Electron.IpcMainEvent,
             eventType: string,
             data: object[]) => void): void {
 
         this.checkInit()
-
-        this.ipc.on(source + "-process", func);
+        this.ipc.on(source.getIpcSource() + "-process", func);
     }
 
 }

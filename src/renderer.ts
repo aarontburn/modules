@@ -35,8 +35,7 @@ window.ipc.on("main-renderer", (_, eventType: string, data: any) => {
             break;
         }
         case "swap-modules-renderer": {
-            console.log(data);
-            swapLayout(String(data))
+            swapLayout(data[0])
         }
     }
 })

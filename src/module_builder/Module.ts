@@ -69,7 +69,7 @@ export abstract class Module implements IPCSource {
     public abstract recieveIpcEvent(eventType: string, data: any[]): void
 
     public sendIpcEvent(eventType: string, ...data: any): void {
-        IPCHandler.fireEvent(super.getIpcSource(), eventType, data);
+        IPCHandler.fireEvent(this, eventType, data);
     }
 
 

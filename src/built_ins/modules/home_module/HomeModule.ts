@@ -8,6 +8,22 @@ export class HomeModule extends Module {
     public static MODULE_NAME: string = "Home";
     private static HTML_PATH: string = path.join(__dirname, "./HomeHTML.html").replace("dist", "src");
 
+    private static LOCALE: string = "en-US";
+    private static STANDARD_TIME_FORMAT: Intl.DateTimeFormatOptions =
+        { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true };
+
+    private static MILITARY_TIME_FORMAT: Intl.DateTimeFormatOptions =
+        { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false };
+
+    private static FULL_DATE_FORMAT: Intl.DateTimeFormatOptions =
+        { weekday: "long", month: 'long', day: 'numeric', year: 'numeric', };
+
+    private static ABBREVIATED_DATE_FORMAT: Intl.DateTimeFormatOptions =
+        {
+            month: 'numeric',
+            day: 'numeric',
+            year: 'numeric',
+        };
 
     public constructor() {
         super(HomeModule.MODULE_NAME, HomeModule.HTML_PATH);
@@ -17,18 +33,21 @@ export class HomeModule extends Module {
         super.initialize();
 
         // Start clock
-        setTimeout(() => this.start(), 1000 - new Date().getMilliseconds());
-    }
 
-    private start() {
-        setInterval(this.updateDateAndTime, 1000);
-        console.log("starting timer");
+        this.updateDateAndTime(false);
+        setTimeout(() => this.updateDateAndTime(true), 1000 - new Date().getMilliseconds());
     }
-
-    public updateDateAndTime() {
+    public updateDateAndTime(repeat: boolean) {
         const date: Date = new Date();
-        super.sendIpcEvent("update-clock", date.getTime().toString())
+        const standardTime: string = date.toLocaleString(HomeModule.LOCALE, HomeModule.STANDARD_TIME_FORMAT);
+        const militaryTime: string = date.toLocaleString(HomeModule.LOCALE, HomeModule.MILITARY_TIME_FORMAT);
+        const fullDate: string = date.toLocaleString(HomeModule.LOCALE, HomeModule.FULL_DATE_FORMAT);
+        const abbreviatedDate: string = date.toLocaleString(HomeModule.LOCALE, HomeModule.ABBREVIATED_DATE_FORMAT);
+        this.sendIpcEvent("update-clock", fullDate, abbreviatedDate, standardTime, militaryTime);
 
+        if (repeat) {
+            setTimeout(() => this.updateDateAndTime(true), 1000);
+        }
     }
 
     public registerSettings(): Setting<unknown>[] {
@@ -71,6 +90,8 @@ export class HomeModule extends Module {
     }
 
     public recieveIpcEvent(eventType: string, data: any[]): void {
-        console.log("recieved " + eventType)
+        switch (eventType) {
+
+        }
     }
 }
