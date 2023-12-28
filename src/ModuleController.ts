@@ -9,7 +9,6 @@ import { IPCSource } from "./IPCSource";
 
 
 const WINDOW_DIMENSION: Dimension = new Dimension(1920, 1080);
-const WINDOW_TITLE: string = "Thoughts";
 
 
 export class ModuleController implements IPCSource {
@@ -33,22 +32,34 @@ export class ModuleController implements IPCSource {
         this.createAndShow();
         this.attachIpcHandler();
 
+        this.checkSettings();
+
+    }
+
+    private checkSettings(): void {
+        this.activeModules.forEach((module: Module) => {
+            this.settingsModule.addModuleSetting(module.getSettings());
+        });
+    }
+
+    private init(): void {
+        const map: Map<string, string> = new Map<string, string>();
+        this.activeModules.forEach((module: Module) => {
+            map.set(module.getModuleName(), module.getHtmlPath());
+        });
+        IPCHandler.fireEvent(this, 'load-modules', map);
+        this.swapLayouts(HomeModule.MODULE_NAME);
     }
 
     private attachIpcHandler(): void {
-        IPCHandler.createHandler(this, (_, eventType: string, data: object[]) => {
+        IPCHandler.createHandler(this, (_, eventType: string, data: any[]) => {
             switch (eventType) {
                 case "renderer-init": {
-                    const map: Map<string, string> = new Map<string, string>();
-                    this.activeModules.forEach((module: Module) => {
-                        map.set(module.getModuleName(), module.getHtmlPath());
-                    });
-                    IPCHandler.fireEvent(this, 'load-modules', map);
-                    this.swapLayouts(HomeModule.MODULE_NAME);
+                    this.init();
                     break;
                 }
                 case "alert-main-swap-modules": {
-                    this.swapLayouts(String(data));
+                    this.swapLayouts(data[0]);
                     break;
                 }
             }
@@ -89,7 +100,6 @@ export class ModuleController implements IPCSource {
             },
         });
         this.window.loadFile(path.join(__dirname, "../index.html"));
-        this.window.setTitle(WINDOW_TITLE);
         IPCHandler.construct(this.window, this.ipc);
 
     }

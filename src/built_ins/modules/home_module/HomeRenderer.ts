@@ -1,12 +1,10 @@
-const parentRenderer: Window = window.parent;
-
 const fullDate: HTMLElement = document.getElementById("full-date");
 const abbreviatedDate: HTMLElement = document.getElementById("abbreviated-date");
 
 const standardTime: HTMLElement = document.getElementById("standard-time");
 const militaryTime: HTMLElement = document.getElementById("military-time");
 
-parentRenderer.ipc.on("home-renderer", (_, eventType: string, data: any[]) => {
+window.parent.ipc.on("home-renderer", (_, eventType: string, data: any[]) => {
     data = data[0]; // Data is wrapped in an extra array.
     switch(eventType) {
         case "update-clock": {

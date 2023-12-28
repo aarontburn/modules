@@ -31,7 +31,7 @@ export class HomeModule extends Module {
     // Start clock
 
     this.updateDateAndTime(false);
-    
+
     setTimeout(
       () => this.updateDateAndTime(true),
       1000 - new Date().getMilliseconds()
@@ -55,7 +55,7 @@ export class HomeModule extends Module {
       HomeModule.LOCALE,
       HomeModule.ABBREVIATED_DATE_FORMAT
     );
-    this.sendIpcEvent(
+    this.notifyObservers(
       "update-clock",
       fullDate,
       abbreviatedDate,
