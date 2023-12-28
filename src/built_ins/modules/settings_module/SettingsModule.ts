@@ -20,6 +20,8 @@ export class SettingsModule extends Module {
     }
 
 
-
+    public recieveIpcEvent(eventType: string, data: any[]): void {
+        console.log(eventType, data);
+    }
 
 }

@@ -11,12 +11,10 @@ export class HomeModule extends Module {
 
     public constructor() {
         super(HomeModule.MODULE_NAME, HomeModule.HTML_PATH);
-
     }
 
     public initialize(): void {
         super.initialize();
-        // window.document.getElementById("standard-time")
 
         // Start clock
         setTimeout(() => this.start(), 1000 - new Date().getMilliseconds());
@@ -29,10 +27,7 @@ export class HomeModule extends Module {
 
     public updateDateAndTime() {
         const date: Date = new Date();
-
-
-
-        // window.document.getElementById("standard-time").innerHTML = date.getTime().toString();
+        super.sendIpcEvent("update-clock", date.getTime().toString())
 
     }
 
@@ -73,5 +68,9 @@ export class HomeModule extends Module {
     }
     public refreshSettings(): void {
         throw new Error("Method not implemented.");
+    }
+
+    public recieveIpcEvent(eventType: string, data: any[]): void {
+        console.log("recieved " + eventType)
     }
 }

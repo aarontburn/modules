@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import { ModuleController } from "./ModuleController";
+import { IPCHandler } from "./IPCHandler";
 
 const ipcMain: Electron.IpcMain = require('electron').ipcMain;
 const guiHandler: ModuleController = new ModuleController(ipcMain);

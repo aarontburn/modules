@@ -1,16 +1,18 @@
-import { BrowserWindow, inAppPurchase } from "electron";
+import { BrowserWindow } from "electron";
 import { Dimension } from "./objects/Dimension";
 import * as path from "path";
 import { Module } from "./module_builder/Module";
 import { SettingsModule } from "./built_ins/modules/settings_module/SettingsModule";
 import { HomeModule } from "./built_ins/modules/home_module/HomeModule";
+import { IPCHandler } from "./IPCHandler";
+import { IPCSource } from "./IPCSource";
 
 
 const WINDOW_DIMENSION: Dimension = new Dimension(1920, 1080);
 const WINDOW_TITLE: string = "Thoughts";
 
 
-export class ModuleController {
+export class ModuleController implements IPCSource {
     private modulesByName = new Map<string, Module>();
     private activeModules: Module[] = [];
 
@@ -24,22 +26,45 @@ export class ModuleController {
         this.ipc = ipcHandler;
     }
 
+    getIpcSource(): string {
+        return "main";
+    }
+
     public start(): void {
         this.registerModules();
         this.createAndShow();
+        this.attachIpcHandler();
 
-        this.ipc.handle('renderer-init', (_, __) => {
-            const map: Map<string, string> = new Map<string, string>();
-            this.activeModules.forEach((module: Module) => {
-                map.set(module.getModuleName(), module.getHtmlPath());
-            });
-            this.window.webContents.send('load-modules', map);
-            this.swapLayouts(HomeModule.MODULE_NAME);
+    }
 
+    private attachIpcHandler(): void {
+        IPCHandler.createHandler(this.getIpcSource(), (_, eventType: string, data: object[]) => {
+            switch (eventType) {
+                case "renderer-init": {
+                    const map: Map<string, string> = new Map<string, string>();
+                    this.activeModules.forEach((module: Module) => {
+                        map.set(module.getModuleName(), module.getHtmlPath());
+                    });
+                    IPCHandler.fireEvent(this.getIpcSource(), 'load-modules', map);
+                    this.swapLayouts(HomeModule.MODULE_NAME);
+                    break;
+                }
+                case "alert-main-swap-modules": {
+                    this.swapLayouts(String(data));
+                    break;
+                }
+                case "test": {
+                    console.log("test recieved")
+                    break;
+                }
+            }
         });
 
-        this.ipc.handle("alert-main-swap-modules", (_, moduleName: string) =>
-            this.swapLayouts(moduleName));
+        this.activeModules.forEach((module: Module) => {
+            this.ipc.on(module.getIpcSource(), (_, eventType: string, data: any[]) => {
+                this.modulesByName.get(module.getModuleName()).recieveIpcEvent(eventType, data);
+            })
+        });
     }
 
     public stop(): void {
@@ -50,24 +75,27 @@ export class ModuleController {
 
     private swapLayouts(moduleName: string): void {
         const module: Module = this.modulesByName.get(moduleName);
+
         if (!module.isInitialized()) {
             module.initialize();
         }
-        this.window.webContents.send('swap-modules-renderer', moduleName);
+        module.onGuiShown();
+        IPCHandler.fireEvent(this.getIpcSource(), 'swap-modules-renderer', moduleName);
     }
 
 
     private createAndShow(): void {
-        console.log("show window")
         this.window = new BrowserWindow({
             height: WINDOW_DIMENSION.getHeight(),
             width: WINDOW_DIMENSION.getWidth(),
             webPreferences: {
+                nodeIntegrationInSubFrames: true,
                 preload: path.join(__dirname, "preload.js"),
             },
         });
         this.window.loadFile(path.join(__dirname, "../index.html"));
         this.window.setTitle(WINDOW_TITLE);
+        IPCHandler.construct(this.window, this.ipc);
 
     }
 
@@ -83,9 +111,6 @@ export class ModuleController {
         this.activeModules.push(module);
     }
 
-    public getWindow(): BrowserWindow {
-        return this.window;
-    }
 
 
 }

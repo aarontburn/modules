@@ -1,11 +1,10 @@
+import { IPCHandler } from "../IPCHandler";
+import { IPCSource } from "../IPCSource";
 import { ModuleSettings } from "./ModuleSettings";
-import { ModuleChangeReporter } from "./change_reporter/ModuleChangeReporter";
-import { ModuleListener } from "./change_reporter/ModuleListener";
 import { Setting } from "./settings/Settings";
 
-export abstract class Module {
+export abstract class Module implements IPCSource {
 
-    private moduleChangeReporter: ModuleChangeReporter = new ModuleChangeReporter();
     private moduleSettings = new ModuleSettings(this);
 
     private moduleName: string;
@@ -18,6 +17,10 @@ export abstract class Module {
         this.htmlPath = theHtmlPath;
     }
 
+    getIpcSource(): string {
+        return this.moduleName.toLowerCase();
+    }
+
     public getModuleName(): string {
         return this.moduleName;
     }
@@ -26,13 +29,6 @@ export abstract class Module {
         return this.moduleSettings;
     }
 
-    public addListener(theListener: ModuleListener) {
-        this.moduleChangeReporter.addListener(theListener);
-    }
-
-    public notifyListeners(theEventName: string, theData: any) {
-        this.moduleChangeReporter.notifyListeners(theEventName, theData);
-    }
 
     public getSettingsFileName(): string {
         return this.moduleName.toLowerCase() + "_settings.json";
@@ -68,6 +64,12 @@ export abstract class Module {
 
     public toString(): string {
         return this.moduleName;
+    }
+
+    public abstract recieveIpcEvent(eventType: string, data: any[]): void
+
+    public sendIpcEvent(eventType: string, ...data: any): void {
+        IPCHandler.fireEvent(super.getIpcSource(), eventType, data);
     }
 
 
