@@ -13,14 +13,12 @@ const WINDOW_TITLE: string = "Thoughts";
 
 
 export class ModuleController implements IPCSource {
+    private window: BrowserWindow;
+    private ipc: Electron.IpcMain;
+
     private modulesByName = new Map<string, Module>();
     private activeModules: Module[] = [];
-
-    private window: BrowserWindow;
-
     private settingsModule: SettingsModule = new SettingsModule();
-
-    private ipc: Electron.IpcMain;
 
     public constructor(ipcHandler: Electron.IpcMain) {
         this.ipc = ipcHandler;
@@ -34,8 +32,6 @@ export class ModuleController implements IPCSource {
         this.registerModules();
         this.createAndShow();
         this.attachIpcHandler();
-
-        this.window.webContents.send("home-renderer", "test");
 
     }
 
@@ -53,10 +49,6 @@ export class ModuleController implements IPCSource {
                 }
                 case "alert-main-swap-modules": {
                     this.swapLayouts(String(data));
-                    break;
-                }
-                case "test": {
-                    console.log("test recieved in main")
                     break;
                 }
             }

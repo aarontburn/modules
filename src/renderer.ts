@@ -9,65 +9,38 @@
 
 const IFRAME_DEFAULT_STYLE: string = "height: 99.7%; width: 99.85%;";
 
-
 window.ipc.send(window.constants.MAIN, "renderer-init"); // let main know that renderer is booted
 
 window.ipc.on("main-renderer", (_, eventType: string, data: any) => {
     switch (eventType) {
         case "load-modules": {
+            const moduleHtml: HTMLElement = document.getElementById("modules");
+            const headerHtml: HTMLElement = document.getElementById("header");
+
             (data[0] as Map<string, string>).forEach((moduleHtmlPath, moduleName) => {
                 console.log("Adding " + moduleName);
                 const moduleView: HTMLElement = document.createElement("iframe");
                 moduleView.id = moduleName;
                 moduleView.setAttribute("src", moduleHtmlPath);
                 moduleView.setAttribute("style", IFRAME_DEFAULT_STYLE);
-                document.getElementById("modules").insertAdjacentElement("beforeend", moduleView);
+                moduleHtml.insertAdjacentElement("beforeend", moduleView);
 
                 const id: string = moduleName + "HeaderButton";
                 const headerButton: HTMLElement = document.createElement("button");
                 headerButton.id = id;
                 headerButton.textContent = moduleName;
                 headerButton.addEventListener("click", () => window.ipc.send(window.constants.MAIN, "alert-main-swap-modules", moduleName));
-                document.getElementById("header").insertAdjacentElement("beforeend", headerButton);
+                headerHtml.insertAdjacentElement("beforeend", headerButton);
 
             });
-
             break;
         }
         case "swap-modules-renderer": {
             swapLayout(data[0])
+            break;
         }
     }
 })
-
-
-
-// window.ipc.on('load-modules',
-//     (_: Electron.IpcRendererEvent, map: Map<string, string>) => {
-//         map.forEach((moduleHtmlPath, moduleName) => {
-//             console.log("Adding " + moduleName);
-//             const moduleView: HTMLElement = document.createElement("iframe");
-//             moduleView.id = moduleName;
-//             moduleView.setAttribute("src", moduleHtmlPath);
-//             moduleView.setAttribute("style", IFRAME_DEFAULT_STYLE);
-//             document.getElementById("modules").insertAdjacentElement("beforeend", moduleView);
-
-//             const id: string = moduleName + "HeaderButton";
-//             const headerButton: HTMLElement = document.createElement("button");
-//             headerButton.id = id;
-//             headerButton.textContent = moduleName;
-//             headerButton.addEventListener("click", () => window.ipc.send(window.constants.MAIN, "alert-main-swap-modules", moduleName));
-//             document.getElementById("header").insertAdjacentElement("beforeend", headerButton);
-
-//         });
-//     });
-
-
-// window.ipc.on('swap-modules-renderer',
-//     (_: Electron.IpcRendererEvent, swapToLayoutId: string) => {
-//         console.log(swapToLayoutId);
-//         swapLayout(swapToLayoutId)
-//     });
 
 function swapLayout(swapToLayoutId: string): void {
     const modules: HTMLCollection = document.getElementById("modules").getElementsByTagName("*")
