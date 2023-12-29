@@ -12,11 +12,17 @@
     --default-background-color: var(--off-black);
 }
 
+* {
+    font-family: "Yu Gothic Light";
+
+}
+
 
 body {
     background-color: var(--default-background-color);
     color: var(--off-white);
-    font-family: "Yu Gothic Light";
     height: 100%;
     margin: 0;
 }
+
+

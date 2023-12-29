@@ -2,16 +2,17 @@ import { Setting } from "../../../module_builder/settings/Settings";
 import { Module } from "../../../module_builder/Module";
 import * as path from "path";
 import { ModuleSettings } from "../../../module_builder/ModuleSettings";
+import { IPCHandler } from "../../../IPCHandler";
 
 export class SettingsModule extends Module {
     public static MODULE_NAME: string = "Settings";
     private static HTML_PATH: string = path.join(__dirname, "./SettingsHTML.html").replace("dist", "src");
 
     private moduleSettingsList: ModuleSettings[] = [];
-    private settingsMap: Map<string, Setting<unknown>[]> = new Map<string, Setting<unknown>[]>();
 
     public constructor() {
         super(SettingsModule.MODULE_NAME, SettingsModule.HTML_PATH);
+        this.getSettings().setSettingsName("General");
     }
 
     public registerSettings(): Setting<unknown>[] {
@@ -26,28 +27,38 @@ export class SettingsModule extends Module {
     public initialize(): void {
         super.initialize();
 
-        const thisSettings: ModuleSettings = this.getSettings();
-        this.settingsMap.set(thisSettings.getModuleSettingsName(), thisSettings.getSettingsList());
 
+        const settings: any[] = [];
         for (const moduleSettings of this.moduleSettingsList) {
-            if (moduleSettings == thisSettings) {
-                continue;
-            }
+            const moduleName: string = moduleSettings.getModuleSettingsName();
+            const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
 
-        
-            const name: string = moduleSettings.getModuleSettingsName();
-            const list: Setting<unknown>[] = moduleSettings.getSettingsList();
-            this.settingsMap.set(name, list);
+            const list: any = {module: moduleName, settings: []};
+
+            settingsList.forEach((setting: Setting<unknown>) => {
+                const settingInfo: any = { 
+                    name: setting.getSettingName(),
+                    description: setting.getDescription(),
+                    value: setting.getValue(),
+                }
+                list.settings.push(settingInfo);
+            });
+            settings.push(list);
         }
 
         // this.refreshSettings();
-        this.notifyObservers("populate-settings-list", this.settingsMap);
+        this.notifyObservers("populate-settings-list", settings);
 
     }
 
 
     public recieveIpcEvent(eventType: string, data: any[]): void {
-        console.log(eventType, data);
+        switch (eventType) {
+            case "settings-init": {
+                this.initialize()
+                break;
+            }
+        }
     }
 
     public addModuleSetting(moduleSettings: ModuleSettings): void {

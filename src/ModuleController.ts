@@ -29,10 +29,9 @@ export class ModuleController implements IPCSource {
 
     public start(): void {
         this.registerModules();
+        this.checkSettings();
         this.createAndShow();
         this.attachIpcHandler();
-
-        this.checkSettings();
 
     }
 
@@ -47,7 +46,7 @@ export class ModuleController implements IPCSource {
         this.activeModules.forEach((module: Module) => {
             map.set(module.getModuleName(), module.getHtmlPath());
         });
-        IPCHandler.fireEvent(this, 'load-modules', map);
+        IPCHandler.fireEventToRenderer(this, 'load-modules', map);
         this.swapLayouts(HomeModule.MODULE_NAME);
     }
 
@@ -85,7 +84,7 @@ export class ModuleController implements IPCSource {
             module.initialize();
         }
         module.onGuiShown();
-        IPCHandler.fireEvent(this, 'swap-modules-renderer', moduleName);
+        IPCHandler.fireEventToRenderer(this, 'swap-modules-renderer', moduleName);
     }
 
 

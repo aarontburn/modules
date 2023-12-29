@@ -26,7 +26,7 @@ export class ModuleSettings {
         this.settingsMap.set(theSetting.getSettingName(), theSetting);
     }
 
-    public addAllSettings(...theSettings: Setting<unknown>[]): void {
+    public addAllSettings(theSettings: Setting<unknown>[]): void {
         theSettings.forEach((setting) => {
             this.addSetting(setting);
         });

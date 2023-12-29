@@ -55,13 +55,8 @@ export class HomeModule extends Module {
       HomeModule.LOCALE,
       HomeModule.ABBREVIATED_DATE_FORMAT
     );
-    this.notifyObservers(
-      "update-clock",
-      fullDate,
-      abbreviatedDate,
-      standardTime,
-      militaryTime
-    );
+    
+    this.notifyObservers("update-clock", fullDate, abbreviatedDate, standardTime, militaryTime);
 
     if (repeat) {
       setTimeout(() => this.updateDateAndTime(true), 1000);
