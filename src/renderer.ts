@@ -5,7 +5,7 @@
 // Use preload.js to selectively enable features
 // needed in the renderer process.
 
-
+console.log(document.createElement("p"));
 
 const IFRAME_DEFAULT_STYLE: string = "height: 99.7%; width: 99.85%;";
 

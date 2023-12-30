@@ -1,11 +1,12 @@
 import { Module } from "../Module";
 import { SettingBox } from "./SettingBox";
- 
+
 export abstract class Setting<T> {
 
     private parentModule: Module;
     private settingName: string;
     private settingDescription: string;
+    private settingId: string = this.generateRandomId()
 
     private inputValidator: (theInput: any) => T;
 
@@ -158,12 +159,13 @@ export abstract class Setting<T> {
      * @throws Error if an attempt was made to set the value before all
      *                               appropriate fields were set.
      */
-    public setValue(theValue: any): void {
+    public setValue(theValue: any): T {
         this.checkRequiredFields();
 
         const value: T = this.parseInput(theValue);
+        console.log(this.settingName + ": " + value)
         this.currentValue = value != null ? value : this.currentValue;
-
+        return value;
         // if (GUIHandler.isGuiInitialized()) {
         //     this.settingBox.updateDisplayValue();
         //     this.parentModule.refreshSettings();
@@ -232,12 +234,20 @@ export abstract class Setting<T> {
     }
 
 
-    protected abstract setUIComponent(): SettingBox<T>; 
+    protected abstract setUIComponent(): SettingBox<T>;
 
     public getUIComponent(): SettingBox<T> {
         return this.settingBox;
     }
-    
+
+    private generateRandomId(): string {
+        return "settingid_" + Math.random().toString(36).replace('0.', '');
+    }
+
+    public getId(): string {
+        return this.settingId;
+    }
+
 
 }
 

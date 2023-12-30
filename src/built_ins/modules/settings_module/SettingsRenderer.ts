@@ -1,48 +1,71 @@
 window.ipc.send("settings-process", "settings-init");
 
+const PROCESS: string = "settings-process";
+const RENDERER: string = "settings-renderer";
+
 
 let currentlySelectedTab: HTMLElement = undefined;
 
 const moduleList: HTMLElement = document.getElementById("left");
 const settingsList: HTMLElement = document.getElementById("right");
 
-window.parent.ipc.on("settings-renderer", (_, eventType: string, data: any[]) => {
+window.parent.ipc.on(RENDERER, (_, eventType: string, data: any[]) => {
     data = data[0]; // Data is wrapped in an extra array.
     switch (eventType) {
         case "populate-settings-list": {
+            populateSettings(data[0]);
+            break;
+        }
+        case "setting-modified": {
+            const elementId = data[0];
+            const newValue = data[1];
 
-            data[0].forEach((obj: any) => {
-                const moduleName: string = obj.module;
-                const groupElement: HTMLElement = document.createElement("p");
-                groupElement.id = moduleName + "Group";
-                groupElement.innerText = moduleName;
-                groupElement.addEventListener("click", () => {
-                    if (currentlySelectedTab != undefined) {
-                        currentlySelectedTab.style.color = "";
-                    }
-                    currentlySelectedTab = groupElement;
-                    currentlySelectedTab.setAttribute("style", "color: var(--accent-color);")
-
-                    // Swap tabs
-                    removeDivChildren(settingsList);
-                    obj.settings.forEach((htmlString: string) => {
-                        settingsList.insertAdjacentHTML("beforeend", htmlString);
-
-                    });
-
-
-                });
-                moduleList.insertAdjacentElement("beforeend", groupElement);
-
-
-            });
-
-
-
+            const element: any = document.getElementById(elementId);
+            element.value = newValue;
+            
             break;
         }
     }
 });
+
+function populateSettings(data: any[]): void {
+    console.log(data);
+    data.forEach((obj: any) => {
+        const moduleName: string = obj.module;
+        const groupElement: HTMLElement = document.createElement("p");
+        groupElement.innerText = moduleName;
+        groupElement.addEventListener("click", () => {
+            if (currentlySelectedTab != undefined) {
+                currentlySelectedTab.style.color = "";
+            }
+            currentlySelectedTab = groupElement;
+            currentlySelectedTab.setAttribute("style", "color: var(--accent-color);")
+
+            // Swap tabs
+            removeDivChildren(settingsList);
+            obj.settings.forEach((settingInfo: any) => {
+                const interactiveIds: string[] = settingInfo.interactiveIds;
+                const ui: string = settingInfo.ui;
+
+                settingsList.insertAdjacentHTML("beforeend", ui);
+
+                interactiveIds.forEach((id: string) => {
+                    const element: any = document.getElementById(id);
+                    element.addEventListener(settingInfo.eventType, () => {
+                        console.log("sending: " + id + " with value: " + element.value)
+                        window.ipc.send(PROCESS, "setting-modified", id, element.value);
+                    })
+
+                });
+
+            });
+        });
+
+        moduleList.insertAdjacentElement("beforeend", groupElement);
+
+
+    });
+}
 
 function removeDivChildren(parent: HTMLElement) {
     while (parent.firstChild) {

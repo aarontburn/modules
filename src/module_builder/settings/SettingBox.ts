@@ -8,7 +8,7 @@ export abstract class SettingBox<T> {
         this.setting = theSetting;
     }
 
-    public createUI(): string {
+    public getUI(): string {
         const html: string = `
             <div class="setting">
                 ${this.createLeft()}
@@ -19,10 +19,13 @@ export abstract class SettingBox<T> {
         return html;
     }
 
+    /**
+     * Any class that overrides this should also override @link #getInteractiveIds() 
+     */
     public createLeft(): string {
         return `
             <div class="left-component" style="display: inline-block;">
-                <input type="text" value='${this.setting.getValue()}'>
+                <input id="${this.setting.getId()}" type="text" value='${this.setting.getValue()}'>
             </div>
         `;
     }
@@ -39,6 +42,18 @@ export abstract class SettingBox<T> {
 
     public getSetting(): Setting<T> {
         return this.setting;
+    }
+
+    public getInteractiveIds(): string[] {
+        return [this.setting.getId()];
+    }
+
+    public getEventType(): string {
+        return "blur";
+    }
+
+    public parseInput(elementId: string, input: string): string | null {
+        return input;
     }
 
 
