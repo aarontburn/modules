@@ -25,9 +25,8 @@ window.parent.ipc.on("settings-renderer", (_, eventType: string, data: any[]) =>
 
                     // Swap tabs
                     removeDivChildren(settingsList);
-                    obj.settings.forEach((settingsObj: any) => {
-                        const settingElement: HTMLElement = undefined
-
+                    obj.settings.forEach((htmlString: string) => {
+                        settingsList.insertAdjacentHTML("beforeend", htmlString);
 
                     });
 

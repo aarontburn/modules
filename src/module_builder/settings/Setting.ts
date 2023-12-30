@@ -1,5 +1,6 @@
 import { Module } from "../Module";
-
+import { SettingBox } from "./SettingBox";
+ 
 export abstract class Setting<T> {
 
     private parentModule: Module;
@@ -10,6 +11,8 @@ export abstract class Setting<T> {
 
     private defaultValue: T;
     private currentValue: T;
+
+    private settingBox: SettingBox<T>;
 
 
     /**
@@ -27,6 +30,10 @@ export abstract class Setting<T> {
      */
     protected constructor(theParentModule: Module) {
         this.parentModule = theParentModule;
+
+        this.settingBox = this.setUIComponent();
+
+
     }
 
 
@@ -223,6 +230,14 @@ export abstract class Setting<T> {
         this.inputValidator = theInputValidator;
         return this;
     }
+
+
+    protected abstract setUIComponent(): SettingBox<T>; 
+
+    public getUIComponent(): SettingBox<T> {
+        return this.settingBox;
+    }
+    
 
 }
 

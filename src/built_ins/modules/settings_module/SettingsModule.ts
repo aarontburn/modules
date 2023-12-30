@@ -1,4 +1,4 @@
-import { Setting } from "../../../module_builder/settings/Settings";
+import { Setting } from "../../../module_builder/settings/Setting";
 import { Module } from "../../../module_builder/Module";
 import * as path from "path";
 import { ModuleSettings } from "../../../module_builder/ModuleSettings";
@@ -36,12 +36,7 @@ export class SettingsModule extends Module {
             const list: any = {module: moduleName, settings: []};
 
             settingsList.forEach((setting: Setting<unknown>) => {
-                const settingInfo: any = { 
-                    name: setting.getSettingName(),
-                    description: setting.getDescription(),
-                    value: setting.getValue(),
-                }
-                list.settings.push(settingInfo);
+                list.settings.push(setting.getUIComponent().createUI());
             });
             settings.push(list);
         }

@@ -1,7 +1,7 @@
 import { IPCHandler } from "../IPCHandler";
 import { IPCSource } from "../IPCSource";
 import { ModuleSettings } from "./ModuleSettings";
-import { Setting } from "./settings/Settings";
+import { Setting } from "./settings/Setting";
 
 export abstract class Module implements IPCSource {
 

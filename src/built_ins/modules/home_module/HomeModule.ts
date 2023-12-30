@@ -1,7 +1,7 @@
-import { Setting } from "../../../module_builder/settings/Settings";
+import { Setting } from "../../../module_builder/settings/Setting";
 import { Module } from "../../../module_builder/Module";
-import { NumericSetting } from "../../../built_ins/settings/NumericSetting";
-import { StringSetting } from "../../../built_ins/settings/StringSetting";
+import { NumericSetting } from "../../settings/types/NumericSetting";
+import { StringSetting } from "../../settings/types/StringSetting";
 import * as path from "path";
 
 export class HomeModule extends Module {

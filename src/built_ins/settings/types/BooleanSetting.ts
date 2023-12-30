@@ -1,7 +1,9 @@
-import { Setting } from "../../module_builder/settings/Settings";
-import { Module } from "../../module_builder/Module";
+import { Setting } from "../../../module_builder/settings/Setting";
+import { Module } from "../../../module_builder/Module";
+import { SettingBox } from "../../../module_builder/settings/SettingBox";
+import { BooleanSettingBox } from "../ui_components/BooleanSettingBox";
 
-export class BooleanSetting extends Setting<Boolean> {
+export class BooleanSetting extends Setting<boolean> {
 
     public constructor(theModule: Module) {
         super(theModule);
@@ -23,6 +25,10 @@ export class BooleanSetting extends Setting<Boolean> {
         }
         return null;
 
+    }
+
+    protected setUIComponent(): SettingBox<boolean> {
+        return new BooleanSettingBox(this);
     }
 
 }
