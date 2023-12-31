@@ -26,6 +26,8 @@ window.parent.ipc.on(RENDERER, (_, eventType: string, data: any[]) => {
             break;
         }
         case "refresh-settings": {
+            document.documentElement.style.setProperty("--accent-color", data[0])
+
 
             break;
         }

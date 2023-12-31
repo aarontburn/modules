@@ -34,10 +34,7 @@ export class HomeModule extends Module {
 
     this.updateDateAndTime(false);
 
-    setTimeout(
-      () => this.updateDateAndTime(true),
-      1000 - new Date().getMilliseconds()
-    );
+    setTimeout(() => this.updateDateAndTime(true), 1000 - new Date().getMilliseconds());
   }
   public updateDateAndTime(repeat: boolean) {
     const date: Date = new Date();
@@ -45,19 +42,22 @@ export class HomeModule extends Module {
       HomeModule.LOCALE,
       HomeModule.STANDARD_TIME_FORMAT
     );
+
     const militaryTime: string = date.toLocaleString(
       HomeModule.LOCALE,
       HomeModule.MILITARY_TIME_FORMAT
     );
+
     const fullDate: string = date.toLocaleString(
       HomeModule.LOCALE,
       HomeModule.FULL_DATE_FORMAT
     );
+
     const abbreviatedDate: string = date.toLocaleString(
       HomeModule.LOCALE,
       HomeModule.ABBREVIATED_DATE_FORMAT
     );
-    
+
     this.notifyObservers("update-clock", fullDate, abbreviatedDate, standardTime, militaryTime);
 
     if (repeat) {
@@ -107,7 +107,7 @@ export class HomeModule extends Module {
     ];
   }
   public refreshSettings(): void {
-    throw new Error("Method not implemented.");
+    
   }
 
   public recieveIpcEvent(eventType: string, data: any[]): void {

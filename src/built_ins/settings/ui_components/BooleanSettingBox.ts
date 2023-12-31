@@ -77,7 +77,7 @@ export class BooleanSettingBox extends SettingBox<boolean> {
             }
             
             /* Rounded sliders */
-                .slider.round {
+            .slider.round {
                 border-radius: 34px;
             }
             
