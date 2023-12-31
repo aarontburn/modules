@@ -52,10 +52,14 @@ export abstract class SettingBox<T> {
         return "blur";
     }
 
-    public parseInput(elementId: string, input: string): string | null {
-        return input;
+
+    public getStyle(): string {
+        return "";
     }
 
+    public getAttribute(): string {
+        return "value";
+    }
 
 
 }

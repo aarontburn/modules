@@ -4,6 +4,7 @@ import * as path from "path";
 import { ModuleSettings } from "../../../module_builder/ModuleSettings";
 import { SettingBox } from "../../../module_builder/settings/SettingBox";
 import { BooleanSetting } from "../../../built_ins/settings/types/BooleanSetting";
+import { HexColorSetting } from "../../../built_ins/settings/types/HexColorSetting";
 
 export class SettingsModule extends Module {
     public static MODULE_NAME: string = "Settings";
@@ -23,12 +24,16 @@ export class SettingsModule extends Module {
                 .setDescription("test boolean")
                 .setDefault(false),
 
+            new HexColorSetting(this)
+                .setName("Accent Color")
+                .setDefault("#2290B5"),
+
 
         ];
     }
 
     public refreshSettings(): void {
-
+        this.notifyObservers("refresh-settings")
 
     }
 
@@ -49,6 +54,8 @@ export class SettingsModule extends Module {
                     interactiveIds: settingBox.getInteractiveIds(),
                     ui: settingBox.getUI(),
                     eventType: settingBox.getEventType(),
+                    style: settingBox.getStyle(),
+                    attribute: settingBox.getAttribute(),
                 };
                 list.settings.push(settingInfo);
             });
@@ -68,7 +75,6 @@ export class SettingsModule extends Module {
                 break;
             }
             case "setting-modified": {
-                console.log(data);
                 const elementId: string = data[0];
                 const elementValue: string = data[1];
 
@@ -76,28 +82,16 @@ export class SettingsModule extends Module {
                     const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
 
                     settingsList.forEach((setting: Setting<unknown>) => {
-                        let found: boolean = false;
                         const settingBox: SettingBox<unknown> = setting.getUIComponent();
 
                         settingBox.getInteractiveIds().forEach((id: string) => {
                             if (id == elementId) { // found the modified setting
-                                const parsed: string = settingBox.parseInput(elementId, elementValue);
-                                const x = setting.setValue(parsed);
-                                console.log("parsed " + elementValue + " to " + x)
-
-
-                                if (parsed != null) {
-                                    this.notifyObservers("setting-modified", elementId, parsed)
-                                }
-
-                                found = true;
+                                setting.setValue(elementValue);
+                                this.notifyObservers("setting-modified", elementId, setting.getValue());
+                                setting.getParentModule().refreshSettings();
                                 return;
                             }
                         });
-                        if (found) {
-                            return;
-                        }
-
                     });
                 }
 

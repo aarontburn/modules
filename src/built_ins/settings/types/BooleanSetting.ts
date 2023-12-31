@@ -11,11 +11,14 @@ export class BooleanSetting extends Setting<boolean> {
 
 
     protected validateInput(theInput: any): boolean | null {
+        if (theInput == null) {
+            return null;
+        }
+
         if (typeof theInput == "boolean") {
             return theInput;
         }
 
-        
         const s: string = theInput.toString().toLocaleLowerCase();
 
         if (s == "true") {

@@ -120,7 +120,7 @@ export abstract class Setting<T> {
      * @return The description of this setting, or undefined if it hasn't been set.
      */
     public getDescription(): string {
-        return this.settingDescription;
+        return this.settingDescription == undefined ? "" : this.settingDescription;
     }
 
 
@@ -159,18 +159,11 @@ export abstract class Setting<T> {
      * @throws Error if an attempt was made to set the value before all
      *                               appropriate fields were set.
      */
-    public setValue(theValue: any): T {
+    public setValue(theValue: any): void {
         this.checkRequiredFields();
 
         const value: T = this.parseInput(theValue);
-        console.log(this.settingName + ": " + value)
         this.currentValue = value != null ? value : this.currentValue;
-        return value;
-        // if (GUIHandler.isGuiInitialized()) {
-        //     this.settingBox.updateDisplayValue();
-        //     this.parentModule.refreshSettings();
-        //     StorageHandler.writeSettingsToModuleStorage(this.parentModule);
-        // }
 
     }
 
@@ -246,6 +239,10 @@ export abstract class Setting<T> {
 
     public getId(): string {
         return this.settingId;
+    }
+
+    public getParentModule(): Module {
+        return this.parentModule;
     }
 
 

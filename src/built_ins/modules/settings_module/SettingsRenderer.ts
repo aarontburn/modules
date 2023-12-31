@@ -22,7 +22,11 @@ window.parent.ipc.on(RENDERER, (_, eventType: string, data: any[]) => {
 
             const element: any = document.getElementById(elementId);
             element.value = newValue;
-            
+
+            break;
+        }
+        case "refresh-settings": {
+
             break;
         }
     }
@@ -46,16 +50,21 @@ function populateSettings(data: any[]): void {
             obj.settings.forEach((settingInfo: any) => {
                 const interactiveIds: string[] = settingInfo.interactiveIds;
                 const ui: string = settingInfo.ui;
+                const style: string = settingInfo.style;
+                const eventType: string = settingInfo.eventType;
+                const attribute: string = settingInfo.attribute;
 
                 settingsList.insertAdjacentHTML("beforeend", ui);
+                // Add custom setting css to setting
+                let sheet: HTMLElement = document.createElement('style')
+                sheet.innerHTML = style
+                document.body.appendChild(sheet);
 
                 interactiveIds.forEach((id: string) => {
                     const element: any = document.getElementById(id);
-                    element.addEventListener(settingInfo.eventType, () => {
-                        console.log("sending: " + id + " with value: " + element.value)
-                        window.ipc.send(PROCESS, "setting-modified", id, element.value);
+                    element.addEventListener(eventType, () => {
+                        window.ipc.send(PROCESS, "setting-modified", id, element[attribute]);
                     })
-
                 });
 
             });
