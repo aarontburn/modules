@@ -41,10 +41,10 @@ export class ModuleController implements IPCSource {
 
     private checkSettings(): void {
 
-        this.activeModules.forEach((module: Module) => {
+        for (const module of this.activeModules) {
             const settingsMap: Map<string, any> = StorageHandler.readSettingsFromModuleStorage(module);
-            const moduleSettings: ModuleSettings = module.getSettings();
 
+            const moduleSettings: ModuleSettings = module.getSettings();
             settingsMap.forEach((settingValue: any, settingName: string) => {
                 const setting: Setting<unknown> = moduleSettings.getSettingByName(settingName);
                 if (setting == undefined) {
@@ -55,13 +55,9 @@ export class ModuleController implements IPCSource {
             });
 
             StorageHandler.writeModuleSettingsToStorage(module);
-        });
-
-
-
-        this.activeModules.forEach((module: Module) => {
             this.settingsModule.addModuleSetting(module.getSettings());
-        });
+        }
+
     }
 
     private init(): void {

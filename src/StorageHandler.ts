@@ -12,20 +12,22 @@ export class StorageHandler {
         const folderName: string = this.STORAGE_PATH + dirName + "/";
         const filePath: string = folderName + theFileName;
 
-        fs.mkdir(folderName,
-            { recursive: true },
-            (err: NodeJS.ErrnoException) => {
+
+        async () => {
+            await fs.mkdir(folderName,
+                { recursive: true },
+                (err: NodeJS.ErrnoException) => {
+                    if (err != null) {
+                        console.log(err)
+                    }
+                });
+
+            fs.writeFile(`${filePath}`, theContents, (err: NodeJS.ErrnoException) => {
                 if (err != null) {
-                    console.log(err)
+                    console.log(err);
                 }
             });
-
-        fs.writeFile(`${filePath}`, theContents, (err: NodeJS.ErrnoException) => {
-            if (err != null) {
-                console.log(err);
-            }
-        });
-
+        }
     }
 
 
@@ -47,7 +49,20 @@ export class StorageHandler {
         const folderName: string = this.STORAGE_PATH + dirName + "/";
         const filePath: string = folderName + theModule.getSettingsFileName();
 
-        const contents: string = fs.readFileSync(filePath, 'utf-8');
+
+        let contents: string;
+        try {
+            contents = fs.readFileSync(filePath, 'utf-8');
+        } catch (err) {
+            if (err.code !== 'ENOENT') {
+                throw err;
+            }
+
+            console.log("WARNING: directory not found.")
+            return settingMap;
+        }
+
+
         const json: any = JSON.parse(contents);
         for (const settingName in json) {
             settingMap.set(settingName, json[settingName]);
