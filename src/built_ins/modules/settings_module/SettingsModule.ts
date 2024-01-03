@@ -5,6 +5,7 @@ import { ModuleSettings } from "../../../module_builder/ModuleSettings";
 import { SettingBox } from "../../../module_builder/settings/SettingBox";
 import { BooleanSetting } from "../../../built_ins/settings/types/BooleanSetting";
 import { HexColorSetting } from "../../../built_ins/settings/types/HexColorSetting";
+import { StorageHandler } from "../../../StorageHandler";
 
 export class SettingsModule extends Module {
     public static MODULE_NAME: string = "Settings";
@@ -87,6 +88,7 @@ export class SettingsModule extends Module {
                         settingBox.getInteractiveIds().forEach((id: string) => {
                             if (id == elementId) { // found the modified setting
                                 setting.setValue(elementValue);
+                                StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
                                 this.notifyObservers("setting-modified", elementId, setting.getValue());
                                 setting.getParentModule().refreshSettings();
                                 return;

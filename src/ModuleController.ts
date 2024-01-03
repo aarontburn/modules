@@ -6,6 +6,10 @@ import { SettingsModule } from "./built_ins/modules/settings_module/SettingsModu
 import { HomeModule } from "./built_ins/modules/home_module/HomeModule";
 import { IPCHandler } from "./IPCHandler";
 import { IPCSource } from "./IPCSource";
+import { AutoClickerModule } from "./modules/auto_clicker/AutoClickerModule";
+import { StorageHandler } from "./StorageHandler";
+import { ModuleSettings } from "./module_builder/ModuleSettings";
+import { Setting } from "./module_builder/settings/Setting";
 
 
 const WINDOW_DIMENSION: Dimension = new Dimension(1920, 1080);
@@ -36,6 +40,25 @@ export class ModuleController implements IPCSource {
     }
 
     private checkSettings(): void {
+
+        this.activeModules.forEach((module: Module) => {
+            const settingsMap: Map<string, any> = StorageHandler.readSettingsFromModuleStorage(module);
+            const moduleSettings: ModuleSettings = module.getSettings();
+
+            settingsMap.forEach((settingValue: any, settingName: string) => {
+                const setting: Setting<unknown> = moduleSettings.getSettingByName(settingName);
+                if (setting == undefined) {
+                    console.log("WARNING: Invalid setting name: '" + settingName + "' found.");
+                } else {
+                    setting.setValue(settingValue);
+                }
+            });
+
+            StorageHandler.writeModuleSettingsToStorage(module);
+        });
+
+
+
         this.activeModules.forEach((module: Module) => {
             this.settingsModule.addModuleSetting(module.getSettings());
         });
@@ -79,10 +102,6 @@ export class ModuleController implements IPCSource {
 
     private swapLayouts(moduleName: string): void {
         const module: Module = this.modulesByName.get(moduleName);
-
-        if (!module.isInitialized()) {
-            module.initialize();
-        }
         module.onGuiShown();
         IPCHandler.fireEventToRenderer(this, 'swap-modules-renderer', moduleName);
     }
@@ -108,6 +127,7 @@ export class ModuleController implements IPCSource {
 
         this.addModule(new HomeModule());
         this.addModule(this.settingsModule);
+        // this.addModule(new AutoClickerModule());
 
     }
     private addModule(module: Module): void {

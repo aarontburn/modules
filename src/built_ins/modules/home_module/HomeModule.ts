@@ -3,8 +3,6 @@ import { Module } from "../../../module_builder/Module";
 import { NumericSetting } from "../../settings/types/NumericSetting";
 import { StringSetting } from "../../settings/types/StringSetting";
 import * as path from "path";
-import { BooleanSetting } from "../../../built_ins/settings/types/BooleanSetting";
-import { HexColorSetting } from "../../../built_ins/settings/types/HexColorSetting";
 
 export class HomeModule extends Module {
   public static MODULE_NAME: string = "Home";
@@ -31,7 +29,6 @@ export class HomeModule extends Module {
     super.initialize();
 
     // Start clock
-
     this.updateDateAndTime(false);
 
     setTimeout(() => this.updateDateAndTime(true), 1000 - new Date().getMilliseconds());
@@ -112,6 +109,11 @@ export class HomeModule extends Module {
 
   public recieveIpcEvent(eventType: string, data: any[]): void {
     switch (eventType) {
+      case "init": {
+        this.initialize();
+        break;
+      }
+
     }
   }
 }

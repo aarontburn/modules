@@ -26,7 +26,7 @@ window.parent.ipc.on(RENDERER, (_, eventType: string, data: any[]) => {
             break;
         }
         case "refresh-settings": {
-            document.documentElement.style.setProperty("--accent-color", data[0])
+            document.documentElement.style.setProperty("--accent-color", data[0]);
 
 
             break;
@@ -58,10 +58,15 @@ function populateSettings(data: any[]): void {
 
                 settingsList.insertAdjacentHTML("beforeend", ui);
                 // Add custom setting css to setting
-                let sheet: HTMLElement = document.createElement('style')
-                sheet.innerHTML = style
-                document.body.appendChild(sheet);
-
+                if (style != "") {
+                    const styleId = interactiveIds[0] + "_style";
+                    if (document.getElementById(styleId) == null) {
+                        const styleSheet: HTMLElement = document.createElement('style')
+                        styleSheet.id = styleId;
+                        styleSheet.innerHTML = style
+                        document.body.appendChild(styleSheet);
+                    }
+                }
                 interactiveIds.forEach((id: string) => {
                     const element: any = document.getElementById(id);
                     element.addEventListener(eventType, () => {
