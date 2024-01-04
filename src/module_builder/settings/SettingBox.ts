@@ -48,15 +48,32 @@ export abstract class SettingBox<T> {
         return [this.setting.getId()];
     }
 
+    /**
+     * Overridable method to determine when the setting updates.
+     * This is triggered by element.addEventListener(<eventType> () => ...)
+     * 
+     * @returns The event to update the setting.
+     */
     public getEventType(): string {
         return "blur";
     }
 
-
+    /**
+     * Overrideable method to add custom CSS to a setting component.
+     * 
+     * @returns A valid CSS style string.
+     */
     public getStyle(): string {
         return "";
     }
 
+    /**
+     * Overrideable method to determine what value of the HTML holds the value.
+     * For example, the data stored in <input type="text"> is stored in the "value"
+     * property, while a checkbox is stored in "checked".
+     * 
+     * @returns 
+     */
     public getAttribute(): string {
         return "value";
     }

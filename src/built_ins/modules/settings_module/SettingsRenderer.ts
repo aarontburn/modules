@@ -35,7 +35,6 @@ window.parent.ipc.on(RENDERER, (_, eventType: string, data: any[]) => {
 });
 
 function populateSettings(data: any[]): void {
-    console.log(data);
     data.forEach((obj: any) => {
         const moduleName: string = obj.module;
         const groupElement: HTMLElement = document.createElement("p");
@@ -107,7 +106,7 @@ function dragElement(element: HTMLElement) {
         };
 
         document.onmousemove = (e: MouseEvent) => {
-            let delta: any = {
+            let delta: { x: number, y: number } = {
                 x: e.clientX - md.e.clientX,
                 y: e.clientY - md.e.clientY
             };

@@ -6,17 +6,18 @@
 // needed in the renderer process.
 
 const IFRAME_DEFAULT_STYLE: string = "height: 99.7%; width: 99.85%;";
+let selectedTab: HTMLElement = undefined;
 
 window.ipc.send(window.constants.MAIN, "renderer-init"); // let main know that renderer is booted
 
 window.ipc.on("main-renderer", (_, eventType: string, data: any) => {
+    data = data[0];
     switch (eventType) {
         case "load-modules": {
             const moduleHtml: HTMLElement = document.getElementById("modules");
             const headerHtml: HTMLElement = document.getElementById("header");
 
-            (data[0] as Map<string, string>).forEach((moduleHtmlPath, moduleName) => {
-                console.log("Adding " + moduleName);
+            (data as Map<string, string>).forEach((moduleHtmlPath, moduleName) => {
                 const moduleView: HTMLElement = document.createElement("iframe");
                 moduleView.id = moduleName;
                 moduleView.setAttribute("src", moduleHtmlPath);
@@ -27,14 +28,26 @@ window.ipc.on("main-renderer", (_, eventType: string, data: any) => {
                 const headerButton: HTMLElement = document.createElement("button");
                 headerButton.id = id;
                 headerButton.textContent = moduleName;
-                headerButton.addEventListener("click", () => window.ipc.send(window.constants.MAIN, "alert-main-swap-modules", moduleName));
-                headerHtml.insertAdjacentElement("beforeend", headerButton);
 
+                if (moduleName == "Home") {
+                    headerButton.setAttribute("style", "color: var(--accent-color);")
+                }
+
+                headerButton.addEventListener("click", () => {
+                    if (selectedTab != undefined) {
+                        selectedTab.style.color = "";
+                    }
+                    selectedTab = headerButton;
+                    selectedTab.setAttribute("style", "color: var(--accent-color);")
+
+                    window.ipc.send(window.constants.MAIN, "alert-main-swap-modules", moduleName);
+                });
+                headerHtml.insertAdjacentElement("beforeend", headerButton);
             });
             break;
         }
         case "swap-modules-renderer": {
-            swapLayout(data[0])
+            swapLayout(data)
             break;
         }
     }
