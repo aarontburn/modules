@@ -7,10 +7,10 @@ import { HomeModule } from "./built_ins/modules/home_module/HomeModule";
 import { IPCHandler } from "./IPCHandler";
 import { IPCSource } from "./IPCSource";
 import { AutoClickerModule } from "./modules/auto_clicker/AutoClickerModule";
+import { VolumeControllerModule } from "./modules/volume_controller/VolumeControllerModule";
 import { StorageHandler } from "./StorageHandler";
 import { ModuleSettings } from "./module_builder/ModuleSettings";
 import { Setting } from "./module_builder/settings/Setting";
-
 
 const WINDOW_DIMENSION: Dimension = new Dimension(1920, 1080);
 
@@ -36,6 +36,9 @@ export class ModuleController implements IPCSource {
         this.checkSettings();
         this.createAndShow();
         this.attachIpcHandler();
+
+
+
 
     }
 
@@ -84,6 +87,7 @@ export class ModuleController implements IPCSource {
         });
 
         this.activeModules.forEach((module: Module) => {
+            console.log("Registering " + module.getIpcSource() + "-process");
             this.ipc.on(module.getIpcSource() + "-process", (_, eventType: string, data: any[]) => {
                 this.modulesByName.get(module.getModuleName()).recieveIpcEvent(eventType, data);
             })
@@ -123,6 +127,7 @@ export class ModuleController implements IPCSource {
 
         this.addModule(new HomeModule());
         this.addModule(this.settingsModule);
+        this.addModule(new VolumeControllerModule());
         // this.addModule(new AutoClickerModule());
 
     }
