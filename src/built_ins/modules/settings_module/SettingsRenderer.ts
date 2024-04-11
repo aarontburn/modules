@@ -26,8 +26,11 @@ window.parent.ipc.on(RENDERER, (_, eventType: string, data: any[]) => {
             break;
         }
         case "refresh-settings": {
-            document.documentElement.style.setProperty("--accent-color", data[0]);
+            const root:any = window.parent.document.querySelector(':root');
 
+            root.style.setProperty('--accent-color', data[0]);
+            // document.documentElement.style.setProperty("--accent-color", data[0]);
+            // TODO: Update accent color of all other IFrames
 
             break;
         }

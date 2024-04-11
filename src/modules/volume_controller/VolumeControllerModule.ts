@@ -14,28 +14,39 @@ export class VolumeControllerModule extends Module {
     }
 
     public initialize(): void {
-        console.log("volume init")
-
         // Get a audio session.
+
+
+        this.updateSessions();
+        setTimeout(() => this.updateSessions(), 1000);
+    }
+
+    private updateSessions() {
+
         const sessions = NodeAudioVolumeMixer.getAudioSessionProcesses();
 
+        const updatedSessions: { pid: number, name: string, volume: number }[] = [];
         sessions.forEach((session) => {
-            console.log(session)
-            console.log("Session: " + session.name + " PID: " + session.pid + " Volume: " + NodeAudioVolumeMixer.getAudioSessionVolumeLevelScalar(session.pid))
-
-
-
-        })
+            updatedSessions.push({ ...session, volume: NodeAudioVolumeMixer.getAudioSessionVolumeLevelScalar(session.pid) })
+        });
+        this.notifyObservers("vol-sessions", ...updatedSessions);
+        setTimeout(() => this.updateSessions(), 1000);
     }
 
     public registerSettings(): Setting<unknown>[] {
-        return []
+        return [];
     }
     public refreshSettings(): void {
 
     }
     public recieveIpcEvent(eventType: string, data: any[]): void {
+        switch (eventType) {
+            case "init": {
+                this.initialize();
+                break;
+            }
 
+        }
     }
 
 

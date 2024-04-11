@@ -81,6 +81,7 @@ export class ModuleController implements IPCSource {
                 }
                 case "alert-main-swap-modules": {
                     this.swapLayouts(data[0]);
+                    
                     break;
                 }
             }

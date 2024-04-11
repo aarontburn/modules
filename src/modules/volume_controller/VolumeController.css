@@ -1,0 +1,11 @@
+.session-name {
+    font-size: 20px;
+}
+
+.session-volume {
+    text-align: center;
+}
+
+#session-box {
+    display: flex;
+}
