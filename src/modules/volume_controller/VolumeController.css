@@ -1,11 +1,32 @@
 .session-name {
     font-size: 20px;
+    padding: 0px;
+    margin: 5px;
 }
 
 .session-volume {
     text-align: center;
 }
 
-#session-box {
+#session-box-container {
     display: flex;
+}
+
+.session-box {
+    border: 1px solid white;
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+
+.session-box > * {
+    text-align: center;
+}
+
+.vol-slider {
+
 }
