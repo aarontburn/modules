@@ -20,15 +20,15 @@ export class VolumeControllerModule extends Module {
     public initialize(): void {
         // Get a audio session.
 
-        exec('tasklist', function (err, stdout, stderr) {
-            const lines = stdout.toString().split('\n');
-            lines.forEach(function (line) {
-                const parts = line.split('=');
-                parts.forEach(items => {
-                    console.log(items);
-                })
-            });
-        });
+        // exec('wmic process get ProcessID, CommandLine | find "Discord"', (err, stdout, stderr) =>{
+        //     const lines = stdout.toString().split('\n')
+        //     lines.forEach(line => {
+        //         const parts = line.split('\t');
+        //         parts.forEach(items => {
+        //             console.log(items);
+        //         })
+        //     });
+        // });
 
         this.updateSessions();
         setTimeout(() => this.updateSessions(), VolumeControllerModule.VOLUME_REFRESH_MS);
@@ -43,7 +43,7 @@ export class VolumeControllerModule extends Module {
             if (session.pid === 0) {
                 session.name = "System Volume"
             }
-            updatedSessions.push({ ...session, volume: this.getProcessVolume(session.pid) })
+            updatedSessions.push({ ...session, volume: this.getSessionVolume(session.pid) })
         });
         this.notifyObservers("vol-sessions", ...updatedSessions);
         setTimeout(() => this.updateSessions(), VolumeControllerModule.VOLUME_REFRESH_MS);
@@ -65,21 +65,62 @@ export class VolumeControllerModule extends Module {
                 const sessionPID: number = Number(data[0]);
                 const newVolume: number = Number(data[1]) / 100;
                 console.log("PID: " + data[0] + " New Volume: " + data[1])
-                this.setProcessVolume(sessionPID, newVolume);
+                this.setSessionVolume(sessionPID, newVolume);
+                break;
+            }
+            case "session-muted": {
+                const sessionPID: number = Number(data);
+                this.setSessionMuted(sessionPID, !this.isSessionMuted(sessionPID));
+                console.log("Toggling mute for session: " + sessionPID);
+                break;
+            }
+            case "session-solo": {
+                const sessionPID: number = Number(data);
+                this.toggleSolo(sessionPID);
                 break;
             }
 
         }
     }
 
+    private toggleSolo(pid: number): void {
+        const sessions = NodeAudioVolumeMixer.getAudioSessionProcesses();
+        let allMuted = true;
+
+        sessions.forEach(session => {
+            if (session.pid !== pid && !this.isSessionMuted(session.pid)) {
+                allMuted = false;
+            }
+        });
+
+        if (allMuted) {
+            if (!this.isSessionMuted(pid)) { // Solo already applied, remove it
+                sessions.forEach(sessions => {
+                    this.setSessionMuted(sessions.pid, false);
+                });
+            } else { // Everything including the solo session is muted. Unmute solo
+                this.setSessionMuted(pid, false);
+            }
+        } else { // Apply solo
+            sessions.forEach(session => {
+                if (session.pid !== pid) {
+                    this.setSessionMuted(session.pid, true);
+                }
+            });
+
+
+        }
+        console.log("Toggling mute for session: " + pid);
+    }
+
     private setMasterMuted(isMuted: boolean): void {
         NodeAudioVolumeMixer.muteMaster(isMuted);
     }
 
-    private setProcessVolume(pid: number, volume: number): void {
+    private setSessionVolume(pid: number, volume: number): void {
         if (volume > 1 || volume < 0) {
             console.log("ERROR (VolumeControllerModule): Volume out of range 0.0 - 1.0: " + volume + " for PID " + pid)
-            return
+            return;
         }
         NodeAudioVolumeMixer.setAudioSessionVolumeLevelScalar(pid, volume);
     }
@@ -87,13 +128,25 @@ export class VolumeControllerModule extends Module {
     private setMasterVolume(volume: number): void {
         if (volume > 1 || volume < 0) {
             console.log("ERROR (VolumeControllerModule): Volume out of range 0.0 - 1.0: " + volume + " for master")
-            return
+            return;
         }
         NodeAudioVolumeMixer.setMasterVolumeLevelScalar(volume);
     }
 
-    private getProcessVolume(pid: number): number {
+    private getSessionVolume(pid: number): number {
         return NodeAudioVolumeMixer.getAudioSessionVolumeLevelScalar(pid);
+    }
+
+    private setSessionMuted(pid: number, isMuted: boolean): void {
+        NodeAudioVolumeMixer.setAudioSessionMute(pid, isMuted);
+    }
+
+    private isSessionMuted(pid: number): boolean {
+        return NodeAudioVolumeMixer.isAudioSessionMuted(pid);
+    }
+
+    private isMasterMuted(): boolean {
+        return NodeAudioVolumeMixer.isMasterMuted();
     }
 
 

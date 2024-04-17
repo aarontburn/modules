@@ -31,6 +31,7 @@ window.ipc.on("main-renderer", (_, eventType: string, data: any) => {
 
                 if (moduleName == "Home") {
                     headerButton.setAttribute("style", "color: var(--accent-color);")
+                    selectedTab = headerButton;
                 }
 
                 headerButton.addEventListener("click", () => {
