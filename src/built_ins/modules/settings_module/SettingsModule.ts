@@ -34,7 +34,7 @@ export class SettingsModule extends Module {
     }
 
     public refreshSettings(): void {
-        this.notifyObservers("refresh-settings", this.getSettings().getSettingByName("Accent Color").getValue())
+        this.notifyObservers("refresh-settings", this.getSettings().getSettingByName("Accent Color").getValue());
 
     }
 

@@ -2,7 +2,7 @@ import { Setting } from "../../module_builder/settings/Setting";
 import { Module } from "../../module_builder/Module";
 import { NodeAudioVolumeMixer } from "node-audio-volume-mixer";
 import * as path from "path";
-import { exec } from "child_process"
+import { BooleanSetting } from "../../built_ins/settings/types/BooleanSetting";
 
 
 export class VolumeControllerModule extends Module {
@@ -18,6 +18,7 @@ export class VolumeControllerModule extends Module {
     }
 
     public initialize(): void {
+        super.initialize()
         // Get a audio session.
 
         // exec('wmic process get ProcessID, CommandLine | find "Discord"', (err, stdout, stderr) =>{
@@ -38,21 +39,30 @@ export class VolumeControllerModule extends Module {
 
         const sessions = NodeAudioVolumeMixer.getAudioSessionProcesses();
 
-        const updatedSessions: { pid: number, name: string, volume: number }[] = [];
+        const updatedSessions: { pid: number, name: string, volume: number, isMuted: boolean }[] = [];
         sessions.forEach((session) => {
             if (session.pid === 0) {
                 session.name = "System Volume"
             }
-            updatedSessions.push({ ...session, volume: this.getSessionVolume(session.pid) })
+            updatedSessions.push({ ...session, volume: this.getSessionVolume(session.pid), isMuted: this.isSessionMuted(session.pid) })
         });
         this.notifyObservers("vol-sessions", ...updatedSessions);
         setTimeout(() => this.updateSessions(), VolumeControllerModule.VOLUME_REFRESH_MS);
     }
 
     public registerSettings(): Setting<unknown>[] {
-        return [];
+        return [
+            new BooleanSetting(this)
+                .setName("Show Session PID")
+                .setDescription("Displays the process ID of the session.")
+                .setDefault(false)
+
+        ];
     }
     public refreshSettings(): void {
+        this.notifyObservers("session-pid-visibility-modified", this.getSettings().getSettingByName("Show Session PID").getValue());
+        
+
 
     }
     public recieveIpcEvent(eventType: string, data: any[]): void {

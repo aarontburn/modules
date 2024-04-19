@@ -10,9 +10,11 @@
 
 #session-box-container {
     display: flex;
-    /* flex-direction: column; */
+    flex-direction: column;
     height: 100%;
-    flex-wrap: wrap;
+    width: 100%;
+    /* flex-wrap: wrap; */
+
 }
 
 .session-box {
@@ -34,6 +36,30 @@
 
 .vol-slider {}
 
+
+#session-settings {
+    border: 1px white solid;
+    width: 100%;
+    background-color: var(--off-black);
+    border-radius: 5px;
+    padding: 5px;
+    margin: 5px;
+
+}
+
+#master-session {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    border: 1px white solid;
+    height: 100%;
+}
+
+#master-vol-slider {
+    appearance: slider-vertical;
+    height: 100%;
+}
+
 .session-controls {
     display: flex;
     flex-direction: row;
@@ -43,6 +69,6 @@
     margin: 5px 15px;
 }
 
-.session-mute:hover, .session-solo:hover {
+.session-mute-active, .session-solo-active {
     color: var(--accent-color);
 }
