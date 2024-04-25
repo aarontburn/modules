@@ -5,7 +5,7 @@ import { Setting } from "./module_builder/settings/Setting";
 
 export class StorageHandler {
 
-    private static STORAGE_PATH: string = app.getPath("home") + "/.thoughts/storage/";
+    private static STORAGE_PATH: string = app.getPath("home") + "/.modules/storage/";
 
     public static writeToModuleStorage(theModule: Module, theFileName: string, theContents: string): void {
         const dirName: string = theModule.getModuleName().toLowerCase();
@@ -13,21 +13,24 @@ export class StorageHandler {
         const filePath: string = folderName + theFileName;
 
 
-        async () => {
+        const write = async () => {
             await fs.mkdir(folderName,
                 { recursive: true },
                 (err: NodeJS.ErrnoException) => {
                     if (err != null) {
+                        console.log("Error creating directories:")
                         console.log(err)
+                        return;
                     }
+                    fs.writeFile(`${filePath}`, theContents, (err: NodeJS.ErrnoException) => {
+                        if (err != null) {
+                            console.log("Error writing to module storage:")
+                            console.log(err);
+                        }
+                    });
                 });
-
-            fs.writeFile(`${filePath}`, theContents, (err: NodeJS.ErrnoException) => {
-                if (err != null) {
-                    console.log(err);
-                }
-            });
         }
+        write()
     }
 
 
