@@ -14,13 +14,11 @@ export class AutoClickerModule extends Module {
 
 
     public registerSettings(): Setting<unknown>[] {
-        throw new Error("Method not implemented.");
+        return []
     }
     public refreshSettings(): void {
-        throw new Error("Method not implemented.");
     }
     public recieveIpcEvent(eventType: string, data: any[]): void {
-        throw new Error("Method not implemented.");
     }
 
 
