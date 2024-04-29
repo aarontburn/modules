@@ -1,8 +1,8 @@
 import { BrowserWindow } from "electron";
 import * as path from "path";
-import { Module } from "./module_builder/Module";
-import { SettingsModule } from "./built_ins/settings_module/SettingsModule";
-import { HomeModule } from "./built_ins/home_module/HomeModule";
+import { Process } from "./module_builder/Process";
+import { SettingsProcess } from "./built_ins/settings_module/SettingsProcess";
+import { HomeProcess } from "./built_ins/home_module/HomeProcess";
 import { IPCHandler } from "./IPCHandler";
 import { IPCCallback, IPCSource } from "./module_builder/IPCObjects";
 import { StorageHandler } from "./StorageHandler";
@@ -20,9 +20,9 @@ export class ModuleController implements IPCSource {
     private window: BrowserWindow;
     private ipc: Electron.IpcMain;
 
-    private modulesByName = new Map<string, Module>();
-    private activeModules: Module[] = [];
-    private settingsModule: SettingsModule = new SettingsModule(ipcCallback);
+    private modulesByName = new Map<string, Process>();
+    private activeModules: Process[] = [];
+    private settingsModule: SettingsProcess = new SettingsProcess(ipcCallback);
 
     public constructor(ipcHandler: Electron.IpcMain) {
         this.ipc = ipcHandler;
@@ -63,11 +63,11 @@ export class ModuleController implements IPCSource {
 
     private init(): void {
         const map: Map<string, string> = new Map<string, string>();
-        this.activeModules.forEach((module: Module) => {
+        this.activeModules.forEach((module: Process) => {
             map.set(module.getModuleName(), module.getHtmlPath());
         });
         ipcCallback.notifyRenderer(this, 'load-modules', map);
-        this.swapLayouts(HomeModule.MODULE_NAME);
+        this.swapLayouts(HomeProcess.MODULE_NAME);
     }
 
     private attachIpcHandler(): void {
@@ -84,7 +84,7 @@ export class ModuleController implements IPCSource {
             }
         });
 
-        this.activeModules.forEach((module: Module) => {
+        this.activeModules.forEach((module: Process) => {
             console.log("Registering " + module.getIpcSource() + "-process");
             this.ipc.on(module.getIpcSource() + "-process", (_, eventType: string, data: any[]) => {
                 this.modulesByName.get(module.getModuleName()).recieveIpcEvent(eventType, data);
@@ -93,13 +93,13 @@ export class ModuleController implements IPCSource {
     }
 
     public stop(): void {
-        this.activeModules.forEach((module: Module) => {
+        this.activeModules.forEach((module: Process) => {
             module.stop();
         });
     }
 
     private swapLayouts(moduleName: string): void {
-        const module: Module = this.modulesByName.get(moduleName);
+        const module: Process = this.modulesByName.get(moduleName);
         module.onGuiShown();
         ipcCallback.notifyRenderer(this, 'swap-modules-renderer', moduleName);
     }
@@ -123,9 +123,9 @@ export class ModuleController implements IPCSource {
     private async registerModules(): Promise<void> {
         console.log("Registering modules...");
 
-        this.addModule(new HomeModule(ipcCallback));
+        this.addModule(new HomeProcess(ipcCallback));
         this.addModule(this.settingsModule);
-        await ModuleCompiler.loadPluginsFromStorage(ipcCallback).then((modules: Module[]) => {
+        await ModuleCompiler.loadPluginsFromStorage(ipcCallback).then((modules: Process[]) => {
             modules.forEach(module => {
                 this.addModule(module)
             })
@@ -133,7 +133,7 @@ export class ModuleController implements IPCSource {
         
 
     }
-    private addModule(module: Module): void {
+    private addModule(module: Process): void {
         this.modulesByName.set(module.getModuleName(), module);
         this.activeModules.push(module);
     }

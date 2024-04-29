@@ -1,11 +1,11 @@
 import { Setting } from "../../Setting";
-import { Module } from "../../Module";
+import { Process } from "../../Process";
 import { SettingBox } from "../../SettingBox";
 import { BooleanSettingBox } from "../ui_components/BooleanSettingBox";
 
 export class BooleanSetting extends Setting<boolean> {
 
-    public constructor(theModule: Module) {
+    public constructor(theModule: Process) {
         super(theModule);
     }
 

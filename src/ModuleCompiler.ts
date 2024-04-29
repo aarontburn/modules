@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import ts from 'typescript';
 import { IPCCallback } from './module_builder/IPCObjects';
-import { Module } from './module_builder/Module';
+import { Process } from './module_builder/Process';
 import { StorageHandler } from './StorageHandler';
 
 
@@ -20,11 +20,11 @@ export class ModuleCompiler {
 
 
     
-    public static async loadPluginsFromStorage(ipcCallback: IPCCallback): Promise<Module[]> {
+    public static async loadPluginsFromStorage(ipcCallback: IPCCallback): Promise<Process[]> {
         await StorageHandler.createDirectories();
         await this.compileAndCopy();
 
-        const externalModules: Module[] = [];
+        const externalModules: Process[] = [];
 
         try {
             const folders = await fs.promises.readdir(this.COMPILED_MODULES_PATH, this.IOOPTIONS);
@@ -36,7 +36,7 @@ export class ModuleCompiler {
 
                 const subfiles = await fs.promises.readdir(`${folder.path}/${folder.name}`, this.IOOPTIONS);
                 for (const subfile of subfiles) {
-                    if (subfile.name.includes("Module")) {
+                    if (subfile.name.includes("Process")) {
                         const module: any = require(subfile.path + "/" + subfile.name);
                         for (const key in module) {
                             externalModules.push(new module[key](ipcCallback));

@@ -1,5 +1,5 @@
 import { Setting } from "../../module_builder/Setting";
-import { Module } from "../../module_builder/Module";
+import { Process } from "../../module_builder/Process";
 import * as path from "path";
 import { ModuleSettings } from "../../module_builder/ModuleSettings";
 import { SettingBox } from "../../module_builder/SettingBox";
@@ -8,14 +8,14 @@ import { HexColorSetting } from "../../module_builder/settings/types/HexColorSet
 import { StorageHandler } from "../../StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 
-export class SettingsModule extends Module {
+export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
     private static HTML_PATH: string = path.join(__dirname, "./SettingsHTML.html").replace("dist", "src");
 
     private moduleSettingsList: ModuleSettings[] = [];
 
     public constructor(ipcCallback: IPCCallback) {
-        super(SettingsModule.MODULE_NAME, SettingsModule.HTML_PATH, ipcCallback);
+        super(SettingsProcess.MODULE_NAME, SettingsProcess.HTML_PATH, ipcCallback);
         this.getSettings().setSettingsName("General");
     }
 

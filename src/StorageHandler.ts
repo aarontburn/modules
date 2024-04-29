@@ -1,4 +1,4 @@
-import { Module } from "./module_builder/Module";
+import { Process } from "./module_builder/Process";
 import fs from "fs";
 import { app } from 'electron';
 import { Setting } from "./module_builder/Setting";
@@ -18,7 +18,7 @@ export class StorageHandler {
     }
 
 
-    public static writeToModuleStorage(theModule: Module, theFileName: string, theContents: string): void {
+    public static writeToModuleStorage(theModule: Process, theFileName: string, theContents: string): void {
         const dirName: string = theModule.getModuleName().toLowerCase();
         const folderName: string = this.STORAGE_PATH + dirName + "/";
         const filePath: string = folderName + theFileName;
@@ -44,7 +44,7 @@ export class StorageHandler {
     }
 
 
-    public static writeModuleSettingsToStorage(theModule: Module): void {
+    public static writeModuleSettingsToStorage(theModule: Process): void {
         const settingMap: Map<string, any> = new Map();
 
         theModule.getSettings().getSettingsList().forEach((setting: Setting<unknown>) => {
@@ -55,7 +55,7 @@ export class StorageHandler {
     }
 
 
-    public static readSettingsFromModuleStorage(theModule: Module): Map<string, any> {
+    public static readSettingsFromModuleStorage(theModule: Process): Map<string, any> {
         const settingMap: Map<string, any> = new Map();
 
         const dirName: string = theModule.getModuleName().toLowerCase();

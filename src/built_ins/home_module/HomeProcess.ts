@@ -1,11 +1,11 @@
 import { Setting } from "../../module_builder/Setting";
-import { Module } from "../../module_builder/Module";
+import { Process } from "../../module_builder/Process";
 import { NumericSetting } from "../../module_builder/settings/types/NumericSetting";
 import { StringSetting } from "../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 
-export class HomeModule extends Module {
+export class HomeProcess extends Process {
 	public static MODULE_NAME: string = "Home";
 	private static HTML_PATH: string = path.join(__dirname, "./HomeHTML.html").replace("dist", "src");
 
@@ -23,7 +23,7 @@ export class HomeModule extends Module {
 		{ month: "numeric", day: "numeric", year: "numeric", };
 
 	public constructor(ipcCallback: IPCCallback) {
-		super(HomeModule.MODULE_NAME, HomeModule.HTML_PATH, ipcCallback);
+		super(HomeProcess.MODULE_NAME, HomeProcess.HTML_PATH, ipcCallback);
 	}
 
 	public initialize(): void {
@@ -38,23 +38,23 @@ export class HomeModule extends Module {
 	public updateDateAndTime(repeat: boolean): void {
 		const date: Date = new Date();
 		const standardTime: string = date.toLocaleString(
-			HomeModule.LOCALE,
-			HomeModule.STANDARD_TIME_FORMAT
+			HomeProcess.LOCALE,
+			HomeProcess.STANDARD_TIME_FORMAT
 		);
 
 		const militaryTime: string = date.toLocaleString(
-			HomeModule.LOCALE,
-			HomeModule.MILITARY_TIME_FORMAT
+			HomeProcess.LOCALE,
+			HomeProcess.MILITARY_TIME_FORMAT
 		);
 
 		const fullDate: string = date.toLocaleString(
-			HomeModule.LOCALE,
-			HomeModule.FULL_DATE_FORMAT
+			HomeProcess.LOCALE,
+			HomeProcess.FULL_DATE_FORMAT
 		);
 
 		const abbreviatedDate: string = date.toLocaleString(
-			HomeModule.LOCALE,
-			HomeModule.ABBREVIATED_DATE_FORMAT
+			HomeProcess.LOCALE,
+			HomeProcess.ABBREVIATED_DATE_FORMAT
 		);
 
 		this.notifyObservers("update-clock", fullDate, abbreviatedDate, standardTime, militaryTime);

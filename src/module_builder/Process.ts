@@ -5,7 +5,7 @@ import { Setting } from "./Setting";
 
 
 
-export abstract class Module implements IPCSource {
+export abstract class Process implements IPCSource {
 
     public moduleSettings = new ModuleSettings(this);
 
