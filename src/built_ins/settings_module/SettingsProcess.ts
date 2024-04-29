@@ -70,7 +70,7 @@ export class SettingsProcess extends Process {
     }
 
 
-    public recieveIpcEvent(eventType: string, data: any[]): void {
+    public receiveIPCEvent(eventType: string, data: any[]): void {
         switch (eventType) {
             case "settings-init": {
                 this.initialize();

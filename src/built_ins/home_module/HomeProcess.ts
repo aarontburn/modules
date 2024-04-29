@@ -22,6 +22,8 @@ export class HomeProcess extends Process {
 	private static ABBREVIATED_DATE_FORMAT: Intl.DateTimeFormatOptions =
 		{ month: "numeric", day: "numeric", year: "numeric", };
 
+	private clockTimeout: NodeJS.Timeout;
+
 	public constructor(ipcCallback: IPCCallback) {
 		super(HomeProcess.MODULE_NAME, HomeProcess.HTML_PATH, ipcCallback);
 	}
@@ -32,7 +34,12 @@ export class HomeProcess extends Process {
 		// Start clock
 		this.updateDateAndTime(false);
 
-		setTimeout(() => this.updateDateAndTime(true), 1000 - new Date().getMilliseconds());
+		this.clockTimeout = setTimeout(() => this.updateDateAndTime(true), 1000 - new Date().getMilliseconds());
+	}
+
+	public stop(): void {
+		super.stop()
+		clearTimeout(this.clockTimeout);
 	}
 
 	public updateDateAndTime(repeat: boolean): void {
@@ -60,7 +67,7 @@ export class HomeProcess extends Process {
 		this.notifyObservers("update-clock", fullDate, abbreviatedDate, standardTime, militaryTime);
 
 		if (repeat) {
-			setTimeout(() => this.updateDateAndTime(true), 1000);
+			this.clockTimeout = setTimeout(() => this.updateDateAndTime(true), 1000);
 		}
 	}
 
@@ -109,7 +116,7 @@ export class HomeProcess extends Process {
 
 	}
 
-	public recieveIpcEvent(eventType: string, data: any[]): void {
+	public receiveIPCEvent(eventType: string, data: any[]): void {
 		switch (eventType) {
 			case "init": {
 				this.initialize();
