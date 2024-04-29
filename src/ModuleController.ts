@@ -1,8 +1,8 @@
 import { BrowserWindow } from "electron";
 import * as path from "path";
 import { Module } from "./module_builder/Module";
-import { SettingsModule } from "./built_ins/modules/settings_module/SettingsModule";
-import { HomeModule } from "./built_ins/modules/home_module/HomeModule";
+import { SettingsModule } from "./built_ins/settings_module/SettingsModule";
+import { HomeModule } from "./built_ins/home_module/HomeModule";
 import { IPCHandler } from "./IPCHandler";
 import { IPCCallback, IPCSource } from "./module_builder/IPCObjects";
 import { StorageHandler } from "./StorageHandler";
@@ -38,11 +38,6 @@ export class ModuleController implements IPCSource {
             this.createAndShow();
             this.attachIpcHandler();
         });
-
-
-
-
-
     }
 
     private checkSettings(): void {

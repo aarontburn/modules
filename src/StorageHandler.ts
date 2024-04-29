@@ -8,7 +8,14 @@ import { Setting } from "./module_builder/Setting";
 export class StorageHandler {
     private static PATH: string = app.getPath("home") + "/.modules/";
     private static STORAGE_PATH: string = this.PATH + "/storage/";
+    private static EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
+    private static COMPILED_MODULES_PATH: string = this.PATH + "/built/"
 
+    public static async createDirectories(): Promise<void> {
+        await fs.promises.mkdir(this.STORAGE_PATH, { recursive: true })
+        await fs.promises.mkdir(this.EXTERNAL_MODULES_PATH, { recursive: true })
+        await fs.promises.mkdir(this.COMPILED_MODULES_PATH, { recursive: true })
+    }
 
 
     public static writeToModuleStorage(theModule: Module, theFileName: string, theContents: string): void {

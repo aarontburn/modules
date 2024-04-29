@@ -4,6 +4,7 @@ import * as path from 'path';
 import ts from 'typescript';
 import { IPCCallback } from './module_builder/IPCObjects';
 import { Module } from './module_builder/Module';
+import { StorageHandler } from './StorageHandler';
 
 
 
@@ -18,7 +19,100 @@ export class ModuleCompiler {
     }
 
 
-    public static async compile(inputFilePath: string, outputDir: string) {
+    
+    public static async loadPluginsFromStorage(ipcCallback: IPCCallback): Promise<Module[]> {
+        await StorageHandler.createDirectories();
+        await this.compileAndCopy();
+
+        const externalModules: Module[] = [];
+
+        try {
+            const folders = await fs.promises.readdir(this.COMPILED_MODULES_PATH, this.IOOPTIONS);
+
+            for (const folder of folders) {
+                if (!folder.isDirectory()) {
+                    continue;
+                }
+
+                const subfiles = await fs.promises.readdir(`${folder.path}/${folder.name}`, this.IOOPTIONS);
+                for (const subfile of subfiles) {
+                    if (subfile.name.includes("Module")) {
+                        const module: any = require(subfile.path + "/" + subfile.name);
+                        for (const key in module) {
+                            externalModules.push(new module[key](ipcCallback));
+                        }
+                    }
+                }
+
+            }
+
+
+        } catch (err) {
+            console.error(err);
+        }
+
+        return externalModules
+
+    }
+
+    private static async compileAndCopy() {
+        try {
+            const files = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IOOPTIONS);
+
+            for (const folder of files) {
+                if (!folder.isDirectory()) {
+                    continue;
+                }
+
+                const subfiles = await fs.promises.readdir(`${folder.path}/${folder.name}`, this.IOOPTIONS);
+                const builtDirectory = this.COMPILED_MODULES_PATH + folder.name;
+
+                await fs.promises.mkdir(builtDirectory, { recursive: true });
+
+                for (const subfile of subfiles) {
+                    const fullSubfilePath = subfile.path + "/" + subfile.name;
+
+                    if (path.extname(subfile.name) === ".ts") {
+                        await this.compile(fullSubfilePath, builtDirectory);
+
+                    } else if (subfile.isDirectory()) {
+                        if (subfile.name === "module_builder") {
+                            await fs.promises.cp(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`, { recursive: true });
+                            console.log(`Copied module_builder into ${builtDirectory}`);
+                        } else {
+                            await fs.promises.cp(subfile.path + "/" + subfile.name, `${builtDirectory}/${subfile.name}`, { recursive: true });
+                            console.log(`Copied ${subfile.name} into ${builtDirectory}`);
+                        }
+
+                    } else if (path.extname(subfile.name) === ".html") {
+                        await this.formatHTML(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
+
+                        const mainFolder: string = path.join(__dirname, "../");
+                        const relativeCSSPath: string = path.join(mainFolder, "colors.css");
+                        const relativeFontPath: string = path.join(mainFolder, "Yu_Gothic_Light.ttf");
+
+                        await fs.promises.mkdir(builtDirectory + "/module_builder/", { recursive: true })
+                        await fs.promises.copyFile(relativeCSSPath, builtDirectory + "/module_builder/colors.css");
+                        await fs.promises.copyFile(relativeFontPath, builtDirectory + "/module_builder/Yu_Gothic_Light.ttf");
+
+
+                    } else {
+                        await fs.promises.copyFile(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
+                    }
+
+                }
+            }
+
+            console.log("All files compiled and copied successfully.");
+        } catch (error) {
+            console.error("Error:", error);
+        }
+
+    }
+
+
+
+    private static async compile(inputFilePath: string, outputDir: string) {
         if (!inputFilePath.endsWith(".ts")) {
             console.log("Skipping " + inputFilePath + ". Not a compilable file (must be .ts)");
             return;
@@ -125,95 +219,6 @@ export class ModuleCompiler {
 
 
 
-
-    public static async loadPluginsFromStorage(ipcCallback: IPCCallback): Promise<Module[]> {
-        await this.compileAndCopy();
-
-        const externalModules: Module[] = [];
-
-        try {
-            const folders = await fs.promises.readdir(this.COMPILED_MODULES_PATH, this.IOOPTIONS);
-
-            for (const folder of folders) {
-                if (!folder.isDirectory()) {
-                    continue;
-                }
-
-                const subfiles = await fs.promises.readdir(`${folder.path}/${folder.name}`, this.IOOPTIONS);
-                for (const subfile of subfiles) {
-                    if (subfile.name.includes("Module")) {
-                        const module: any = require(subfile.path + "/" + subfile.name);
-                        for (const key in module) {
-                            externalModules.push(new module[key](ipcCallback));
-                        }
-                    }
-                }
-
-            }
-
-
-        } catch (err) {
-            console.error(err);
-        }
-
-        return externalModules
-
-    }
-
-    public static async compileAndCopy() {
-        try {
-            const files = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IOOPTIONS);
-
-            for (const folder of files) {
-                if (!folder.isDirectory()) {
-                    continue;
-                }
-
-                const subfiles = await fs.promises.readdir(`${folder.path}/${folder.name}`, this.IOOPTIONS);
-                const builtDirectory = this.COMPILED_MODULES_PATH + folder.name;
-
-                await fs.promises.mkdir(builtDirectory, { recursive: true });
-
-                for (const subfile of subfiles) {
-                    const fullSubfilePath = subfile.path + "/" + subfile.name;
-
-                    if (path.extname(subfile.name) === ".ts") {
-                        await this.compile(fullSubfilePath, builtDirectory);
-
-                    } else if (subfile.isDirectory()) {
-                        if (subfile.name === "module_builder") {
-                            await fs.promises.cp(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`, { recursive: true });
-                            console.log(`Copied module_builder into ${builtDirectory}`);
-                        } else {
-                            await fs.promises.cp(subfile.path + "/" + subfile.name, `${builtDirectory}/${subfile.name}`, { recursive: true });
-                            console.log(`Copied ${subfile.name} into ${builtDirectory}`);
-                        }
-
-                    } else if (path.extname(subfile.name) === ".html") {
-                        await this.formatHTML(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
-
-                        const mainFolder: string = path.join(__dirname, "../");
-                        const relativeCSSPath: string = path.join(mainFolder, "colors.css");
-                        const relativeFontPath: string = path.join(mainFolder, "Yu_Gothic_Light.ttf");
-
-                        await fs.promises.mkdir(builtDirectory + "/module_builder/", { recursive: true })
-                        await fs.promises.copyFile(relativeCSSPath, builtDirectory + "/module_builder/colors.css");
-                        await fs.promises.copyFile(relativeFontPath, builtDirectory + "/module_builder/Yu_Gothic_Light.ttf");
-
-
-                    } else {
-                        await fs.promises.copyFile(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
-                    }
-
-                }
-            }
-
-            console.log("All files compiled and copied successfully.");
-        } catch (error) {
-            console.error("Error:", error);
-        }
-
-    }
 
 
 }
