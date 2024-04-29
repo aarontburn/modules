@@ -11,7 +11,7 @@ export class HexColorSetting extends Setting<string> {
     }
 
 
-    protected validateInput(theInput: any): string | null {
+    public validateInput(theInput: any): string | null {
         if (theInput == null) {
             return null;
         }
@@ -20,7 +20,7 @@ export class HexColorSetting extends Setting<string> {
         return s.match("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$") ? s : null;
 
     }
-    protected setUIComponent(): SettingBox<string> {
+    public setUIComponent(): SettingBox<string> {
         return new HexColorSettingBox(this);
     }
 

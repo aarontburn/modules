@@ -10,13 +10,13 @@ export class StringSetting extends Setting<string> {
     }
 
 
-    protected validateInput(theInput: any): string | null {
+    public validateInput(theInput: any): string | null {
         const s: string = theInput.toString();
         return s == "" ? null : s;
 
     }
 
-    protected setUIComponent(): SettingBox<string> {
+    public setUIComponent(): SettingBox<string> {
         return new StringSettingBox(this);
     }
 

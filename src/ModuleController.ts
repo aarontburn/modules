@@ -1,27 +1,28 @@
 import { BrowserWindow } from "electron";
-import { Dimension } from "./objects/Dimension";
 import * as path from "path";
 import { Module } from "./module_builder/Module";
 import { SettingsModule } from "./built_ins/modules/settings_module/SettingsModule";
 import { HomeModule } from "./built_ins/modules/home_module/HomeModule";
 import { IPCHandler } from "./IPCHandler";
-import { IPCSource } from "./IPCSource";
-import { AutoClickerModule } from "./modules/auto_clicker/AutoClickerModule";
-import { VolumeControllerModule } from "./modules/volume_controller/VolumeControllerModule";
+import { IPCCallback, IPCSource } from "./module_builder/IPCObjects";
 import { StorageHandler } from "./StorageHandler";
 import { ModuleSettings } from "./module_builder/ModuleSettings";
 import { Setting } from "./module_builder/settings/Setting";
+import { ModuleCompiler } from "./ModuleCompiler";
 
-const WINDOW_DIMENSION: Dimension = new Dimension(1920, 1080);
-
+const WINDOW_DIMENSION: { width: number, height: number } = { width: 1920, height: 1080 };
+const ipcCallback: IPCCallback = {
+    notifyRenderer: IPCHandler.fireEventToRenderer.bind(IPCHandler)
+}
 
 export class ModuleController implements IPCSource {
+
     private window: BrowserWindow;
     private ipc: Electron.IpcMain;
 
     private modulesByName = new Map<string, Module>();
     private activeModules: Module[] = [];
-    private settingsModule: SettingsModule = new SettingsModule();
+    private settingsModule: SettingsModule = new SettingsModule(ipcCallback);
 
     public constructor(ipcHandler: Electron.IpcMain) {
         this.ipc = ipcHandler;
@@ -32,10 +33,12 @@ export class ModuleController implements IPCSource {
     }
 
     public start(): void {
-        this.registerModules();
-        this.checkSettings();
-        this.createAndShow();
-        this.attachIpcHandler();
+        this.registerModules().then(() => {
+            this.checkSettings();
+            this.createAndShow();
+            this.attachIpcHandler();
+        });
+
 
 
 
@@ -68,7 +71,7 @@ export class ModuleController implements IPCSource {
         this.activeModules.forEach((module: Module) => {
             map.set(module.getModuleName(), module.getHtmlPath());
         });
-        IPCHandler.fireEventToRenderer(this, 'load-modules', map);
+        ipcCallback.notifyRenderer(this, 'load-modules', map);
         this.swapLayouts(HomeModule.MODULE_NAME);
     }
 
@@ -81,7 +84,6 @@ export class ModuleController implements IPCSource {
                 }
                 case "alert-main-swap-modules": {
                     this.swapLayouts(data[0]);
-                    
                     break;
                 }
             }
@@ -104,14 +106,14 @@ export class ModuleController implements IPCSource {
     private swapLayouts(moduleName: string): void {
         const module: Module = this.modulesByName.get(moduleName);
         module.onGuiShown();
-        IPCHandler.fireEventToRenderer(this, 'swap-modules-renderer', moduleName);
+        ipcCallback.notifyRenderer(this, 'swap-modules-renderer', moduleName);
     }
 
 
     private createAndShow(): void {
         this.window = new BrowserWindow({
-            height: WINDOW_DIMENSION.getHeight(),
-            width: WINDOW_DIMENSION.getWidth(),
+            height: WINDOW_DIMENSION.height,
+            width: WINDOW_DIMENSION.width,
             webPreferences: {
                 nodeIntegrationInSubFrames: true,
                 backgroundThrottling: false,
@@ -123,13 +125,17 @@ export class ModuleController implements IPCSource {
 
     }
 
-    private registerModules(): void {
+    private async registerModules(): Promise<void> {
         console.log("Registering modules...");
 
-        this.addModule(new HomeModule());
+        this.addModule(new HomeModule(ipcCallback));
         this.addModule(this.settingsModule);
-        this.addModule(new VolumeControllerModule());
-        // this.addModule(new AutoClickerModule());
+        await ModuleCompiler.loadPluginsFromStorage(ipcCallback).then((modules: Module[]) => {
+            modules.forEach(module => {
+                this.addModule(module)
+            })
+        });
+        
 
     }
     private addModule(module: Module): void {

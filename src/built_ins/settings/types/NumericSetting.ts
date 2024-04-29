@@ -13,7 +13,7 @@ export class NumericSetting extends Setting<number> {
     }
 
 
-    protected validateInput(theInput: any): number | null {
+    public validateInput(theInput: any): number | null {
         if (typeof theInput === 'number') {
             return theInput as number;
         }
@@ -28,7 +28,7 @@ export class NumericSetting extends Setting<number> {
         return null;
     }
 
-    protected setUIComponent(): SettingBox<number> {
+    public setUIComponent(): SettingBox<number> {
         return new NumericSettingBox(this);
     }
 

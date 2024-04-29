@@ -3,17 +3,17 @@ import { SettingBox } from "./SettingBox";
 
 export abstract class Setting<T> {
 
-    private parentModule: Module;
-    private settingName: string;
-    private settingDescription: string;
-    private settingId: string = this.generateRandomId()
+    public parentModule: Module;
+    public settingName: string;
+    public settingDescription: string;
+    public settingId: string = this.generateRandomId()
 
-    private inputValidator: (theInput: any) => T;
+    public inputValidator: (theInput: any) => T;
 
-    private defaultValue: T;
-    private currentValue: T;
+    public defaultValue: T;
+    public currentValue: T;
 
-    private settingBox: SettingBox<T>;
+    public settingBox: SettingBox<T>;
 
 
     /**
@@ -29,7 +29,7 @@ export abstract class Setting<T> {
      *
      * @param theParentModule The module that this setting belongs to.
      */
-    protected constructor(theParentModule: Module) {
+    public constructor(theParentModule: Module) {
         this.parentModule = theParentModule;
 
         this.settingBox = this.setUIComponent();
@@ -45,7 +45,7 @@ export abstract class Setting<T> {
      *
      * @throws Error if the required fields were NOT set.
      */
-    private checkRequiredFields(): void {
+    public checkRequiredFields(): void {
         if (this.settingName == undefined || this.defaultValue == undefined) {
             throw new Error(
                 "Attempted to access '" + this.settingName + "' before all values were set. Missing:"
@@ -181,7 +181,7 @@ export abstract class Setting<T> {
      * @param theInput The input to parse.
      * @return A {@link T} type valid input, or null if the input couldn't be parsed.
      */
-    private parseInput(theInput: any): T {
+    public parseInput(theInput: any): T {
         if (this.inputValidator != undefined) {
             return this.inputValidator(theInput);
         }
@@ -202,7 +202,7 @@ export abstract class Setting<T> {
      * @param theInput The input to parse.
      * @return A {@link T} valid input, or null if the input could not be parsed.
      */
-    protected abstract validateInput(theInput: any): T | null;
+    public abstract validateInput(theInput: any): T | null;
 
 
     /**
@@ -230,13 +230,13 @@ export abstract class Setting<T> {
     }
 
 
-    protected abstract setUIComponent(): SettingBox<T>;
+    public abstract setUIComponent(): SettingBox<T>;
 
     public getUIComponent(): SettingBox<T> {
         return this.settingBox;
     }
 
-    private generateRandomId(): string {
+    public generateRandomId(): string {
         return "settingid_" + Math.random().toString(36).replace('0.', '');
     }
 

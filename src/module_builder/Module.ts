@@ -1,20 +1,24 @@
-import { IPCHandler } from "../IPCHandler";
-import { IPCSource } from "../IPCSource";
+import { IPCCallback, IPCSource } from "./IPCObjects";
 import { ModuleSettings } from "./ModuleSettings";
 import { Setting } from "./settings/Setting";
 
+
+
+
 export abstract class Module implements IPCSource {
 
-    private moduleSettings = new ModuleSettings(this);
+    public moduleSettings = new ModuleSettings(this);
 
-    private moduleName: string;
-    private hasBeenInit: boolean = false;
+    public ipcCallback: IPCCallback;
+    public moduleName: string;
+    public hasBeenInit: boolean = false;
 
-    private htmlPath: string;
+    public htmlPath: string;
 
-    public constructor(theModuleName: string, theHtmlPath: string) {
+    public constructor(theModuleName: string, theHtmlPath: string, ipcCallback: IPCCallback) {
         this.moduleName = theModuleName;
         this.htmlPath = theHtmlPath;
+        this.ipcCallback = ipcCallback;
 
         this.moduleSettings.addAllSettings(this.registerSettings());
     }
@@ -71,7 +75,8 @@ export abstract class Module implements IPCSource {
     public abstract recieveIpcEvent(eventType: string, data: any[]): void
 
     public notifyObservers(eventType: string, ...data: any): void {
-        IPCHandler.fireEventToRenderer(this, eventType, data);
+        this.ipcCallback.notifyRenderer(this, eventType, data);
+        // IPCHandler.fireEventToRenderer(this, eventType, data);
     }
 
 

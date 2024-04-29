@@ -2,7 +2,7 @@ import { Setting } from "./Setting";
 
 export abstract class SettingBox<T> {
 
-    private setting: Setting<T>;
+    public setting: Setting<T>;
 
     public constructor(theSetting: Setting<T>) {
         this.setting = theSetting;

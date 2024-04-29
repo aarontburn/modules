@@ -2,80 +2,14 @@ import { Module } from "./module_builder/Module";
 import fs from "fs";
 import { app } from 'electron';
 import { Setting } from "./module_builder/settings/Setting";
-import path from "path"
-import { ModuleCompiler } from "./ModuleCompiler";
+
+
 
 export class StorageHandler {
     private static PATH: string = app.getPath("home") + "/.modules/";
     private static STORAGE_PATH: string = this.PATH + "/storage/";
-    private static EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
-    private static COMPILED_MODULES_PATH: string = this.PATH + "/built/"
 
 
-    public static loadPluginsFromStorage() {
-        const options: any = {
-            encoding: "utf-8",
-            withFileTypes: true
-        }
-        fs.readdir(this.EXTERNAL_MODULES_PATH, options, (err, files: fs.Dirent[]) => {
-            if (err) {
-                console.error("Error reading plugins from storage")
-                console.log(err);
-                return;
-            };
-
-
-            files.forEach(file => {
-                if (file.isDirectory()) {
-                    const directoryName: string = file.name;
-                    
-                    fs.readdir(file.path + "/" + directoryName, options, (err, subfiles: fs.Dirent[]) => {
-                        if (err) {
-                            console.error("Error reading from " + file.path + "/" +  file.name)
-                            console.log(err);
-                            return;
-                        };
-
-                        subfiles.forEach(subfile => {
-                            const fullSubfilePath = subfile.path + "/" + subfile.name;
-                            const builtDirectory = this.COMPILED_MODULES_PATH + directoryName;
-                            if (path.extname(subfile.name) === ".ts") { // Compile if typescript file
-                                ModuleCompiler.compile(fullSubfilePath, builtDirectory)
-                            } else { // Copy file
-                                fs.copyFile(fullSubfilePath, builtDirectory + "/" + subfile.name, (err) => {
-                                    if (err) {
-                                        console.error("Error copying " + subfile.name + " into " + builtDirectory);
-                                        console.error(err)
-                                    }
-                                    console.log("Copied " + subfile.name + " into " + builtDirectory)
-                                })
-
-                            }
-                        })
-
-                    })
-                }
-            })
-
-        });
-
-
-
-
-        fs.readdir(this.COMPILED_MODULES_PATH, options, (err: NodeJS.ErrnoException, files: fs.Dirent[]) => {
-            if (err) {
-                console.error("Error reading plugins from storage")
-                console.log(err);
-                return;
-            }
-
-            files.forEach(file => {
-
-
-
-            })
-        });
-    }
 
     public static writeToModuleStorage(theModule: Module, theFileName: string, theContents: string): void {
         const dirName: string = theModule.getModuleName().toLowerCase();
@@ -83,7 +17,7 @@ export class StorageHandler {
         const filePath: string = folderName + theFileName;
 
 
-        const write = async () => {
+        (async () => {
             await fs.mkdir(folderName,
                 { recursive: true },
                 (err: NodeJS.ErrnoException) => {
@@ -99,8 +33,7 @@ export class StorageHandler {
                         }
                     });
                 });
-        }
-        write()
+        })()
     }
 
 

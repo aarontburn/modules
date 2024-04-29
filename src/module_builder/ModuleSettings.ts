@@ -2,9 +2,9 @@ import { Module } from "./Module";
 import { Setting } from "./settings/Setting";
 
 export class ModuleSettings {
-    private settingsMap: Map<string, Setting<unknown>> = new Map<string, Setting<unknown>>();
-    private parentModule: Module;
-    private settingsName: string;
+    public settingsMap: Map<string, Setting<unknown>> = new Map<string, Setting<unknown>>();
+    public parentModule: Module;
+    public settingsName: string;
 
     public constructor(theModule: Module) {
         this.parentModule = theModule;

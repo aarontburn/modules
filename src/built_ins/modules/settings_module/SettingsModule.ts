@@ -6,6 +6,7 @@ import { SettingBox } from "../../../module_builder/settings/SettingBox";
 import { BooleanSetting } from "../../../built_ins/settings/types/BooleanSetting";
 import { HexColorSetting } from "../../../built_ins/settings/types/HexColorSetting";
 import { StorageHandler } from "../../../StorageHandler";
+import { IPCCallback } from "../../../module_builder/IPCObjects";
 
 export class SettingsModule extends Module {
     public static MODULE_NAME: string = "Settings";
@@ -13,8 +14,8 @@ export class SettingsModule extends Module {
 
     private moduleSettingsList: ModuleSettings[] = [];
 
-    public constructor() {
-        super(SettingsModule.MODULE_NAME, SettingsModule.HTML_PATH);
+    public constructor(ipcCallback: IPCCallback) {
+        super(SettingsModule.MODULE_NAME, SettingsModule.HTML_PATH, ipcCallback);
         this.getSettings().setSettingsName("General");
     }
 

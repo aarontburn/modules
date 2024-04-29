@@ -1,11 +1,15 @@
 import { BrowserWindow } from "electron";
-import { IPCSource } from "./IPCSource";
+import { IPCSource } from "./module_builder/IPCObjects";
 
 // Note: This class should be used in the main process, not renderer process.
 export class IPCHandler {
 
     private static ipc: Electron.IpcMain;
     private static window: BrowserWindow;
+
+    constructor() {
+        console.log("Constructor called")
+    }
 
     public static construct(theWindow: BrowserWindow, theIpc: Electron.IpcMain) {
         this.ipc = theIpc;
@@ -19,7 +23,7 @@ export class IPCHandler {
     }
 
     public static fireEventToRenderer(target: IPCSource, eventType: string, ...data: any[]): void {
-        this.checkInit()
+        IPCHandler.checkInit()
         this.window.webContents.send(target.getIpcSource() + "-renderer", eventType, data);
     }
 

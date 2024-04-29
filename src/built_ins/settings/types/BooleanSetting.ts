@@ -10,7 +10,7 @@ export class BooleanSetting extends Setting<boolean> {
     }
 
 
-    protected validateInput(theInput: any): boolean | null {
+    public validateInput(theInput: any): boolean | null {
         if (theInput == null) {
             return null;
         }
@@ -30,7 +30,7 @@ export class BooleanSetting extends Setting<boolean> {
 
     }
 
-    protected setUIComponent(): SettingBox<boolean> {
+    public setUIComponent(): SettingBox<boolean> {
         return new BooleanSettingBox(this);
     }
 
