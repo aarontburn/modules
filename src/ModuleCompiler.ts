@@ -179,10 +179,15 @@ export class ModuleCompiler {
 
                     if (path.extname(subfile.name) === ".ts") {
                         await this.compile(fullSubfilePath, builtDirectory);
-                        
-                    } else if (subfile.isDirectory() && subfile.name === "module_builder") {
-                        await fs.promises.cp(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`, { recursive: true });
-                        console.log(`Copied module_builder into ${builtDirectory}`);
+
+                    } else if (subfile.isDirectory()) {
+                        if (subfile.name === "module_builder") {
+                            await fs.promises.cp(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`, { recursive: true });
+                            console.log(`Copied module_builder into ${builtDirectory}`);
+                        } else {
+                            await fs.promises.cp(subfile.path + "/" + subfile.name, `${builtDirectory}/${subfile.name}`, { recursive: true });
+                            console.log(`Copied ${subfile.name} into ${builtDirectory}`);
+                        }
 
                     } else if (path.extname(subfile.name) === ".html") {
                         await this.formatHTML(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
