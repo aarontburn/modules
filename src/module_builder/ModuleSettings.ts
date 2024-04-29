@@ -1,5 +1,5 @@
 import { Module } from "./Module";
-import { Setting } from "./settings/Setting";
+import { Setting } from "./Setting";
 
 export class ModuleSettings {
     public settingsMap: Map<string, Setting<unknown>> = new Map<string, Setting<unknown>>();

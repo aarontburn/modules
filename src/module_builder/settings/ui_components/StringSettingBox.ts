@@ -1,4 +1,4 @@
-import { SettingBox } from "../../../module_builder/settings/SettingBox";
+import { SettingBox } from "../../SettingBox";
 
 export class StringSettingBox extends SettingBox<string> {
 

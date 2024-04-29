@@ -1,7 +1,7 @@
-import { Setting } from "../../../module_builder/settings/Setting";
+import { Setting } from "../../../module_builder/Setting";
 import { Module } from "../../../module_builder/Module";
-import { NumericSetting } from "../../settings/types/NumericSetting";
-import { StringSetting } from "../../settings/types/StringSetting";
+import { NumericSetting } from "../../../module_builder/settings/types/NumericSetting";
+import { StringSetting } from "../../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../../module_builder/IPCObjects";
 

@@ -1,10 +1,10 @@
-import { Setting } from "../../../module_builder/settings/Setting";
+import { Setting } from "../../../module_builder/Setting";
 import { Module } from "../../../module_builder/Module";
 import * as path from "path";
 import { ModuleSettings } from "../../../module_builder/ModuleSettings";
-import { SettingBox } from "../../../module_builder/settings/SettingBox";
-import { BooleanSetting } from "../../../built_ins/settings/types/BooleanSetting";
-import { HexColorSetting } from "../../../built_ins/settings/types/HexColorSetting";
+import { SettingBox } from "../../../module_builder/SettingBox";
+import { BooleanSetting } from "../../../module_builder/settings/types/BooleanSetting";
+import { HexColorSetting } from "../../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../../StorageHandler";
 import { IPCCallback } from "../../../module_builder/IPCObjects";
 

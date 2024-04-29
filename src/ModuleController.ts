@@ -7,7 +7,7 @@ import { IPCHandler } from "./IPCHandler";
 import { IPCCallback, IPCSource } from "./module_builder/IPCObjects";
 import { StorageHandler } from "./StorageHandler";
 import { ModuleSettings } from "./module_builder/ModuleSettings";
-import { Setting } from "./module_builder/settings/Setting";
+import { Setting } from "./module_builder/Setting";
 import { ModuleCompiler } from "./ModuleCompiler";
 
 const WINDOW_DIMENSION: { width: number, height: number } = { width: 1920, height: 1080 };

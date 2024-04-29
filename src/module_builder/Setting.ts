@@ -1,4 +1,4 @@
-import { Module } from "../Module";
+import { Module } from "./Module";
 import { SettingBox } from "./SettingBox";
 
 export abstract class Setting<T> {

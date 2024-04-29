@@ -1,6 +1,6 @@
 import { IPCCallback, IPCSource } from "./IPCObjects";
 import { ModuleSettings } from "./ModuleSettings";
-import { Setting } from "./settings/Setting";
+import { Setting } from "./Setting";
 
 
 
