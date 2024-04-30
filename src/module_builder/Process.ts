@@ -45,10 +45,11 @@ export abstract class Process implements IPCSource {
     }
 
     public initialize(): void {
-        // moduleGUI.initialize()
-
         this.hasBeenInit = true;
         // Override this, and do a super.initialize() after initializing model.
+
+
+        
     }
 
     public abstract registerSettings(): Setting<unknown>[];
