@@ -63,6 +63,7 @@ export class SettingsProcess extends Process {
                 list.settings.push(settingInfo);
             });
             settings.push(list);
+            moduleSettings.getParentModule().refreshSettings();
         }
 
         // this.refreshSettings();
