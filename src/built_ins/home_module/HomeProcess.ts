@@ -109,10 +109,18 @@ export class HomeProcess extends Process {
 					const s: string = o.toString();
 					return s == "" || s.match("^(?!.*(\\d).*\\1)[1-4\\s]+$") ? s : null;
 				}),
-
 		];
 	}
+
+
 	public refreshSettings(): void {
+		const sizes = {
+			fullDate: this.getSettings().getSettingByName('Full Date Font Size (1)').getValue(),
+			abbrDate: this.getSettings().getSettingByName('Abbreviated Date Font Size (2)').getValue(),
+			standardTime: this.getSettings().getSettingByName('Standard Time Font Size (3)').getValue(),
+			militaryTime: this.getSettings().getSettingByName('Military Time Font Size (4)').getValue()
+		}
+		this.notifyObservers('font-sizes', sizes);
 
 	}
 

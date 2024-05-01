@@ -127,7 +127,7 @@ export class ModuleController implements IPCSource {
         this.addModule(this.settingsModule);
         await ModuleCompiler.loadPluginsFromStorage(ipcCallback).then((modules: Process[]) => {
             modules.forEach(module => {
-                this.addModule(module)
+                this.addModule(module);
             })
         });
         
