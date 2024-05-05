@@ -14,6 +14,6 @@ Plugin-based architecture is difficult to implement, especially if you're loadin
 This module is a substitute for the Windows Audio Mixer and includes additional functions.
 
 ## Developing a module:
-Visit the **modules-modules_develop** GitHub repository to develop a module.  
-[modules: developer template](https://github.com/aarontburn/modules-module_develop)
+Visit the **modules-module-quickstart** GitHub repository to develop a module.  
+[modules quickstart template](https://github.com/aarontburn/modules-module-quickstart)
 
