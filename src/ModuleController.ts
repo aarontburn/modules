@@ -28,7 +28,7 @@ export class ModuleController implements IPCSource {
         this.ipc = ipcHandler;
     }
 
-    getIPCSource(): string {
+    public getIPCSource(): string {
         return "main";
     }
 
@@ -36,7 +36,7 @@ export class ModuleController implements IPCSource {
         this.registerModules().then(() => {
             this.checkSettings();
             this.createAndShow();
-            this.attachIpcHandler();
+            this.attachIPCHandler();
         });
     }
 
@@ -70,7 +70,7 @@ export class ModuleController implements IPCSource {
         this.swapLayouts(HomeProcess.MODULE_NAME);
     }
 
-    private attachIpcHandler(): void {
+    private attachIPCHandler(): void {
         IPCHandler.createHandler(this, (_, eventType: string, data: any[]) => {
             switch (eventType) {
                 case "renderer-init": {

@@ -7,7 +7,6 @@ import { Process } from './module_builder/Process';
 import { StorageHandler } from './StorageHandler';
 
 
-
 export class ModuleCompiler {
 
     private static PATH: string = app.getPath("home") + "/.modules/";
@@ -19,7 +18,7 @@ export class ModuleCompiler {
     }
 
 
-    
+
     public static async loadPluginsFromStorage(ipcCallback: IPCCallback): Promise<Process[]> {
         await StorageHandler.createDirectories();
         await this.compileAndCopy();
@@ -27,14 +26,16 @@ export class ModuleCompiler {
         const externalModules: Process[] = [];
 
         try {
-            const folders = await fs.promises.readdir(this.COMPILED_MODULES_PATH, this.IOOPTIONS);
+            const folders: fs.Dirent[] = await fs.promises.readdir(this.COMPILED_MODULES_PATH, this.IOOPTIONS);
 
             for (const folder of folders) {
                 if (!folder.isDirectory()) {
                     continue;
                 }
 
-                const subfiles = await fs.promises.readdir(`${folder.path}/${folder.name}`, this.IOOPTIONS);
+                const moduleFolderPath: string = `${folder.path}/${folder.name}`;
+                const subfiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IOOPTIONS);
+
                 for (const subfile of subfiles) {
                     if (subfile.name.includes("Process")) {
                         const module: any = require(subfile.path + "/" + subfile.name);
@@ -52,6 +53,45 @@ export class ModuleCompiler {
         }
 
         return externalModules
+    }
+
+    private static async getModuleInfo(path: string): Promise<Object | null | undefined> {
+        try {
+            return JSON.parse((await fs.promises.readFile(path)).toString());
+        } catch (err) {
+            if (err.code === 'ENOENT') { // File doesn't exist
+                return undefined
+            }
+            console.error(err);
+        }
+        return null
+    }
+
+    private static async checkModuleInfo(externalPath: string, builtPath: string): Promise<boolean> {
+        const moduleInfo: any = await this.getModuleInfo(externalPath + "/moduleinfo.json");
+
+        if (!moduleInfo) {
+            if (moduleInfo === undefined) {
+                console.log(`WARNING: ${externalPath} does not contain 'moduleinfo.json'.`);
+            }
+            return true;
+        }
+
+        const builtModuleInfo: any = await this.getModuleInfo(builtPath + "/moduleinfo.json");
+
+        if (!builtModuleInfo) {
+            if (builtModuleInfo === undefined) {
+                console.log(`WARNING: ${builtPath} does not contain 'moduleinfo.json'.`);
+            }
+            return true;
+        }
+
+        for (const [key, value] of Object.entries(moduleInfo)) {
+            if (builtModuleInfo[key] !== value) {
+                return true
+            }
+        }
+        return false
 
     }
 
@@ -64,8 +104,16 @@ export class ModuleCompiler {
                     continue;
                 }
 
-                const subfiles = await fs.promises.readdir(`${folder.path}/${folder.name}`, this.IOOPTIONS);
                 const builtDirectory = this.COMPILED_MODULES_PATH + folder.name;
+                const moduleFolderPath: string = `${folder.path}${folder.name}`;
+
+                const doCompileModule: boolean = !(await this.checkModuleInfo(moduleFolderPath, builtDirectory))
+                if (doCompileModule) {
+                    console.log("Skipping compiling of " + folder.name + "; no changes detected.");
+                    continue;
+                }
+
+                const subfiles = await fs.promises.readdir(moduleFolderPath, this.IOOPTIONS);
 
                 await fs.promises.mkdir(builtDirectory, { recursive: true });
 

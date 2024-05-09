@@ -24,7 +24,3 @@ contextBridge.exposeInMainWorld('ipc', {
   on: (channel: string, func:(event: Electron.IpcRendererEvent, ...args: any[]) => void) =>
     ipcRenderer.on(channel, func)
 });
-
-contextBridge.exposeInMainWorld("constants", {
-  MAIN: "main-process"
-})
