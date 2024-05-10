@@ -24,9 +24,20 @@ export class ModuleController implements IPCSource {
     private activeModules: Process[] = [];
     private settingsModule: SettingsProcess = new SettingsProcess(ipcCallback);
 
-    public constructor(ipcHandler: Electron.IpcMain) {
+    private static isDev = false;
+
+    public constructor(ipcHandler: Electron.IpcMain, args: string[]) {
+        if (args[2] === "--dev") {
+            ModuleController.isDev = true;
+        }
+
         this.ipc = ipcHandler;
     }
+
+    public static isDevelopmentMode(): boolean {
+        return this.isDev;
+    }
+
 
     public getIPCSource(): string {
         return "main";
@@ -115,7 +126,7 @@ export class ModuleController implements IPCSource {
                 preload: path.join(__dirname, "preload.js"),
             },
         });
-        this.window.loadFile(path.join(__dirname, "../index.html"));
+        this.window.loadFile(path.join(__dirname, "./view/index.html"));
         IPCHandler.construct(this.window, this.ipc);
 
     }

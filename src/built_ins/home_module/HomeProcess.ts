@@ -4,10 +4,16 @@ import { NumericSetting } from "../../module_builder/settings/types/NumericSetti
 import { StringSetting } from "../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
+import { ModuleController } from "../../ModuleController";
+
+
+
 
 export class HomeProcess extends Process {
 	public static MODULE_NAME: string = "Home";
-	private static HTML_PATH: string = path.join(__dirname, "./HomeHTML.html").replace("dist", "src");
+
+	private static HTML_PATH: string = path.join(__dirname, "./HomeHTML.html");
+
 
 	private static LOCALE: string = "en-US";
 	private static STANDARD_TIME_FORMAT: Intl.DateTimeFormatOptions =
@@ -25,7 +31,16 @@ export class HomeProcess extends Process {
 	private clockTimeout: NodeJS.Timeout;
 
 	public constructor(ipcCallback: IPCCallback) {
-		super(HomeProcess.MODULE_NAME, HomeProcess.HTML_PATH, ipcCallback);
+		super(
+			HomeProcess.MODULE_NAME,
+			ModuleController.isDevelopmentMode()
+				? HomeProcess.HTML_PATH.replace("dist", "src")
+				: HomeProcess.HTML_PATH,
+			ipcCallback);
+
+		console.log(path.join(__dirname, "./HomeHTML.html"))
+
+
 	}
 
 	public initialize(): void {

@@ -1,5 +1,6 @@
 import { app } from 'electron';
 import * as fs from 'fs';
+import * as fse from 'fs-extra'
 import * as path from 'path';
 import ts from 'typescript';
 import { IPCCallback } from './module_builder/IPCObjects';
@@ -125,7 +126,14 @@ export class ModuleCompiler {
 
                     } else if (subfile.isDirectory()) {
                         if (subfile.name === "module_builder") {
-                            await fs.promises.cp(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`, { recursive: true });
+
+
+                            console.log((await fs.promises.readdir(__dirname + "/module_builder")).toString())
+
+                            await fse.moveSync(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`, { overwrite: true })
+
+
+                            // await fs.promises.cp(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`, { recursive: true });
                             console.log(`Copied module_builder into ${builtDirectory}`);
                         } else {
                             await fs.promises.cp(subfile.path + "/" + subfile.name, `${builtDirectory}/${subfile.name}`, { recursive: true });
@@ -135,9 +143,9 @@ export class ModuleCompiler {
                     } else if (path.extname(subfile.name) === ".html") {
                         await this.formatHTML(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
 
-                        const mainFolder: string = path.join(__dirname, "../");
-                        const relativeCSSPath: string = path.join(mainFolder, "colors.css");
-                        const relativeFontPath: string = path.join(mainFolder, "Yu_Gothic_Light.ttf");
+                        const mainFolder: string = path.join(__dirname, "/");
+                        const relativeCSSPath: string = path.join(mainFolder + "/view", "colors.css");
+                        const relativeFontPath: string = path.join(mainFolder + "/view", "Yu_Gothic_Light.ttf");
 
                         await fs.promises.mkdir(builtDirectory + "/module_builder/", { recursive: true })
                         await fs.promises.copyFile(relativeCSSPath, builtDirectory + "/module_builder/colors.css");
