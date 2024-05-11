@@ -1,7 +1,7 @@
 (() => {
-    const MODULE_NAME = "Home"
-    const MODULE_PROCESS_NAME = MODULE_NAME.toLowerCase() + "-process";
-    const MODULE_RENDERER_NAME = MODULE_NAME.toLowerCase() + "-renderer"
+    const MODULE_NAME: string = "Home"
+    const MODULE_PROCESS_NAME: string = MODULE_NAME.toLowerCase() + "-process";
+    const MODULE_RENDERER_NAME: string = MODULE_NAME.toLowerCase() + "-renderer"
 
     const sendToProcess = (eventType: string, ...data: any): void => {
         window.parent.ipc.send(MODULE_PROCESS_NAME.toLowerCase(), eventType, ...data);
@@ -15,8 +15,7 @@
     const standardTime: HTMLElement = document.getElementById("standard-time");
     const militaryTime: HTMLElement = document.getElementById("military-time");
     
-    window.parent.ipc.on(MODULE_RENDERER_NAME, (_, eventType: string, data: any[]) => {
-        data = data[0]; // Data is wrapped in an extra array.
+    window.parent.ipc.on(MODULE_RENDERER_NAME, (_, eventType: string, ...data: any[]) => {
         switch(eventType) {
             case "update-clock": {
                 fullDate.innerHTML = data[0];
@@ -26,7 +25,6 @@
                 break;
             }
             case "font-sizes": {
-                console.log(data[0])
                 fullDate.style.fontSize = data[0].fullDate + "px";
                 abbreviatedDate.style.fontSize = data[0].abbrDate + "px";
                 standardTime.style.fontSize = data[0].standardTime + "px";

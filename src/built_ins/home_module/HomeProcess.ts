@@ -4,8 +4,6 @@ import { NumericSetting } from "../../module_builder/settings/types/NumericSetti
 import { StringSetting } from "../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
-import { ModuleController } from "../../ModuleController";
-
 
 
 
@@ -33,14 +31,8 @@ export class HomeProcess extends Process {
 	public constructor(ipcCallback: IPCCallback) {
 		super(
 			HomeProcess.MODULE_NAME,
-			ModuleController.isDevelopmentMode()
-				? HomeProcess.HTML_PATH.replace("dist", "src")
-				: HomeProcess.HTML_PATH,
+			HomeProcess.HTML_PATH,
 			ipcCallback);
-
-		console.log(path.join(__dirname, "./HomeHTML.html"))
-
-
 	}
 
 	public initialize(): void {

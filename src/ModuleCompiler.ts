@@ -97,14 +97,14 @@ export class ModuleCompiler {
 
     private static async compileAndCopy() {
         try {
-            const files = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IOOPTIONS);
+            const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IOOPTIONS);
 
             for (const folder of files) {
                 if (!folder.isDirectory()) {
                     continue;
                 }
 
-                const builtDirectory = this.COMPILED_MODULES_PATH + folder.name;
+                const builtDirectory: string = this.COMPILED_MODULES_PATH + folder.name;
                 const moduleFolderPath: string = `${folder.path}${folder.name}`;
 
                 const doCompileModule: boolean = !(await this.checkModuleInfo(moduleFolderPath, builtDirectory))
@@ -113,12 +113,12 @@ export class ModuleCompiler {
                     continue;
                 }
 
-                const subfiles = await fs.promises.readdir(moduleFolderPath, this.IOOPTIONS);
+                const subfiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IOOPTIONS);
 
                 await fs.promises.mkdir(builtDirectory, { recursive: true });
 
                 for (const subfile of subfiles) {
-                    const fullSubfilePath = subfile.path + "/" + subfile.name;
+                    const fullSubfilePath: string = subfile.path + "/" + subfile.name;
 
                     if (path.extname(subfile.name) === ".ts") {
                         await this.compile(fullSubfilePath, builtDirectory);
@@ -224,7 +224,7 @@ export class ModuleCompiler {
     }
 
     private static formatCompilerOutput(moduleText: string): string {
-        const splitLines = moduleText.split("\n");
+        const splitLines: string[] = moduleText.split("\n");
         for (let i = 0; i < splitLines.length; i++) {
             if (splitLines[i].trim() === "/** @htmlpath */") {
                 const formatted: string = splitLines[i + 1].replace('.replace("dist", "src")', '');
@@ -244,7 +244,7 @@ export class ModuleCompiler {
                 case "<!-- @css -->": { // Modify colors.css path
                     const css: string = lines[i + 1].trim();
 
-                    const href = css.replace("<", "").replace(">", "").split(" ")[2];
+                    const href: string = css.replace("<", "").replace(">", "").split(" ")[2];
                     if (href.substring(0, 4) !== "href") {
                         throw new Error("Could not parse css line: " + css);
                     }

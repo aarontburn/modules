@@ -7,7 +7,6 @@ import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetti
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
-import { ModuleController } from "../../ModuleController";
 
 export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
@@ -16,13 +15,11 @@ export class SettingsProcess extends Process {
     private moduleSettingsList: ModuleSettings[] = [];
 
     public constructor(ipcCallback: IPCCallback) {
-		super(
-			SettingsProcess.MODULE_NAME,
-			ModuleController.isDevelopmentMode()
-				? SettingsProcess.HTML_PATH.replace("dist", "src")
-				: SettingsProcess.HTML_PATH,
-			ipcCallback);
-            
+        super(
+            SettingsProcess.MODULE_NAME,
+            SettingsProcess.HTML_PATH,
+            ipcCallback);
+
         this.getSettings().setSettingsName("General");
     }
 

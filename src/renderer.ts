@@ -8,7 +8,7 @@
     window.ipc.send(PROCESS, "renderer-init"); // let main know that renderer is booted
 
     window.ipc.on(RENDERER, (_, eventType: string, data: any) => {
-        data = data[0];
+        // data = data[0];
         switch (eventType) {
             case "load-modules": {
                 const moduleHtml: HTMLElement = document.getElementById("modules");
