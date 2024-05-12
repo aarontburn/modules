@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Application to create tools.",
   "scripts": {
-    "build": "tsc && node src/copyFiles.js",
+    "build": "tsc && node copyFiles.js",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
     "start": "npm run build && electron ./dist/main.js --dev",

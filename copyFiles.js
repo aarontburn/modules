@@ -1,7 +1,7 @@
 const fs = require("fs")
 const path = require("path")
 
-const PWD = path.join(__dirname);
+const PWD = path.join(__dirname, 'src');
 
 // These are all the files to copy into the "dist" folder
 const pathsToCopy = [
