@@ -39,6 +39,7 @@ export class SettingsProcess extends Process {
     }
 
     public refreshSettings(): void {
+
         this.notifyObservers("refresh-settings", this.getSettings().getSettingByName("Accent Color").getValue());
 
     }
@@ -127,7 +128,7 @@ export class SettingsProcess extends Process {
                         const settingBox: SettingBox<unknown> = setting.getUIComponent();
 
                         settingBox.getInteractiveIds().forEach((id: string) => {
-                            if (id == elementId) { // found the modified setting
+                            if (id === elementId) { // found the modified setting
                                 setting.setValue(elementValue);
                                 setting.getParentModule().refreshSettings();
                                 StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());

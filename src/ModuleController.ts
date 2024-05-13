@@ -17,12 +17,13 @@ const ipcCallback: IPCCallback = {
 
 export class ModuleController implements IPCSource {
 
-    private window: BrowserWindow;
-    private ipc: Electron.IpcMain;
+    private readonly ipc: Electron.IpcMain;
 
-    private modulesByName = new Map<string, Process>();
-    private activeModules: Process[] = [];
-    private settingsModule: SettingsProcess = new SettingsProcess(ipcCallback);
+    private window: BrowserWindow;
+
+    private readonly modulesByName = new Map<string, Process>();
+    private readonly activeModules: Process[] = [];
+    private readonly settingsModule: SettingsProcess = new SettingsProcess(ipcCallback);
 
     private static isDev = false;
 
@@ -121,7 +122,6 @@ export class ModuleController implements IPCSource {
             height: WINDOW_DIMENSION.height,
             width: WINDOW_DIMENSION.width,
             webPreferences: {
-                nodeIntegrationInSubFrames: true,
                 backgroundThrottling: false,
                 preload: path.join(__dirname, "preload.js"),
             },
@@ -141,14 +141,15 @@ export class ModuleController implements IPCSource {
                 this.addModule(module);
             })
         });
-        
-
     }
+
+
     private addModule(module: Process): void {
         this.modulesByName.set(module.getModuleName(), module);
         this.activeModules.push(module);
     }
 
+    
 
 
 }
