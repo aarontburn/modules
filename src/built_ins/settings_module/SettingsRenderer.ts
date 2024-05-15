@@ -89,6 +89,14 @@
         }
 
 
+        const moduleInfo: string = `
+            <div>
+                
+
+            </div>
+        `
+
+
         tab.settings.forEach((settingInfo: any) => {
             const inputType: string = settingInfo.inputType;
             const interactiveIds: string[] = settingInfo.interactiveIds;

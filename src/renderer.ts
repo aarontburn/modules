@@ -38,13 +38,13 @@
                         selectedTab = headerButton;
                         selectedTab.setAttribute("style", "color: var(--accent-color);")
 
-                        window.ipc.send(PROCESS, "alert-main-swap-modules", moduleName);
+                        window.ipc.send(PROCESS, "swap-modules", moduleName);
                     });
                     headerHtml.insertAdjacentElement("beforeend", headerButton);
                 });
                 break;
             }
-            case "swap-modules-renderer": {
+            case "swap-modules": {
                 swapLayout(data)
                 break;
             }

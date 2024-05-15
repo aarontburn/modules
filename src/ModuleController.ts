@@ -89,7 +89,7 @@ export class ModuleController implements IPCSource {
                     this.init();
                     break;
                 }
-                case "alert-main-swap-modules": {
+                case "swap-modules": {
                     this.swapLayouts(data[0]);
                     break;
                 }
@@ -113,7 +113,7 @@ export class ModuleController implements IPCSource {
     private swapLayouts(moduleName: string): void {
         const module: Process = this.modulesByName.get(moduleName);
         module.onGuiShown();
-        ipcCallback.notifyRenderer(this, 'swap-modules-renderer', moduleName);
+        ipcCallback.notifyRenderer(this, 'swap-modules', moduleName);
     }
 
 
