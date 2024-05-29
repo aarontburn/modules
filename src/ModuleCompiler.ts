@@ -86,8 +86,10 @@ export class ModuleCompiler {
             return true;
         }
 
+
         for (const [key, value] of Object.entries(moduleInfo)) {
-            if (builtModuleInfo[key] !== value) {
+            if (builtModuleInfo[key].toString() !== value.toString()) {
+                console.log("here")
                 return true
             }
         }

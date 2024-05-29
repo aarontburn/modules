@@ -45,7 +45,7 @@ export class BooleanSettingBox extends SettingBox<boolean> {
                 left: 0;
                 right: 0;
                 bottom: 0;
-                background-color: var(--default-background-color);
+                background-color: #7f7f7f;
                 -webkit-transition: .4s;
                 transition: .4s;
             }

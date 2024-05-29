@@ -25,11 +25,6 @@ export class SettingsProcess extends Process {
 
     public registerSettings(): Setting<unknown>[] {
         return [
-            new BooleanSetting(this)
-                .setName("test boolean")
-                .setDescription("test boolean")
-                .setDefault(false),
-
             new HexColorSetting(this)
                 .setName("Accent Color")
                 .setDefault("#2290B5"),
