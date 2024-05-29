@@ -12,7 +12,7 @@ export class ModuleCompiler {
     private static PATH: string = app.getPath("home") + "/.modules/";
     private static EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
     private static COMPILED_MODULES_PATH: string = this.PATH + "/built/"
-    private static IOOPTIONS: { encoding: BufferEncoding, withFileTypes: true } = {
+    private static IO_OPTIONS: { encoding: BufferEncoding, withFileTypes: true } = {
         encoding: "utf-8",
         withFileTypes: true
     }
@@ -26,7 +26,7 @@ export class ModuleCompiler {
         const externalModules: Process[] = [];
 
         try {
-            const folders: fs.Dirent[] = await fs.promises.readdir(this.COMPILED_MODULES_PATH, this.IOOPTIONS);
+            const folders: fs.Dirent[] = await fs.promises.readdir(this.COMPILED_MODULES_PATH, this.IO_OPTIONS);
 
             for (const folder of folders) {
                 if (!folder.isDirectory()) {
@@ -34,11 +34,11 @@ export class ModuleCompiler {
                 }
 
                 const moduleFolderPath: string = `${folder.path}/${folder.name}`;
-                const subfiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IOOPTIONS);
+                const subFiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IO_OPTIONS);
 
-                for (const subfile of subfiles) {
-                    if (subfile.name.includes("Process")) {
-                        const module: any = require(subfile.path + "/" + subfile.name);
+                for (const subFile of subFiles) {
+                    if (subFile.name.includes("Process")) {
+                        const module: any = require(subFile.path + "/" + subFile.name);
                         for (const key in module) {
                             externalModules.push(new module[key](ipcCallback));
                         }
@@ -97,7 +97,7 @@ export class ModuleCompiler {
 
     private static async compileAndCopy() {
         try {
-            const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IOOPTIONS);
+            const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IO_OPTIONS);
 
             for (const folder of files) {
                 if (!folder.isDirectory()) {
@@ -113,27 +113,27 @@ export class ModuleCompiler {
                     continue;
                 }
 
-                const subfiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IOOPTIONS);
+                const subFiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IO_OPTIONS);
 
                 await fs.promises.mkdir(builtDirectory, { recursive: true });
 
-                for (const subfile of subfiles) {
-                    const fullSubfilePath: string = subfile.path + "/" + subfile.name;
+                for (const subFile of subFiles) {
+                    const fullSubFilePath: string = subFile.path + "/" + subFile.name;
 
-                    if (path.extname(subfile.name) === ".ts") {
-                        await this.compile(fullSubfilePath, builtDirectory);
+                    if (path.extname(subFile.name) === ".ts") {
+                        await this.compile(fullSubFilePath, builtDirectory);
 
-                    } else if (subfile.isDirectory()) {
-                        if (subfile.name === "module_builder") {
-                            await this.copyFromProd(__dirname + "/module_builder", `${builtDirectory}/${subfile.name}`);
+                    } else if (subFile.isDirectory()) {
+                        if (subFile.name === "module_builder") {
+                            await this.copyFromProd(__dirname + "/module_builder", `${builtDirectory}/${subFile.name}`);
                             console.log(`Copied module_builder into ${builtDirectory}`);
                         } else {
-                            await fs.promises.cp(subfile.path + "/" + subfile.name, `${builtDirectory}/${subfile.name}`, { recursive: true });
-                            console.log(`Copied ${subfile.name} into ${builtDirectory}`);
+                            await fs.promises.cp(subFile.path + "/" + subFile.name, `${builtDirectory}/${subFile.name}`, { recursive: true });
+                            console.log(`Copied ${subFile.name} into ${builtDirectory}`);
                         }
 
-                    } else if (path.extname(subfile.name) === ".html") {
-                        await this.formatHTML(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
+                    } else if (path.extname(subFile.name) === ".html") {
+                        await this.formatHTML(fullSubFilePath, `${builtDirectory}/${subFile.name}`);
 
                         const viewFolder: string = path.join(__dirname, "/view");
                         const relativeCSSPath: string = path.join(viewFolder, "colors.css");
@@ -145,7 +145,7 @@ export class ModuleCompiler {
 
 
                     } else {
-                        await fs.promises.copyFile(fullSubfilePath, `${builtDirectory}/${subfile.name}`);
+                        await fs.promises.copyFile(fullSubFilePath, `${builtDirectory}/${subFile.name}`);
                     }
 
                 }
