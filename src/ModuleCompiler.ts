@@ -4,7 +4,7 @@ import * as path from 'path';
 import ts from 'typescript';
 import { IPCCallback } from './module_builder/IPCObjects';
 import { Process } from './module_builder/Process';
-import { StorageHandler } from './StorageHandler';
+import { StorageHandler } from './module_builder/StorageHandler';
 
 
 export class ModuleCompiler {

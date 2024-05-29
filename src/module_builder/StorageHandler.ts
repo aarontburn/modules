@@ -1,7 +1,7 @@
-import { Process } from "./module_builder/Process";
+import { Process } from "./Process";
+import { Setting } from "./Setting";
 import fs from "fs";
 import { app } from 'electron';
-import { Setting } from "./module_builder/Setting";
 
 
 

@@ -5,7 +5,7 @@ import { SettingsProcess } from "./built_ins/settings_module/SettingsProcess";
 import { HomeProcess } from "./built_ins/home_module/HomeProcess";
 import { IPCHandler } from "./IPCHandler";
 import { IPCCallback, IPCSource } from "./module_builder/IPCObjects";
-import { StorageHandler } from "./StorageHandler";
+import { StorageHandler } from "./module_builder/StorageHandler";
 import { ModuleSettings } from "./module_builder/ModuleSettings";
 import { Setting } from "./module_builder/Setting";
 import { ModuleCompiler } from "./ModuleCompiler";

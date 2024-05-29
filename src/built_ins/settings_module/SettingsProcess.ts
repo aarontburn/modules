@@ -5,7 +5,7 @@ import { ModuleSettings } from "../../module_builder/ModuleSettings";
 import { SettingBox } from "../../module_builder/SettingBox";
 import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
-import { StorageHandler } from "../../StorageHandler";
+import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 
 export class SettingsProcess extends Process {
