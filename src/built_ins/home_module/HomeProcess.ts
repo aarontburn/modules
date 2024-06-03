@@ -83,28 +83,28 @@ export class HomeProcess extends Process {
 			new NumericSetting(this)
 				.setName("Full Date Font Size (1)")
 				.setDescription(
-					"Adjusts the font size of the full date display (ex. Sunday, January 1st, 2023)."
+					"Adjusts the font size of the full date display (e.g. Sunday, January 1st, 2023)."
 				)
 				.setDefault(40.0),
 
 			new NumericSetting(this)
 				.setName("Abbreviated Date Font Size (2)")
 				.setDescription(
-					"Adjusts the font size of the abbreviated date display (ex. 1/01/2023)."
+					"Adjusts the font size of the abbreviated date display (e.g. 1/01/2023)."
 				)
 				.setDefault(30.0),
 
 			new NumericSetting(this)
 				.setName("Standard Time Font Size (3)")
 				.setDescription(
-					"Adjusts the font size of the standard time display (ex. 11:59:59 PM)."
+					"Adjusts the font size of the standard time display (e.g. 11:59:59 PM)."
 				)
 				.setDefault(90.0),
 
 			new NumericSetting(this)
 				.setName("Military Time Font Size (4)")
 				.setDescription(
-					"Adjusts the font size of the military time display (ex. 23:59:49)."
+					"Adjusts the font size of the military time display (e.g. 23:59:49)."
 				)
 				.setDefault(30.0),
 
