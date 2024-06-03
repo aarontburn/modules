@@ -8,6 +8,12 @@ Modules is an Electron-based application, developed with Typescript, to house su
 Plugin-based architecture is difficult to implement, especially if you're loading the plugins (or in this case, modules) at runtime. This application is designed to streamline that process for both the developer and the user.
 
 
+
+## Developer Features:
+- Full Node support
+- Full NPM support (able to use NPM packages for modules)
+
+
 ## Example: [Volume Controller Module](https://github.com/aarontburn/modules-volume_controller) 
 (TODO: Put an image here)
 <br/>  
