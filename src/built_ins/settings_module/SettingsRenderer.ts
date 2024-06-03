@@ -98,14 +98,22 @@
 
 
         tab.settings.forEach((settingInfo: any) => {
+            const settingId: string = settingInfo.settingId;
             const inputType: string = settingInfo.inputType;
             const interactiveIds: string[] = settingInfo.interactiveIds;
-            const ui: string = settingInfo.ui;
+            const html: string = settingInfo.ui;
             const style: string = settingInfo.style;
             const attribute: string = settingInfo.attribute;
 
 
-            settingsList.insertAdjacentHTML("beforeend", ui);
+            settingsList.insertAdjacentHTML("beforeend", html);
+
+            // Attach events to undo button
+            const undoButton: HTMLElement = document.getElementById(`undo-button_${settingId}`);
+            undoButton?.addEventListener("click", () => {
+                sendToProcess("setting-undo", settingId); 
+            });
+
             // Add custom setting css to setting
             if (style != "") {
                 const styleId = interactiveIds[0] + "_style";
@@ -116,6 +124,7 @@
                     document.body.appendChild(styleSheet);
                 }
             }
+
             interactiveIds.forEach((id: string) => {
                 const element: HTMLElement = document.getElementById(id);
 

@@ -2,6 +2,8 @@ import { Setting } from "./Setting";
 
 export abstract class SettingBox<T> {
 
+    protected static UNDO_ID: string = 'undo-button';  
+
     public setting: Setting<T>;
 
     public constructor(theSetting: Setting<T>) {
@@ -33,7 +35,7 @@ export abstract class SettingBox<T> {
     public createRight(): string {
         return `
             <div class="right-component" style="display: inline-block;">
-                <h1>↩ ${this.setting.getSettingName()}</h1>
+                <h1><span id='${SettingBox.UNDO_ID + "_" + this.setting.getId()}'>↩</span> ${this.setting.getSettingName()}</h1>
                 <p>${this.setting.getDescription()}</p>
             </div>
         `;

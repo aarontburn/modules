@@ -54,6 +54,7 @@ export class SettingsProcess extends Process {
 
                 const settingBox: SettingBox<unknown> = setting.getUIComponent();
                 const settingInfo: any = {
+                    settingId: setting.getId(),
                     inputType: settingBox.getInputType(),
                     interactiveIds: settingBox.getInteractiveIds(),
                     ui: settingBox.getUI(),
@@ -94,6 +95,7 @@ export class SettingsProcess extends Process {
                     settingsList.forEach((setting: Setting<unknown>) => {
                         const settingBox: SettingBox<unknown> = setting.getUIComponent();
                         const settingInfo: any = {
+                            settingId: setting.getId(),
                             inputType: settingBox.getInputType(),
                             interactiveIds: settingBox.getInteractiveIds(),
                             ui: settingBox.getUI(),
@@ -133,6 +135,29 @@ export class SettingsProcess extends Process {
                         });
                     });
                 }
+
+                break;
+            }
+
+            case 'setting-undo': {
+                const settingId: string = data[0];
+                for (const moduleSettings of this.moduleSettingsList) {
+                    const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
+
+                    settingsList.forEach((setting: Setting<unknown>) => {
+                        if (setting.getId() === settingId) {
+                            setting.resetToDefault();
+                            setting.getParentModule().refreshSettings();
+                            StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
+                            this.notifyObservers("setting-modified", settingId, setting.getValue());
+
+                            return
+                        }
+
+                    });
+                }
+
+
 
                 break;
             }
