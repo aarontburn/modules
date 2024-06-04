@@ -1,9 +1,8 @@
 import { Setting } from "../../module_builder/Setting";
-import { Process } from "../../module_builder/Process";
+import { Process, ModuleInfo } from "../../module_builder/Process";
 import * as path from "path";
 import { ModuleSettings } from "../../module_builder/ModuleSettings";
 import { SettingBox } from "../../module_builder/SettingBox";
-import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
@@ -21,6 +20,14 @@ export class SettingsProcess extends Process {
             ipcCallback);
 
         this.getSettings().setSettingsName("General");
+        this.setModuleInfo({
+            moduleName: "General",
+            author: "aarontburn",
+            version: "1.0.0",
+            description: "General settings.",
+            buildVersion: 1,
+            platforms: []
+        })
     }
 
     public registerSettings(): Setting<unknown>[] {
@@ -28,8 +35,6 @@ export class SettingsProcess extends Process {
             new HexColorSetting(this)
                 .setName("Accent Color")
                 .setDefault("#2290B5"),
-
-
         ];
     }
 
@@ -48,12 +53,17 @@ export class SettingsProcess extends Process {
             const moduleName: string = moduleSettings.getModuleSettingsName();
             const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
 
-            const list: any = { module: moduleName, settings: [] };
+            const list: any = {
+                module: moduleName,
+                moduleInfo: moduleSettings.getParentModule().getModuleInfo(),
+                settings: []
+            };
 
             settingsList.forEach((setting: Setting<unknown>) => {
 
                 const settingBox: SettingBox<unknown> = setting.getUIComponent();
                 const settingInfo: any = {
+                    moduleInfo: setting.parentModule.getModuleInfo(),
                     settingId: setting.getId(),
                     inputType: settingBox.getInputType(),
                     interactiveIds: settingBox.getInteractiveIds(),
@@ -91,7 +101,11 @@ export class SettingsProcess extends Process {
                     }
 
                     const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
-                    const list: any = { module: moduleName, settings: [] };
+                    const list: any = {
+                        module: moduleName,
+                        moduleInfo: moduleSettings.getParentModule().getModuleInfo(),
+                        settings: []
+                    };
                     settingsList.forEach((setting: Setting<unknown>) => {
                         const settingBox: SettingBox<unknown> = setting.getUIComponent();
                         const settingInfo: any = {

@@ -99,3 +99,10 @@ input::-webkit-inner-spin-button {
     align-items: center;
     justify-content: center;
 }
+
+
+.module-info {
+    border: 1px solid var(--off-white);
+    border-radius: 5px;
+    margin: 5px;
+}

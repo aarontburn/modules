@@ -12,7 +12,7 @@ export class StringSettingBox extends SettingBox<string> {
         return `
             <div class="right-component">
                 <div style="display: flex;">
-                    <h1>${this.getSetting().getSettingName()}</h1>
+                    <h1><span id='${SettingBox.UNDO_ID + "_" + this.setting.getId()}'>↩</span> ${this.getSetting().getSettingName()}</h1>
                     <p style="align-self: flex-end; padding-left: 24px;">${this.getSetting().getDescription()}</p>
                 </div>
 

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import ts from 'typescript';
 import { IPCCallback } from './module_builder/IPCObjects';
-import { Process } from './module_builder/Process';
+import { ModuleInfo, Process } from './module_builder/Process';
 import { StorageHandler } from './module_builder/StorageHandler';
 
 
@@ -38,10 +38,13 @@ export class ModuleCompiler {
 
                 for (const subFile of subFiles) {
                     if (subFile.name.includes("Process")) {
+                        const moduleInfo: ModuleInfo = await this.getModuleInfo(subFile.path + "/module_info.json");
+
                         const module: any = require(subFile.path + "/" + subFile.name);
-                        for (const key in module) {
-                            externalModules.push(new module[key](ipcCallback));
-                        }
+
+                        const m: Process = new module[Object.keys(module)[0]](ipcCallback);
+                        m.setModuleInfo(moduleInfo)
+                        externalModules.push(m);
                     }
                 }
 
@@ -55,9 +58,9 @@ export class ModuleCompiler {
         return externalModules
     }
 
-    private static async getModuleInfo(path: string): Promise<Object | null | undefined> {
+    private static async getModuleInfo(path: string): Promise<ModuleInfo | null | undefined> {
         try {
-            return JSON.parse((await fs.promises.readFile(path)).toString());
+            return JSON.parse((await fs.promises.readFile(path)).toString())
         } catch (err) {
             if (err.code === 'ENOENT') { // File doesn't exist
                 return undefined
@@ -89,7 +92,6 @@ export class ModuleCompiler {
 
         for (const [key, value] of Object.entries(moduleInfo)) {
             if (builtModuleInfo[key].toString() !== value.toString()) {
-                console.log("here")
                 return true
             }
         }

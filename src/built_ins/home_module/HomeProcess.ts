@@ -33,6 +33,15 @@ export class HomeProcess extends Process {
 			HomeProcess.MODULE_NAME,
 			HomeProcess.HTML_PATH,
 			ipcCallback);
+
+		this.setModuleInfo({
+			moduleName: "Home",
+			author: "aarontburn",
+			version: "1.0.0",
+			description: "A home screen that displays time and date.",
+			buildVersion: 1,
+			platforms: []
+		});
 	}
 
 	public initialize(): void {
@@ -121,13 +130,19 @@ export class HomeProcess extends Process {
 
 
 	public refreshSettings(): void {
-		const sizes = {
+		const sizes: object = {
 			fullDate: this.getSettings().getSettingByName('Full Date Font Size (1)').getValue(),
 			abbrDate: this.getSettings().getSettingByName('Abbreviated Date Font Size (2)').getValue(),
 			standardTime: this.getSettings().getSettingByName('Standard Time Font Size (3)').getValue(),
 			militaryTime: this.getSettings().getSettingByName('Military Time Font Size (4)').getValue()
 		}
+
+
+		const order: string = this.getSettings().getSettingByName("Display Order").getValue() as string
+
+
 		this.notifyObservers('font-sizes', sizes);
+		this.notifyObservers('display-order', order);
 
 	}
 

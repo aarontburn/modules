@@ -1,4 +1,16 @@
+interface ModuleInfo {
+    moduleName: string,
+    author: string,
+    version: string,
+    description: string, 
+    buildVersion: number,
+    platforms: string[]
+}
+
+
 (() => {
+
+
     const MODULE_NAME = "Settings"
     const MODULE_PROCESS_NAME = MODULE_NAME.toLowerCase() + "-process";
     const MODULE_RENDERER_NAME = MODULE_NAME.toLowerCase() + "-renderer"
@@ -88,13 +100,25 @@
             settingsList.removeChild(settingsList.firstChild);
         }
 
+        const moduleInfo: ModuleInfo = tab.moduleInfo;
 
-        const moduleInfo: string = `
-            <div>
-                
+        if (moduleInfo !== undefined) {
+            console.log(moduleInfo)
 
-            </div>
-        `
+            const moduleInfoHTML: string = `
+                <div class='module-info'>
+                    <p style="padding-left: 10px; font-size: 25px;">${moduleInfo.moduleName}</p>
+                    <p style="padding-left: 10px; font-size: 25px;">${moduleInfo.author}</p>
+                    <p style="padding-left: 10px; font-size: 25px;">${moduleInfo.description}</p>
+    
+                </div>
+            `
+            settingsList.insertAdjacentHTML("beforeend", moduleInfoHTML);
+        }
+
+
+
+
 
 
         tab.settings.forEach((settingInfo: any) => {
