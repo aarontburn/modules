@@ -38,7 +38,7 @@ export class ModuleCompiler {
 
                 for (const subFile of subFiles) {
                     if (subFile.name.includes("Process")) {
-                        const moduleInfo: ModuleInfo = await this.getModuleInfo(subFile.path + "/module_info.json");
+                        const moduleInfo: ModuleInfo = await this.getModuleInfo(subFile.path + "/moduleinfo.json");
 
                         const module: any = require(subFile.path + "/" + subFile.name);
 
@@ -60,7 +60,7 @@ export class ModuleCompiler {
 
     private static async getModuleInfo(path: string): Promise<ModuleInfo | null | undefined> {
         try {
-            return JSON.parse((await fs.promises.readFile(path)).toString())
+            return JSON.parse((await fs.promises.readFile(path)).toString());
         } catch (err) {
             if (err.code === 'ENOENT') { // File doesn't exist
                 return undefined

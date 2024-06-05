@@ -2,7 +2,7 @@ interface ModuleInfo {
     moduleName: string,
     author: string,
     version: string,
-    description: string, 
+    description: string,
     buildVersion: number,
     platforms: string[]
 }
@@ -93,7 +93,39 @@ interface ModuleInfo {
         });
     }
 
+
     function swapTabs(tab: any): void {
+        function getModuleInfoHTML(moduleInfo: any): string {
+            const toSentenceCase = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
+
+            let inner: string[] = [];
+
+            inner.push(`<p style="font-size: 27px; color: var(--accent-color);">${moduleInfo.moduleName || tab.module}</p>`);
+
+            const blacklist: string[] = [
+                'moduleName', 'module_name',
+                'buildVersion', 'build_version',
+            ];
+
+
+            for (const key in moduleInfo) {
+                if (blacklist.includes(key)) {
+                    continue;
+                }
+
+
+                const value: any = moduleInfo[key];
+                if (!value || value.length === 0) {
+                    continue;
+                }
+
+                inner.push(`<p><span>${toSentenceCase(key)}:</span> ${value}</p>`);
+
+            }
+
+            return inner.reduce((acc, html) => acc += html + "\n", '');
+        }
+
 
         // Clear existing settings
         while (settingsList.firstChild) {
@@ -107,10 +139,7 @@ interface ModuleInfo {
 
             const moduleInfoHTML: string = `
                 <div class='module-info'>
-                    <p style="padding-left: 10px; font-size: 25px;">${moduleInfo.moduleName}</p>
-                    <p style="padding-left: 10px; font-size: 25px;">${moduleInfo.author}</p>
-                    <p style="padding-left: 10px; font-size: 25px;">${moduleInfo.description}</p>
-    
+                    ${getModuleInfoHTML(moduleInfo)}
                 </div>
             `
             settingsList.insertAdjacentHTML("beforeend", moduleInfoHTML);
@@ -135,7 +164,7 @@ interface ModuleInfo {
             // Attach events to undo button
             const undoButton: HTMLElement = document.getElementById(`undo-button_${settingId}`);
             undoButton?.addEventListener("click", () => {
-                sendToProcess("setting-undo", settingId); 
+                sendToProcess("setting-undo", settingId);
             });
 
             // Add custom setting css to setting

@@ -17,7 +17,8 @@
 
 }
 
-h1, p {
+h1,
+p {
     user-select: none;
 }
 
@@ -30,3 +31,23 @@ body {
 }
 
 
+
+/* width */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    background: var(--default-background-color);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--accent-color);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
