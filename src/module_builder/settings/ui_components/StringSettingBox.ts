@@ -1,4 +1,4 @@
-import { SettingBox } from "../../SettingBox";
+import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
 
 export class StringSettingBox extends SettingBox<string> {
 
@@ -22,8 +22,12 @@ export class StringSettingBox extends SettingBox<string> {
         `;
     }
 
-    public getInteractiveIds(): string[] {
-        return [this.getSetting().getId()];
+    public getInputIdAndType(): InputElement[] {
+        return [{ id: this.getSetting().getId(), inputType: 'text', attribute: 'value' }];
+    }
+
+    public onChange(newValue: any): ChangeEvent[] {
+        return [{ id: this.getSetting().getId(), attribute: 'value', value: newValue }];
     }
 
 

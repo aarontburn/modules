@@ -4,6 +4,7 @@ import { NumericSetting } from "../../module_builder/settings/types/NumericSetti
 import { StringSetting } from "../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
+import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
 
 
 
@@ -58,29 +59,23 @@ export class HomeProcess extends Process {
 		clearTimeout(this.clockTimeout);
 	}
 
+	private createSpan(text: string) {
+		return `<span style='color: var(--accent-color)'>${text}</span>`
+	}
+
 	public updateDateAndTime(repeat: boolean): void {
 		const date: Date = new Date();
-		const standardTime: string = date.toLocaleString(
-			HomeProcess.LOCALE,
-			HomeProcess.STANDARD_TIME_FORMAT
-		);
+		const standardTime: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.STANDARD_TIME_FORMAT);
+		const militaryTime: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.MILITARY_TIME_FORMAT);
+		const fullDate: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.FULL_DATE_FORMAT);
+		const abbreviatedDate: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.ABBREVIATED_DATE_FORMAT);
 
-		const militaryTime: string = date.toLocaleString(
-			HomeProcess.LOCALE,
-			HomeProcess.MILITARY_TIME_FORMAT
-		);
+		const formattedStandardTime: string = standardTime.replace(/:/g, this.createSpan(":"));
+		const formattedAbbreviatedDate: string = abbreviatedDate.replace(/\//g, this.createSpan('/'));
+		const formattedFullDate: string = fullDate.replace(/,/g, this.createSpan(','));
+		const formattedMilitaryTime: string = militaryTime.replace(/:/g, this.createSpan(":"))
 
-		const fullDate: string = date.toLocaleString(
-			HomeProcess.LOCALE,
-			HomeProcess.FULL_DATE_FORMAT
-		);
-
-		const abbreviatedDate: string = date.toLocaleString(
-			HomeProcess.LOCALE,
-			HomeProcess.ABBREVIATED_DATE_FORMAT
-		);
-
-		this.notifyObservers("update-clock", fullDate, abbreviatedDate, standardTime, militaryTime);
+		this.notifyObservers("update-clock", formattedFullDate, formattedAbbreviatedDate, formattedStandardTime, formattedMilitaryTime);
 
 		if (repeat) {
 			this.clockTimeout = setTimeout(() => this.updateDateAndTime(true), 1000);

@@ -7,10 +7,21 @@ interface ModuleInfo {
     platforms: string[]
 }
 
+interface InputElement {
+    id: string,
+    inputType: string,
+    attribute: string
+}
+
+interface ChangeEvent {
+    id: string,
+    attribute: string,
+    value: any
+}
+
+
 
 (() => {
-
-
     const MODULE_NAME = "Settings"
     const MODULE_PROCESS_NAME = MODULE_NAME.toLowerCase() + "-process";
     const MODULE_RENDERER_NAME = MODULE_NAME.toLowerCase() + "-renderer"
@@ -33,11 +44,14 @@ interface ModuleInfo {
                 break;
             }
             case "setting-modified": {
-                const elementId: string = data[0];
-                const newValue = data[1];
+                const event: ChangeEvent[] = data[0]
 
-                const element: any = document.getElementById(elementId);
-                element.value = newValue;
+                for (const group of event) {
+                    const element: any = document.getElementById(group.id);
+                    element[group.attribute] = group.value
+
+                }
+
 
                 break;
             }
@@ -62,14 +76,13 @@ interface ModuleInfo {
 
             case "swap-tab": {
                 swapTabs(data[0]);
-
                 break;
             }
         }
     });
 
-    function populateSettings(data: any[]): void {
-        data.forEach((obj: any) => {
+    function populateSettings(data: { module: string, moduleInfo: any, settings: any[] }[]): void {
+        data.forEach((obj: { module: string, moduleInfo: any, settings: any[] }) => {
             const moduleName: string = obj.module;
 
             // Setting group click button
@@ -83,13 +96,9 @@ interface ModuleInfo {
                 currentlySelectedTab.setAttribute("style", "color: var(--accent-color);")
 
                 sendToProcess('swap-settings-tab', moduleName);
-
-
             });
 
             moduleList.insertAdjacentElement("beforeend", groupElement);
-
-
         });
     }
 
@@ -98,7 +107,7 @@ interface ModuleInfo {
         function getModuleInfoHTML(moduleInfo: any): string {
             const toSentenceCase = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
 
-            let inner: string[] = [];
+            const inner: string[] = [];
 
             inner.push(`<p style="font-size: 27px; color: var(--accent-color);">${moduleInfo.moduleName || tab.module}</p>`);
 
@@ -107,12 +116,10 @@ interface ModuleInfo {
                 'buildVersion', 'build_version',
             ];
 
-
             for (const key in moduleInfo) {
                 if (blacklist.includes(key)) {
                     continue;
                 }
-
 
                 const value: any = moduleInfo[key];
                 if (!value || value.length === 0) {
@@ -135,8 +142,6 @@ interface ModuleInfo {
         const moduleInfo: ModuleInfo = tab.moduleInfo;
 
         if (moduleInfo !== undefined) {
-            console.log(moduleInfo)
-
             const moduleInfoHTML: string = `
                 <div class='module-info'>
                     ${getModuleInfoHTML(moduleInfo)}
@@ -145,18 +150,11 @@ interface ModuleInfo {
             settingsList.insertAdjacentHTML("beforeend", moduleInfoHTML);
         }
 
-
-
-
-
-
         tab.settings.forEach((settingInfo: any) => {
             const settingId: string = settingInfo.settingId;
-            const inputType: string = settingInfo.inputType;
-            const interactiveIds: string[] = settingInfo.interactiveIds;
+            const inputTypeAndId: InputElement[] = settingInfo.inputTypeAndId;
             const html: string = settingInfo.ui;
             const style: string = settingInfo.style;
-            const attribute: string = settingInfo.attribute;
 
 
             settingsList.insertAdjacentHTML("beforeend", html);
@@ -169,7 +167,7 @@ interface ModuleInfo {
 
             // Add custom setting css to setting
             if (style != "") {
-                const styleId = interactiveIds[0] + "_style";
+                const styleId = inputTypeAndId[0] + "_style";
                 if (document.getElementById(styleId) == null) {
                     const styleSheet: HTMLElement = document.createElement('style')
                     styleSheet.id = styleId;
@@ -178,7 +176,11 @@ interface ModuleInfo {
                 }
             }
 
-            interactiveIds.forEach((id: string) => {
+            inputTypeAndId.forEach((group: InputElement) => {
+                const id: string = group.id;
+                const inputType: string = group.inputType;
+                const attribute: string = group.attribute;
+
                 const element: HTMLElement = document.getElementById(id);
 
                 switch (inputType) {
@@ -188,10 +190,12 @@ interface ModuleInfo {
                         });
                         break;
                     }
+                    case 'number':
                     case 'text': {
                         element.addEventListener('keyup', (event: KeyboardEvent) => {
                             if (event.key === "Enter") {
                                 sendToProcess("setting-modified", id, (element as any)[attribute]);
+                                element.blur();
                             }
                         });
 
@@ -200,6 +204,11 @@ interface ModuleInfo {
                         });
 
                         break;
+                    }
+                    case 'input': {
+                        element.addEventListener('input', () => {
+                            sendToProcess('setting-modified', id, (element as any)[attribute])
+                        })
                     }
                     // TODO: Add additional options
                 }

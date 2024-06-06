@@ -3,6 +3,10 @@
     src: url("./Yu_Gothic_Light.ttf");
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 :root {
     --off-black: #111111;
     --off-white: #f5f5f5;

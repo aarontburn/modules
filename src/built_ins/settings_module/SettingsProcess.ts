@@ -2,7 +2,7 @@ import { Setting } from "../../module_builder/Setting";
 import { Process, ModuleInfo } from "../../module_builder/Process";
 import * as path from "path";
 import { ModuleSettings } from "../../module_builder/ModuleSettings";
-import { SettingBox } from "../../module_builder/SettingBox";
+import { ChangeEvent, SettingBox } from "../../module_builder/SettingBox";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
@@ -65,11 +65,9 @@ export class SettingsProcess extends Process {
                 const settingInfo: any = {
                     moduleInfo: setting.parentModule.getModuleInfo(),
                     settingId: setting.getId(),
-                    inputType: settingBox.getInputType(),
-                    interactiveIds: settingBox.getInteractiveIds(),
+                    inputTypeAndId: settingBox.getInputIdAndType(),
                     ui: settingBox.getUI(),
                     style: settingBox.getStyle(),
-                    attribute: settingBox.getAttribute(),
                 };
                 list.settings.push(settingInfo);
             });
@@ -79,6 +77,33 @@ export class SettingsProcess extends Process {
 
         // this.refreshSettings();
         this.notifyObservers("populate-settings-list", settings);
+    }
+
+    // TODO: Restructure stuff 
+    private onSettingChange(settingId: string, newValue?: any): void {
+        for (const moduleSettings of this.moduleSettingsList) {
+            const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
+
+            settingsList.forEach((setting: Setting<unknown>) => {
+                const settingBox: SettingBox<unknown> = setting.getUIComponent();
+
+                settingBox.getInputIdAndType().forEach((group: InputElement) => {
+                    const id: string = group.id;
+                    if (id === settingId) { // found the modified setting
+                        if (newValue === undefined) {
+                            setting.resetToDefault()
+                        } else {
+                            setting.setValue(newValue);
+                        }
+                        setting.getParentModule().refreshSettings();
+                        const update: ChangeEvent[] = settingBox.onChange(setting.getValue());
+                        StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
+                        this.notifyObservers("setting-modified", update);
+                        return;
+                    }
+                });
+            });
+        }
 
     }
 
@@ -106,15 +131,14 @@ export class SettingsProcess extends Process {
                         moduleInfo: moduleSettings.getParentModule().getModuleInfo(),
                         settings: []
                     };
+
                     settingsList.forEach((setting: Setting<unknown>) => {
                         const settingBox: SettingBox<unknown> = setting.getUIComponent();
                         const settingInfo: any = {
                             settingId: setting.getId(),
-                            inputType: settingBox.getInputType(),
-                            interactiveIds: settingBox.getInteractiveIds(),
+                            inputTypeAndId: settingBox.getInputIdAndType(),
                             ui: settingBox.getUI(),
                             style: settingBox.getStyle(),
-                            attribute: settingBox.getAttribute(),
                         };
                         list.settings.push(settingInfo);
                     });
@@ -131,47 +155,14 @@ export class SettingsProcess extends Process {
             case "setting-modified": {
                 const elementId: string = data[0];
                 const elementValue: string = data[1];
-
-                for (const moduleSettings of this.moduleSettingsList) {
-                    const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
-
-                    settingsList.forEach((setting: Setting<unknown>) => {
-                        const settingBox: SettingBox<unknown> = setting.getUIComponent();
-
-                        settingBox.getInteractiveIds().forEach((id: string) => {
-                            if (id === elementId) { // found the modified setting
-                                setting.setValue(elementValue);
-                                setting.getParentModule().refreshSettings();
-                                StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
-                                this.notifyObservers("setting-modified", elementId, setting.getValue());
-                                return;
-                            }
-                        });
-                    });
-                }
+                this.onSettingChange(elementId, elementValue);
 
                 break;
             }
 
             case 'setting-undo': {
                 const settingId: string = data[0];
-                for (const moduleSettings of this.moduleSettingsList) {
-                    const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
-
-                    settingsList.forEach((setting: Setting<unknown>) => {
-                        if (setting.getId() === settingId) {
-                            setting.resetToDefault();
-                            setting.getParentModule().refreshSettings();
-                            StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
-                            this.notifyObservers("setting-modified", settingId, setting.getValue());
-
-                            return
-                        }
-
-                    });
-                }
-
-
+                this.onSettingChange(settingId);
 
                 break;
             }
