@@ -55,12 +55,12 @@ export class HomeProcess extends Process {
 	}
 
 	public stop(): void {
-		super.stop()
+		super.stop();
 		clearTimeout(this.clockTimeout);
 	}
 
 	private createSpan(text: string) {
-		return `<span style='color: var(--accent-color)'>${text}</span>`
+		return `<span style='color: var(--accent-color)'>${text}</span>`;
 	}
 
 	public updateDateAndTime(repeat: boolean): void {
