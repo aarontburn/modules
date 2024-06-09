@@ -16,7 +16,7 @@ export class BooleanSettingBox extends SettingBox<boolean> {
     }
 
     public getInputIdAndType(): InputElement[] {
-        return [{ id: this.parentSetting.getId(), inputType: "checkbox", attribute: 'checked' }];
+        return [{ id: this.parentSetting.getId(), inputType: "checkbox" }];
     }
 
     public onChange(newValue: any): ChangeEvent[] {

@@ -5,6 +5,8 @@ import { StringSetting } from "../../module_builder/settings/types/StringSetting
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
+import { RangeSettingBox } from "../../module_builder/settings/ui_components/RangeSettingBox";
+import { RangeSetting } from "../../module_builder/settings/types/RangeSetting";
 
 
 
@@ -120,6 +122,12 @@ export class HomeProcess extends Process {
 					const s: string = o.toString();
 					return s == "" || s.match("^(?!.*(\\d).*\\1)[1-4\\s]+$") ? s : null;
 				}),
+				
+			new RangeSetting(this)
+				.setRange(5, 50)
+				.setName("Test Range")
+				.setDefault(30)
+				.setDescription("Test range slider")
 		];
 	}
 

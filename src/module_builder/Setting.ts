@@ -15,6 +15,8 @@ export abstract class Setting<T> {
 
     public settingBox: SettingBox<T>;
 
+    public deferred: boolean;
+
 
     /**
      * Creates a new setting with the module that this setting belongs to.
@@ -24,15 +26,20 @@ export abstract class Setting<T> {
      *     <li>{@link setName(string)} Sets the name of the setting (REQUIRED).</li>
      *     <li>{@link setDefault(T)}} Sets the default value of the setting (REQUIRED).</li>
      *     <li>{@link setDescription(string)} Sets the description of the setting.</li>
-     *     <li>{@link setBoundNodeId(string)} Sets bound node ID.</li>
      * </ul>
      *
      * @param theParentModule The module that this setting belongs to.
      */
-    public constructor(theParentModule: Process) {
+    public constructor(theParentModule: Process, deferUI: boolean = false) {
         this.parentModule = theParentModule;
 
-        this.settingBox = this.setUIComponent();
+        this.deferred = deferUI
+        if (!deferUI) {
+            this.settingBox = this.setUIComponent();
+        } else {
+            console.log("deferring")
+        }
+
     }
 
 
@@ -44,12 +51,32 @@ export abstract class Setting<T> {
      * @throws Error if the required fields were NOT set.
      */
     public checkRequiredFields(): void {
-        if (this.settingName == undefined || this.defaultValue == undefined) {
+        if (this.settingName === undefined
+            || this.defaultValue === undefined
+            || this.settingBox === undefined) {
+
             throw new Error(
-                "Attempted to access '" + this.settingName + "' before all values were set. Missing:"
-                + (this.settingName == null ? "NAME" : "")
-                + (this.defaultValue == null ? "DEFAULT" : ""));
+                `Attempted to access '${this.settingName}' before all values were set. Missing: `
+                + (this.settingName === undefined ? "NAME " : "")
+                + (this.defaultValue === undefined ? "DEFAULT " : "")
+                + (this.settingBox === undefined ? "SETTING_BOX" : "")
+            );
         }
+    }
+
+
+    public initUI(): void {
+        if (!this.deferred) {
+            console.log("WARNING: Attempted to init non-deferred setting UI: " + this.settingName);
+            return;
+        }
+
+        if (this.settingBox !== undefined) {
+            console.log("WARNING: Attempted to re-init setting UI: " + this.settingName);
+            return;
+        }
+
+        this.settingBox = this.setUIComponent();
     }
 
 
@@ -165,7 +192,7 @@ export abstract class Setting<T> {
         this.currentValue = value != null ? value : this.currentValue;
 
 
-        
+
 
     }
 

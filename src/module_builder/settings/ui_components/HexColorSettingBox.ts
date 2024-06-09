@@ -14,8 +14,8 @@ export class HexColorSettingBox extends StringSettingBox {
 
     public getInputIdAndType(): InputElement[] {
         return [
-            { id: this.getSetting().getId(), inputType: 'text', attribute: 'value' },
-            { id: this.getSetting().getId() + "_color-picker", inputType: 'input', attribute: 'value' }
+            { id: this.getSetting().getId(), inputType: 'text' },
+            { id: this.getSetting().getId() + "_color-picker", inputType: 'color' }
         ];
     }
     public onChange(newValue: any): ChangeEvent[] {

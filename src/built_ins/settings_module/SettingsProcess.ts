@@ -153,6 +153,7 @@ export class SettingsProcess extends Process {
             }
 
             case "setting-modified": {
+                console.log(data)
                 const elementId: string = data[0];
                 const elementValue: string = data[1];
                 this.onSettingChange(elementId, elementValue);

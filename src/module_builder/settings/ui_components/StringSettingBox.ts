@@ -12,7 +12,7 @@ export class StringSettingBox extends SettingBox<string> {
         return `
             <div class="right-component">
                 <div style="display: flex;">
-                    <h1><span id='${SettingBox.UNDO_ID + "_" + this.setting.getId()}'>↩</span> ${this.getSetting().getSettingName()}</h1>
+                    <h1><span id='${SettingBox.RESET_ID + "_" + this.setting.getId()}'>↩</span> ${this.getSetting().getSettingName()}</h1>
                     <p style="align-self: flex-end; padding-left: 24px;">${this.getSetting().getDescription()}</p>
                 </div>
 
@@ -23,7 +23,7 @@ export class StringSettingBox extends SettingBox<string> {
     }
 
     public getInputIdAndType(): InputElement[] {
-        return [{ id: this.getSetting().getId(), inputType: 'text', attribute: 'value' }];
+        return [{ id: this.getSetting().getId(), inputType: 'text' }];
     }
 
     public onChange(newValue: any): ChangeEvent[] {

@@ -4,12 +4,11 @@ import { SettingBox } from "../../SettingBox";
 import { NumericSettingBox } from "../ui_components/NumericSettingBox";
 
 
-
 export class NumericSetting extends Setting<number> {
 
 
-    public constructor(theModule: Process) {
-        super(theModule);
+    public constructor(theModule: Process, defer: boolean = false) {
+        super(theModule, defer);
     }
 
 
@@ -19,7 +18,7 @@ export class NumericSetting extends Setting<number> {
         }
 
         try {
-            const parsedValue = parseFloat(String(theInput));
+            const parsedValue: number = parseFloat(String(theInput));
             if (!isNaN(parsedValue)) {
                 return Number(parsedValue.toFixed(1));
             }
@@ -28,8 +27,10 @@ export class NumericSetting extends Setting<number> {
         return null;
     }
 
+
     public setUIComponent(): SettingBox<number> {
         return new NumericSettingBox(this);
+
     }
 
 

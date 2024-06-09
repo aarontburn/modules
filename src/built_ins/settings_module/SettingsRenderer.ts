@@ -10,7 +10,6 @@ interface ModuleInfo {
 interface InputElement {
     id: string,
     inputType: string,
-    attribute: string
 }
 
 interface ChangeEvent {
@@ -102,22 +101,33 @@ interface ChangeEvent {
         });
     }
 
+    const inputTypeToStateMap: Map<string, string> = new Map([
+        ['text', 'value'],
+        ['number', 'value'],
+        ['password', 'value'],
+        ['checkbox', 'checked'],
+        ['radio', 'checked'],
+        ['button', 'value'],
+        ['submit', 'value'],
+        ['file', 'files'],
+        ['color', 'value'],
+        ['date', 'value'],
+        ['range', 'value']
+    ]);
+
+    const keyBlacklist: string[] = [
+        'moduleName', 'module_name',
+        'buildVersion', 'build_version',
+    ];
+
 
     function swapTabs(tab: any): void {
         function getModuleInfoHTML(moduleInfo: any): string {
             const toSentenceCase = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
-
             const inner: string[] = [];
-
             inner.push(`<p style="font-size: 27px; color: var(--accent-color);">${moduleInfo.moduleName || tab.module}</p>`);
-
-            const blacklist: string[] = [
-                'moduleName', 'module_name',
-                'buildVersion', 'build_version',
-            ];
-
             for (const key in moduleInfo) {
-                if (blacklist.includes(key)) {
+                if (keyBlacklist.includes(key)) {
                     continue;
                 }
 
@@ -127,7 +137,6 @@ interface ChangeEvent {
                 }
 
                 inner.push(`<p><span>${toSentenceCase(key)}:</span> ${value}</p>`);
-
             }
 
             return inner.reduce((acc, html) => acc += html + "\n", '');
@@ -179,7 +188,15 @@ interface ChangeEvent {
             inputTypeAndId.forEach((group: InputElement) => {
                 const id: string = group.id;
                 const inputType: string = group.inputType;
-                const attribute: string = group.attribute;
+                let attribute: string = inputTypeToStateMap.get(inputType);
+
+                if (attribute === undefined) {
+                    console.error('Invalid input type found: ' + inputType);
+                    console.error('Attempting to assign it "value"');
+                    attribute = 'value';
+                }
+
+
 
                 const element: HTMLElement = document.getElementById(id);
 
@@ -205,10 +222,17 @@ interface ChangeEvent {
 
                         break;
                     }
-                    case 'input': {
+                    case 'color': {
                         element.addEventListener('input', () => {
                             sendToProcess('setting-modified', id, (element as any)[attribute])
                         })
+                        break;
+                    }
+                    case 'range': {
+                        element.addEventListener('input', () => {
+                            sendToProcess('setting-modified', id, (element as any)[attribute])
+                        })
+                        break;
                     }
                     // TODO: Add additional options
                 }

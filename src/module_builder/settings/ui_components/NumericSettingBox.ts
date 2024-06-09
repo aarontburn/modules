@@ -12,7 +12,7 @@ export class NumericSettingBox extends SettingBox<number> {
     }
 
     public getInputIdAndType(): InputElement[] {
-        return [{ id: this.getSetting().getId(), inputType: 'number', attribute: 'value' }];
+        return [{ id: this.getSetting().getId(), inputType: 'number' }];
     }
 
     public onChange(newValue: any): ChangeEvent[] {
