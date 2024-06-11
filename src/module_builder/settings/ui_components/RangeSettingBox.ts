@@ -1,8 +1,8 @@
 import { Setting } from "../../Setting";
 import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
-import { NumericSettingBox } from "./NumericSettingBox";
+import { NumberSettingBox } from "./NumberSettingBox";
 
-export class RangeSettingBox extends NumericSettingBox {
+export class RangeSettingBox extends NumberSettingBox {
 
     private min: number = 0;
     private max: number = 100;
@@ -22,13 +22,12 @@ export class RangeSettingBox extends NumericSettingBox {
 
                 <input type="range" 
                     min="${this.min}" max="${this.max}" step='${this.step}' 
-                    style="width: 110px; text-align: center;"
                     id="${this.getSetting().getId()}_slider" value='${this.getSetting().getValue()}'>
             </div>
         `;
     }
 
-    public setRange(min: number, max: number): void {
+    public setInputRange(min: number, max: number): void {
         if (min > max) {
             throw new Error(`Attempted to set a greater min than max. Min: ${min} | Max: ${max}`);
         }
@@ -37,7 +36,7 @@ export class RangeSettingBox extends NumericSettingBox {
         this.max = max;
     }
 
-    public setStep(step: number): void {
+    public setInputStep(step: number): void {
         this.step = step;
     }
 

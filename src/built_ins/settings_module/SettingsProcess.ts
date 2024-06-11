@@ -6,6 +6,7 @@ import { ChangeEvent, SettingBox } from "../../module_builder/SettingBox";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
+import { shell } from 'electron';
 
 export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
@@ -46,6 +47,10 @@ export class SettingsProcess extends Process {
 
     public initialize(): void {
         super.initialize();
+
+        const temp: ModuleSettings = this.moduleSettingsList[0]
+        this.moduleSettingsList[0] = this.moduleSettingsList[1]
+        this.moduleSettingsList[1] = temp
 
 
         const settings: any[] = [];
@@ -161,9 +166,17 @@ export class SettingsProcess extends Process {
                 break;
             }
 
-            case 'setting-undo': {
+            case 'setting-reset': {
                 const settingId: string = data[0];
+                console.log(settingId)
                 this.onSettingChange(settingId);
+
+
+                break;
+            }
+            case 'open-link': {
+                const link: string = data[0];
+                shell.openExternal(link);
 
                 break;
             }

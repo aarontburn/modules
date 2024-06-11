@@ -81,6 +81,7 @@ interface ChangeEvent {
     });
 
     function populateSettings(data: { module: string, moduleInfo: any, settings: any[] }[]): void {
+        const firstModuleName: string = data[0].module;
         data.forEach((obj: { module: string, moduleInfo: any, settings: any[] }) => {
             const moduleName: string = obj.module;
 
@@ -99,6 +100,8 @@ interface ChangeEvent {
 
             moduleList.insertAdjacentElement("beforeend", groupElement);
         });
+        sendToProcess('swap-settings-tab', firstModuleName);
+
     }
 
     const inputTypeToStateMap: Map<string, string> = new Map([
@@ -136,6 +139,12 @@ interface ChangeEvent {
                     continue;
                 }
 
+                if (key.toUpperCase() === "LINK") {
+                    inner.push(`<p><span>${toSentenceCase(key)}: </span><a href=${value}>${value}</a><p/>`);
+                    continue;
+                }
+
+
                 inner.push(`<p><span>${toSentenceCase(key)}:</span> ${value}</p>`);
             }
 
@@ -168,15 +177,15 @@ interface ChangeEvent {
 
             settingsList.insertAdjacentHTML("beforeend", html);
 
-            // Attach events to undo button
-            const undoButton: HTMLElement = document.getElementById(`undo-button_${settingId}`);
-            undoButton?.addEventListener("click", () => {
-                sendToProcess("setting-undo", settingId);
+            // Attach events to reset button
+            const resetButton: HTMLElement = document.getElementById(`reset-button_${settingId}`);
+            resetButton?.addEventListener("click", () => {
+                sendToProcess("setting-reset", settingId);
             });
 
             // Add custom setting css to setting
             if (style != "") {
-                const styleId = inputTypeAndId[0] + "_style";
+                const styleId = inputTypeAndId[0].id + "_style";
                 if (document.getElementById(styleId) == null) {
                     const styleSheet: HTMLElement = document.createElement('style')
                     styleSheet.id = styleId;
@@ -202,9 +211,8 @@ interface ChangeEvent {
 
                 switch (inputType) {
                     case "checkbox": {
-                        element.addEventListener('change', () => {
-                            sendToProcess("setting-modified", id, (element as any)[attribute]);
-                        });
+                        element.addEventListener('change',
+                            () => sendToProcess("setting-modified", id, (element as any)[attribute]));
                         break;
                     }
                     case 'number':
@@ -216,22 +224,19 @@ interface ChangeEvent {
                             }
                         });
 
-                        element.addEventListener('blur', () => {
-                            sendToProcess("setting-modified", id, (element as any)[attribute]);
-                        });
+                        element.addEventListener('blur',
+                            () => sendToProcess("setting-modified", id, (element as any)[attribute]));
 
                         break;
                     }
                     case 'color': {
-                        element.addEventListener('input', () => {
-                            sendToProcess('setting-modified', id, (element as any)[attribute])
-                        })
+                        element.addEventListener('input',
+                            () => sendToProcess('setting-modified', id, (element as any)[attribute]))
                         break;
                     }
                     case 'range': {
-                        element.addEventListener('input', () => {
-                            sendToProcess('setting-modified', id, (element as any)[attribute])
-                        })
+                        element.addEventListener('input',
+                            () => sendToProcess('setting-modified', id, (element as any)[attribute]))
                         break;
                     }
                     // TODO: Add additional options
@@ -241,6 +246,42 @@ interface ChangeEvent {
             });
 
         });
+    }
+
+    function openLinkPopup(link: string): void {
+        const html: string = `
+            <div class="dialog">
+                <h3 class='disable-highlight'>You are navigating to an external website.</h3>
+                <h4 class='link'>${link}</h4>
+                <h4 style="padding-top: 10px;" class='disable-highlight'>Only visit the site if you trust it.</h4>
+
+                <div style="display: flex; justify-content: space-between; margin: 0px 15px; margin-top: 15px;">
+                    <h3 class='disable-highlight' id='dialog-cancel'>Cancel</h3>
+                    <h3 class='disable-highlight' id='dialog-proceed'>Proceed</h3>
+                </div>
+            </div>
+        `
+
+        const div: HTMLElement = document.createElement("div");
+        div.classList.add('overlay')
+        div.innerHTML = html
+
+        document.body.prepend(div)
+
+
+        div.addEventListener('click', (event) => {
+            if ((event.target as HTMLElement).className.includes('overlay')) {
+                div.remove();
+            };
+        });
+
+        div.querySelector('#dialog-cancel').addEventListener('click', () => div.remove());
+
+        div.querySelector('#dialog-proceed').addEventListener('click', () => {
+            sendToProcess("open-link", link);
+            div.remove();
+        });
+
     }
 
 
@@ -278,6 +319,13 @@ interface ChangeEvent {
             }
         };
     }
+
+    document.body.addEventListener('click', event => {
+        if ((event.target as HTMLElement).tagName.toLowerCase() === 'a') {
+            event.preventDefault();
+            openLinkPopup((event.target as HTMLAnchorElement).href)
+        }
+    });
 })();
 
 

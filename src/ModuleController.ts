@@ -27,18 +27,17 @@ export class ModuleController implements IPCSource {
 
     private static isDev = false;
 
+    public static isDevelopmentMode(): boolean {
+        return this.isDev;
+    }
+
     public constructor(ipcHandler: Electron.IpcMain, args: string[]) {
-        if (args[2] === "--dev") {
+        if (args.includes("--dev")) {
             ModuleController.isDev = true;
         }
 
         this.ipc = ipcHandler;
     }
-
-    public static isDevelopmentMode(): boolean {
-        return this.isDev;
-    }
-
 
     public getIPCSource(): string {
         return "main";
@@ -53,14 +52,13 @@ export class ModuleController implements IPCSource {
     }
 
     private checkSettings(): void {
-
         for (const module of this.activeModules) {
             const settingsMap: Map<string, any> = StorageHandler.readSettingsFromModuleStorage(module);
 
             const moduleSettings: ModuleSettings = module.getSettings();
             settingsMap.forEach((settingValue: any, settingName: string) => {
                 const setting: Setting<unknown> = moduleSettings.getSettingByName(settingName);
-                if (setting == undefined) {
+                if (setting === undefined) {
                     console.log("WARNING: Invalid setting name: '" + settingName + "' found.");
                 } else {
                     setting.setValue(settingValue);
@@ -122,6 +120,7 @@ export class ModuleController implements IPCSource {
             height: WINDOW_DIMENSION.height,
             width: WINDOW_DIMENSION.width,
             webPreferences: {
+                devTools: ModuleController.isDevelopmentMode(),
                 backgroundThrottling: false,
                 preload: path.join(__dirname, "preload.js"),
             },

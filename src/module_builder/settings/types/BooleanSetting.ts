@@ -3,6 +3,14 @@ import { Process } from "../../Process";
 import { SettingBox } from "../../SettingBox";
 import { BooleanSettingBox } from "../ui_components/BooleanSettingBox";
 
+
+
+/**
+ *  Setting to receive boolean input. Will render in the form of a toggle switch
+ *      instead of a checkbox. 
+ * 
+ *  @author aarontburn
+ */
 export class BooleanSetting extends Setting<boolean> {
 
     public constructor(theModule: Process) {

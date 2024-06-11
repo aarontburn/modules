@@ -1,8 +1,15 @@
 import { ChangeEvent, InputElement } from "../../SettingBox";
 import { StringSettingBox } from "./StringSettingBox";
 
-export class HexColorSettingBox extends StringSettingBox {
 
+
+/**
+ *  Color setting box. The user can use a color picker or paste in
+ *      a color of their choosing, in hexadecimal.
+ *  
+ *  @author aarontburn
+ */
+export class ColorSettingBox extends StringSettingBox {
 
     public createLeft(): string {
         return `

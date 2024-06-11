@@ -4,8 +4,6 @@ import { NumericSetting } from "../../module_builder/settings/types/NumericSetti
 import { StringSetting } from "../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
-import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
-import { RangeSettingBox } from "../../module_builder/settings/ui_components/RangeSettingBox";
 import { RangeSetting } from "../../module_builder/settings/types/RangeSetting";
 
 
@@ -43,7 +41,8 @@ export class HomeProcess extends Process {
 			version: "1.0.0",
 			description: "A home screen that displays time and date.",
 			buildVersion: 1,
-			platforms: []
+			platforms: [],
+			link: 'https://github.com/aarontburn/modules'
 		});
 	}
 
@@ -125,9 +124,18 @@ export class HomeProcess extends Process {
 				
 			new RangeSetting(this)
 				.setRange(5, 50)
+				.setStep(5)
 				.setName("Test Range")
 				.setDefault(30)
-				.setDescription("Test range slider")
+				.setDescription("Test range slider"),
+			
+			new NumericSetting(this)
+				.setRange(3, 72)
+				.setName("Ranged Number (3 - 72)")
+				.setDefault(5)
+				.setDescription("number with a range")
+			
+
 		];
 	}
 

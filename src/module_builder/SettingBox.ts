@@ -21,7 +21,7 @@ export interface ChangeEvent {
  * 
  * 1. The Reset-To-Default Button
  *      If your setting supports a reset-to-default, embed the following html somewhere in your code.
- *          <span id='${SettingBox.UNDO_ID + "_" + this.setting.getId()}'>↩</span>
+ *          <span id='${SettingBox.RESET_ID + "_" + this.setting.getId()}'>↩</span>
  *      When passed to the renderer, the element with an ID of '"reset-button_" + this.setting.getId()' will
  *          be assigned a click handler to reset the setting to its specified default value.
  * 

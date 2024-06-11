@@ -1,6 +1,12 @@
 import { Setting } from "../../Setting";
 import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
 
+
+/**
+ *  Boolean setting box. Will render as a toggle switch. 
+ * 
+ *  @author aarontburn
+ */
 export class BooleanSettingBox extends SettingBox<boolean> {
     private parentSetting: Setting<boolean> = this.getSetting();
 

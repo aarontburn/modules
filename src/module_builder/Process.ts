@@ -10,7 +10,8 @@ export interface ModuleInfo {
     version: string,
     description: string, 
     buildVersion: number,
-    platforms: string[]
+    platforms: string[],
+    link?: string
 }
 
 

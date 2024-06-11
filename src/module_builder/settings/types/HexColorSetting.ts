@@ -1,9 +1,13 @@
 import { SettingBox } from "../../SettingBox";
 import { Setting } from "../../Setting";
 import { Process } from "../../Process";
-import { HexColorSettingBox } from "../ui_components/HexColorSettingBox";
+import { ColorSettingBox } from "../ui_components/ColorSettingBox";
 
-
+/**
+ *  Setting to receive color input.
+ * 
+ *  @author aarontburn
+ */
 export class HexColorSetting extends Setting<string> {
 
     public constructor(theModule: Process) {
@@ -21,7 +25,7 @@ export class HexColorSetting extends Setting<string> {
 
     }
     public setUIComponent(): SettingBox<string> {
-        return new HexColorSettingBox(this);
+        return new ColorSettingBox(this);
     }
 
 

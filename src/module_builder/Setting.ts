@@ -15,7 +15,6 @@ export abstract class Setting<T> {
 
     public settingBox: SettingBox<T>;
 
-    public deferred: boolean;
 
 
     /**
@@ -30,16 +29,12 @@ export abstract class Setting<T> {
      *
      * @param theParentModule The module that this setting belongs to.
      */
-    public constructor(theParentModule: Process, deferUI: boolean = false) {
+    public constructor(theParentModule: Process, defer: boolean = false) {
         this.parentModule = theParentModule;
 
-        this.deferred = deferUI
-        if (!deferUI) {
+        if (!defer) {
             this.settingBox = this.setUIComponent();
-        } else {
-            console.log("deferring")
         }
-
     }
 
 
@@ -52,30 +47,18 @@ export abstract class Setting<T> {
      */
     public checkRequiredFields(): void {
         if (this.settingName === undefined
-            || this.defaultValue === undefined
-            || this.settingBox === undefined) {
+            || this.defaultValue === undefined) {
 
             throw new Error(
                 `Attempted to access '${this.settingName}' before all values were set. Missing: `
                 + (this.settingName === undefined ? "NAME " : "")
                 + (this.defaultValue === undefined ? "DEFAULT " : "")
-                + (this.settingBox === undefined ? "SETTING_BOX" : "")
             );
         }
     }
 
 
-    public initUI(): void {
-        if (!this.deferred) {
-            console.log("WARNING: Attempted to init non-deferred setting UI: " + this.settingName);
-            return;
-        }
-
-        if (this.settingBox !== undefined) {
-            console.log("WARNING: Attempted to re-init setting UI: " + this.settingName);
-            return;
-        }
-
+    public reinitUI(): void {
         this.settingBox = this.setUIComponent();
     }
 
@@ -208,7 +191,7 @@ export abstract class Setting<T> {
      * @return A {@link T} type valid input, or null if the input couldn't be parsed.
      */
     public parseInput(theInput: any): T {
-        if (this.inputValidator != undefined) {
+        if (this.inputValidator !== undefined) {
             return this.inputValidator(theInput);
         }
 
@@ -248,7 +231,7 @@ export abstract class Setting<T> {
      * @return This setting.
      */
     public setValidator(theInputValidator: (theInput: any) => T): Setting<T> {
-        if (this.inputValidator != undefined) {
+        if (this.inputValidator !== undefined) {
             throw new Error("Cannot redefine input validator for " + this.settingName);
         }
         this.inputValidator = theInputValidator;
