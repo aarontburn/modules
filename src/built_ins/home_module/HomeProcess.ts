@@ -5,6 +5,7 @@ import { StringSetting } from "../../module_builder/settings/types/StringSetting
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 import { RangeSetting } from "../../module_builder/settings/types/RangeSetting";
+import { MultipleChoiceSetting } from "../../module_builder/settings/types/MultipleChoiceSetting";
 
 
 
@@ -128,12 +129,28 @@ export class HomeProcess extends Process {
 				.setName("Test Range")
 				.setDefault(30)
 				.setDescription("Test range slider"),
+
+			new RangeSetting(this)
+				.setRange(5, 50)
+				.setStep(5)
+				.setName("Test Range w/ long name")
+				.setDefault(30)
+				.setDescription("Test range slider with a much longer description"),
 			
 			new NumericSetting(this)
 				.setRange(3, 72)
 				.setName("Ranged Number (3 - 72)")
 				.setDefault(5)
-				.setDescription("number with a range")
+				.setDescription("number with a range"),
+			
+			new MultipleChoiceSetting(this)
+				.addOption("Option 1")
+				.addOption('Option 2')
+				.addOption('Option 3')
+				.setName('Test Multiple Choice Setting')
+				.setDescription('Testing the multiple choice setting')
+				.setDefault('Option 1'),
+			
 			
 
 		];

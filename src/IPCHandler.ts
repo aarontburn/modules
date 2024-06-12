@@ -17,7 +17,7 @@ export class IPCHandler {
 
     private static checkInit() {
         if (this.ipc == undefined || this.window == undefined) {
-            throw new Error("IPC and/or BrowserWindow are not defined.")
+            throw new Error("IPC and/or BrowserWindow are undefined.")
         }
     }
 

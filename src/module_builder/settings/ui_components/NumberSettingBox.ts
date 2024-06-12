@@ -10,17 +10,16 @@ import { NumericSetting } from "../types/NumericSetting";
 export class NumberSettingBox extends SettingBox<number> {
 
     public createLeft(): string {
-        const range: { min: number, max: number } = (this.getSetting() as NumericSetting).getRange(); 
+        const range: { min: number, max: number } = (this.getSetting() as NumericSetting).getRange();
 
         return `
             <div class="left-component">
                 <input type="number" style="width: 110px; text-align: center;"
                     id="${this.getSetting().getId()}" value='${this.getSetting().getValue()}'>
-                ${(
-                    this.getSetting() as NumericSetting).getRange() !== undefined 
-                    ? `<p>(${range.min} - ${range.max})</p>`
-                    : ''
-                }
+                ${range !== undefined
+                ? `<p>(${range.min} - ${range.max})</p>`
+                : ''
+            }
             </div>
         `
     }

@@ -3,10 +3,11 @@ import { SettingBox } from "./SettingBox";
 
 export abstract class Setting<T> {
 
-    public parentModule: Process;
+    public readonly parentModule: Process;
+    public readonly settingId: string = this.generateRandomId()
+
     public settingName: string;
     public settingDescription: string;
-    public settingId: string = this.generateRandomId()
 
     public inputValidator: (theInput: any) => T;
 
@@ -173,10 +174,6 @@ export abstract class Setting<T> {
 
         const value: T = this.parseInput(theValue);
         this.currentValue = value != null ? value : this.currentValue;
-
-
-
-
     }
 
 

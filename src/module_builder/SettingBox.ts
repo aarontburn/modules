@@ -2,9 +2,10 @@ import { Setting } from "./Setting";
 
 
 
-export class InputElement {
-    id: string;
-    inputType: string;
+export interface InputElement {
+    id: string,
+    inputType: string,
+    returnValue?: any;
 }
 
 export interface ChangeEvent {
@@ -45,18 +46,15 @@ export interface ChangeEvent {
  * 
  */
 
-
-
-
-
 export abstract class SettingBox<T> {
 
-    protected static RESET_ID: string = 'reset-button';
+    protected readonly resetID: string;
 
-    public setting: Setting<T>;
+    public readonly setting: Setting<T>;
 
     public constructor(theSetting: Setting<T>) {
         this.setting = theSetting;
+        this.resetID = 'reset-button_' + this.setting.getId()
     }
 
     public getUI(): string {
@@ -90,7 +88,7 @@ export abstract class SettingBox<T> {
     public createRight(): string {
         return `
             <div class="right-component" style="display: inline-block;">
-                <h1><span id='${SettingBox.RESET_ID + "_" + this.setting.getId()}'>↩</span> ${this.setting.getSettingName()}</h1>
+                <h1><span id='${this.resetID}'>↩</span> ${this.setting.getSettingName()}</h1>
                 <p>${this.setting.getDescription()}</p>
             </div>
         `;

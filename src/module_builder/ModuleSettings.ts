@@ -2,8 +2,8 @@ import { Process } from "./Process";
 import { Setting } from "./Setting";
 
 export class ModuleSettings {
-    public settingsMap: Map<string, Setting<unknown>> = new Map<string, Setting<unknown>>();
-    public parentModule: Process;
+    public readonly settingsMap: Map<string, Setting<unknown>> = new Map<string, Setting<unknown>>();
+    public readonly parentModule: Process;
     public settingsName: string;
 
     public constructor(theModule: Process) {

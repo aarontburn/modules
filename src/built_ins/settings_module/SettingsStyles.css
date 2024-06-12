@@ -81,8 +81,20 @@ input::-webkit-inner-spin-button {
 input[type='range'] {
     height: 15px;
     width: 100%;
-    accent-color: var(--accent-color)
+    accent-color: var(--accent-color);
 }
+
+input[type='radio'] {
+    margin: 0;
+    padding: 0;
+}
+
+label {
+    margin-left: 5px;
+    margin-right: 25px;
+    font-size: 18px;
+}
+
 
 
 .setting h1 {

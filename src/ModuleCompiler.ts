@@ -9,10 +9,10 @@ import { StorageHandler } from './module_builder/StorageHandler';
 
 export class ModuleCompiler {
 
-    private static PATH: string = app.getPath("home") + "/.modules/";
-    private static EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
-    private static COMPILED_MODULES_PATH: string = this.PATH + "/built/"
-    private static IO_OPTIONS: { encoding: BufferEncoding, withFileTypes: true } = {
+    private static readonly PATH: string = app.getPath("home") + "/.modules/";
+    private static readonly EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
+    private static readonly COMPILED_MODULES_PATH: string = this.PATH + "/built/"
+    private static readonly IO_OPTIONS: { encoding: BufferEncoding, withFileTypes: true } = {
         encoding: "utf-8",
         withFileTypes: true
     }

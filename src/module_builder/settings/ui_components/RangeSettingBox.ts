@@ -15,12 +15,13 @@ export class RangeSettingBox extends NumberSettingBox {
     public createRight(): string {
         return `
             <div class="right-component">
-                <div style="display: flex;">
-                    <h1><span id='${SettingBox.RESET_ID + "_" + this.setting.getId()}'>↩</span> ${this.getSetting().getSettingName()}</h1>
+                <div style="display: flex; flex-wrap: wrap">
+                    <h1><span id='${this.resetID}'>↩</span> ${this.getSetting().getSettingName()}</h1>
                     <p style="align-self: flex-end; padding-left: 24px;">${this.getSetting().getDescription()}</p>
                 </div>
 
                 <input type="range" 
+                    style='width: 500px;'
                     min="${this.min}" max="${this.max}" step='${this.step}' 
                     id="${this.getSetting().getId()}_slider" value='${this.getSetting().getValue()}'>
             </div>

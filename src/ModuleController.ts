@@ -17,15 +17,14 @@ const ipcCallback: IPCCallback = {
 
 export class ModuleController implements IPCSource {
 
+    private static isDev = false;
+
     private readonly ipc: Electron.IpcMain;
-
-    private window: BrowserWindow;
-
     private readonly modulesByName = new Map<string, Process>();
     private readonly activeModules: Process[] = [];
     private readonly settingsModule: SettingsProcess = new SettingsProcess(ipcCallback);
 
-    private static isDev = false;
+    private window: BrowserWindow;
 
     public static isDevelopmentMode(): boolean {
         return this.isDev;

@@ -4,10 +4,10 @@ import { Process } from "./Process";
 import { Setting } from "./Setting";
 
 export class StorageHandler {
-    private static PATH: string = app.getPath("home") + "/.modules/";
-    private static STORAGE_PATH: string = this.PATH + "/storage/";
-    private static EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
-    private static COMPILED_MODULES_PATH: string = this.PATH + "/built/"
+    private static readonly PATH: string = app.getPath("home") + "/.modules/";
+    private static readonly STORAGE_PATH: string = this.PATH + "/storage/";
+    private static readonly EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
+    private static readonly COMPILED_MODULES_PATH: string = this.PATH + "/built/"
 
     public static async createDirectories(): Promise<void> {
         await fs.promises.mkdir(this.STORAGE_PATH, { recursive: true })

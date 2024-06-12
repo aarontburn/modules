@@ -2,7 +2,7 @@ import { Setting } from "../../module_builder/Setting";
 import { Process, ModuleInfo } from "../../module_builder/Process";
 import * as path from "path";
 import { ModuleSettings } from "../../module_builder/ModuleSettings";
-import { ChangeEvent, SettingBox } from "../../module_builder/SettingBox";
+import { ChangeEvent, InputElement, SettingBox } from "../../module_builder/SettingBox";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
@@ -48,9 +48,10 @@ export class SettingsProcess extends Process {
     public initialize(): void {
         super.initialize();
 
-        const temp: ModuleSettings = this.moduleSettingsList[0]
-        this.moduleSettingsList[0] = this.moduleSettingsList[1]
-        this.moduleSettingsList[1] = temp
+        // Swap settings so General settings is the first one to appear.
+        const temp: ModuleSettings = this.moduleSettingsList[0];
+        this.moduleSettingsList[0] = this.moduleSettingsList[1];
+        this.moduleSettingsList[1] = temp;
 
 
         const settings: any[] = [];
@@ -65,7 +66,6 @@ export class SettingsProcess extends Process {
             };
 
             settingsList.forEach((setting: Setting<unknown>) => {
-
                 const settingBox: SettingBox<unknown> = setting.getUIComponent();
                 const settingInfo: any = {
                     moduleInfo: setting.parentModule.getModuleInfo(),
@@ -91,15 +91,16 @@ export class SettingsProcess extends Process {
 
             settingsList.forEach((setting: Setting<unknown>) => {
                 const settingBox: SettingBox<unknown> = setting.getUIComponent();
-
                 settingBox.getInputIdAndType().forEach((group: InputElement) => {
                     const id: string = group.id;
+                    console.log(id)
                     if (id === settingId) { // found the modified setting
                         if (newValue === undefined) {
-                            setting.resetToDefault()
+                            setting.resetToDefault();
                         } else {
                             setting.setValue(newValue);
                         }
+                        console.log("Final setting value: " + setting.getValue())
                         setting.getParentModule().refreshSettings();
                         const update: ChangeEvent[] = settingBox.onChange(setting.getValue());
                         StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
@@ -168,7 +169,7 @@ export class SettingsProcess extends Process {
 
             case 'setting-reset': {
                 const settingId: string = data[0];
-                console.log(settingId)
+                console.log("Resetting:" + settingId);
                 this.onSettingChange(settingId);
 
 

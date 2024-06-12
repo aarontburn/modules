@@ -1,26 +1,25 @@
-interface ModuleInfo {
-    moduleName: string,
-    author: string,
-    version: string,
-    description: string,
-    buildVersion: number,
-    platforms: string[]
-}
-
-interface InputElement {
-    id: string,
-    inputType: string,
-}
-
-interface ChangeEvent {
-    id: string,
-    attribute: string,
-    value: any
-}
-
-
-
 (() => {
+    interface ModuleInfo {
+        moduleName: string,
+        author: string,
+        version: string,
+        description: string,
+        buildVersion: number,
+        platforms: string[]
+    }
+    
+    interface InputElement {
+        id: string,
+        inputType: string,
+        returnValue?: any
+    }
+    
+    interface ChangeEvent {
+        id: string,
+        attribute: string,
+        value: any
+    }
+
     const MODULE_NAME = "Settings"
     const MODULE_PROCESS_NAME = MODULE_NAME.toLowerCase() + "-process";
     const MODULE_RENDERER_NAME = MODULE_NAME.toLowerCase() + "-renderer"
@@ -81,7 +80,8 @@ interface ChangeEvent {
     });
 
     function populateSettings(data: { module: string, moduleInfo: any, settings: any[] }[]): void {
-        const firstModuleName: string = data[0].module;
+        let firstModule: HTMLElement;
+
         data.forEach((obj: { module: string, moduleInfo: any, settings: any[] }) => {
             const moduleName: string = obj.module;
 
@@ -89,7 +89,7 @@ interface ChangeEvent {
             const groupElement: HTMLElement = document.createElement("p");
             groupElement.innerText = moduleName;
             groupElement.addEventListener("click", () => {
-                if (currentlySelectedTab != undefined) {
+                if (currentlySelectedTab !== undefined) {
                     currentlySelectedTab.style.color = "";
                 }
                 currentlySelectedTab = groupElement;
@@ -98,10 +98,13 @@ interface ChangeEvent {
                 sendToProcess('swap-settings-tab', moduleName);
             });
 
+            if (firstModule === undefined) {
+                firstModule = groupElement;
+            }
+
             moduleList.insertAdjacentElement("beforeend", groupElement);
         });
-        sendToProcess('swap-settings-tab', firstModuleName);
-
+        firstModule.click();
     }
 
     const inputTypeToStateMap: Map<string, string> = new Map([
@@ -180,11 +183,11 @@ interface ChangeEvent {
             // Attach events to reset button
             const resetButton: HTMLElement = document.getElementById(`reset-button_${settingId}`);
             resetButton?.addEventListener("click", () => {
-                sendToProcess("setting-reset", settingId);
+                sendToProcess("setting-reset", inputTypeAndId[0].id);
             });
 
             // Add custom setting css to setting
-            if (style != "") {
+            if (style !== "") {
                 const styleId = inputTypeAndId[0].id + "_style";
                 if (document.getElementById(styleId) == null) {
                     const styleSheet: HTMLElement = document.createElement('style')
@@ -197,6 +200,7 @@ interface ChangeEvent {
             inputTypeAndId.forEach((group: InputElement) => {
                 const id: string = group.id;
                 const inputType: string = group.inputType;
+                const returnValue: string | undefined = group.returnValue;
                 let attribute: string = inputTypeToStateMap.get(inputType);
 
                 if (attribute === undefined) {
@@ -212,31 +216,37 @@ interface ChangeEvent {
                 switch (inputType) {
                     case "checkbox": {
                         element.addEventListener('change',
-                            () => sendToProcess("setting-modified", id, (element as any)[attribute]));
+                            () => sendToProcess("setting-modified", id, returnValue ? returnValue : (element as any)[attribute]));
                         break;
                     }
                     case 'number':
                     case 'text': {
                         element.addEventListener('keyup', (event: KeyboardEvent) => {
                             if (event.key === "Enter") {
-                                sendToProcess("setting-modified", id, (element as any)[attribute]);
+                                sendToProcess("setting-modified", id, returnValue ? returnValue : (element as any)[attribute]);
                                 element.blur();
                             }
                         });
 
                         element.addEventListener('blur',
-                            () => sendToProcess("setting-modified", id, (element as any)[attribute]));
+                            () => sendToProcess("setting-modified", id, returnValue ? returnValue : (element as any)[attribute]));
 
                         break;
                     }
                     case 'color': {
                         element.addEventListener('input',
-                            () => sendToProcess('setting-modified', id, (element as any)[attribute]))
+                            () => sendToProcess('setting-modified', id, returnValue ? returnValue : (element as any)[attribute]))
                         break;
                     }
                     case 'range': {
                         element.addEventListener('input',
-                            () => sendToProcess('setting-modified', id, (element as any)[attribute]))
+                            () => sendToProcess('setting-modified', id, returnValue ? returnValue : (element as any)[attribute]))
+                        break;
+                    }
+                    case 'radio': {
+                        element.addEventListener('change', () => {
+                            sendToProcess('setting-modified', id, returnValue ? returnValue : (element as any)[attribute])
+                        })
                         break;
                     }
                     // TODO: Add additional options

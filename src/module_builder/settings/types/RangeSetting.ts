@@ -7,7 +7,7 @@ import { NumericSetting } from "./NumericSetting";
  *  Similar to the functionalities of the @see NumericSetting, this will render as a 
  *      slider.
  * 
- *  The default range is 0 - 100 inclusive, and the default step is 1. 
+ *  The default range is [0, 100], and the default step is 1. 
  * 
  *  @author aarontburn
  */

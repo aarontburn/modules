@@ -11,12 +11,12 @@ export class StringSettingBox extends SettingBox<string> {
     public createRight(): string {
         return `
             <div class="right-component">
-                <div style="display: flex;">
-                    <h1><span id='${SettingBox.RESET_ID + "_" + this.setting.getId()}'>↩</span> ${this.getSetting().getSettingName()}</h1>
+                <div style="display: flex; flex-wrap: wrap">
+                    <h1><span id='${this.resetID}'>↩</span> ${this.getSetting().getSettingName()}</h1>
                     <p style="align-self: flex-end; padding-left: 24px;">${this.getSetting().getDescription()}</p>
                 </div>
 
-                <input type="text" style="width: 100%;" 
+                <input type="text" style="width: 500px;" 
                     value="${this.getSetting().getValue()}" id="${this.getSetting().getId()}">
             </div>
         `;

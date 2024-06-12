@@ -19,10 +19,10 @@ export abstract class Process implements IPCSource {
 
     public moduleInfo: ModuleInfo;
 
-    public moduleSettings = new ModuleSettings(this);
+    public readonly moduleSettings = new ModuleSettings(this);
+    public readonly ipcCallback: IPCCallback;
 
-    public ipcCallback: IPCCallback;
-    public moduleName: string;
+    public readonly moduleName: string;
     public hasBeenInit: boolean = false;
 
     public htmlPath: string;
@@ -82,7 +82,7 @@ export abstract class Process implements IPCSource {
     }
 
     public stop(): void {
-        // moduleGUI.stop();
+        // Do nothing by default
     }
 
     public getHtmlPath(): string {
@@ -98,7 +98,6 @@ export abstract class Process implements IPCSource {
 
     public notifyObservers(eventType: string, ...data: any): void {
         this.ipcCallback.notifyRenderer(this, eventType, ...data);
-        // IPCHandler.fireEventToRenderer(this, eventType, data);
     }
 
 
