@@ -79,10 +79,10 @@
         }
     });
 
-    function populateSettings(data: { module: string, moduleInfo: any, settings: any[] }[]): void {
+    function populateSettings(data: { module: string, moduleInfo: any }[]): void {
         let firstModule: HTMLElement;
 
-        data.forEach((obj: { module: string, moduleInfo: any, settings: any[] }) => {
+        data.forEach((obj: { module: string, moduleInfo: any }) => {
             const moduleName: string = obj.module;
 
             // Setting group click button
@@ -118,7 +118,8 @@
         ['file', 'files'],
         ['color', 'value'],
         ['date', 'value'],
-        ['range', 'value']
+        ['range', 'value'],
+        ['select', 'value']
     ]);
 
     const keyBlacklist: string[] = [
@@ -175,7 +176,7 @@
             const settingId: string = settingInfo.settingId;
             const inputTypeAndId: InputElement[] = settingInfo.inputTypeAndId;
             const html: string = settingInfo.ui;
-            const style: string = settingInfo.style;
+            const [sourceObject, style]: string[] = settingInfo.style;
 
 
             settingsList.insertAdjacentHTML("beforeend", html);
@@ -188,12 +189,12 @@
 
             // Add custom setting css to setting
             if (style !== "") {
-                const styleId = inputTypeAndId[0].id + "_style";
-                if (document.getElementById(styleId) == null) {
+                const styleId = sourceObject;
+                if (document.getElementById(styleId) === null) {
                     const styleSheet: HTMLElement = document.createElement('style')
-                    styleSheet.id = styleId;
+                    styleSheet.id = sourceObject;
                     styleSheet.innerHTML = style
-                    document.body.appendChild(styleSheet);
+                    settingsList.appendChild(styleSheet);
                 }
             }
 
@@ -214,11 +215,6 @@
                 const element: HTMLElement = document.getElementById(id);
 
                 switch (inputType) {
-                    case "checkbox": {
-                        element.addEventListener('change',
-                            () => sendToProcess("setting-modified", id, returnValue ? returnValue : (element as any)[attribute]));
-                        break;
-                    }
                     case 'number':
                     case 'text': {
                         element.addEventListener('keyup', (event: KeyboardEvent) => {
@@ -233,16 +229,14 @@
 
                         break;
                     }
-                    case 'color': {
-                        element.addEventListener('input',
-                            () => sendToProcess('setting-modified', id, returnValue ? returnValue : (element as any)[attribute]))
-                        break;
-                    }
+                    case 'color':
                     case 'range': {
                         element.addEventListener('input',
                             () => sendToProcess('setting-modified', id, returnValue ? returnValue : (element as any)[attribute]))
                         break;
                     }
+                    case "checkbox":
+                    case 'select':
                     case 'radio': {
                         element.addEventListener('change', () => {
                             sendToProcess('setting-modified', id, returnValue ? returnValue : (element as any)[attribute])
@@ -256,6 +250,15 @@
             });
 
         });
+
+        // Add spacers to the bottom
+        const spacerHTML: string = `
+            <br/>
+            <br/>
+        `
+
+        settingsList.insertAdjacentHTML("beforeend", spacerHTML);
+
     }
 
     function openLinkPopup(link: string): void {

@@ -1,16 +1,17 @@
 import { Process } from "../../Process";
 import { Setting } from "../../Setting";
 import { SettingBox } from "../../SettingBox";
+import { DropdownSettingBox } from "../ui_components/DropdownSettingBox";
 import { RadioSettingBox } from "../ui_components/RadioSettingBox";
 
 
 
-export class MultipleChoiceSetting extends Setting<string> {
+export class ChoiceSetting extends Setting<string> {
 
     private readonly options: Set<string> = new Set();
 
     // private multipleAnswersAllowed: boolean = false;
-
+    private dropdown: boolean = false
 
 
     public constructor(theModule: Process) {
@@ -21,9 +22,22 @@ export class MultipleChoiceSetting extends Setting<string> {
     //     this.multipleAnswersAllowed = true;
     // }
 
-    public addOption(option: string): MultipleChoiceSetting {
-        this.options.add(option);
+    public useDropdown(): ChoiceSetting {
+        this.dropdown = true;
+        return this;
+
+    }
+
+    public addOption(option: string): ChoiceSetting {
+        return this.addOptions(option);
+    }
+
+    public addOptions(...options: string[]): ChoiceSetting {
+        for (const option of options) {
+            this.options.add(option);
+        }
         this.reinitUI()
+
         return this;
     }
 
@@ -41,6 +55,9 @@ export class MultipleChoiceSetting extends Setting<string> {
     }
 
     public setUIComponent(): SettingBox<string> {
+        if (this.dropdown) {
+            return new DropdownSettingBox(this);
+        }
         return new RadioSettingBox(this);
     }
 

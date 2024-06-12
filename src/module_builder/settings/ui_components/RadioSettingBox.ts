@@ -1,6 +1,6 @@
 import { Setting } from "../../Setting";
 import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
-import { MultipleChoiceSetting } from "../types/MultipleChoiceSetting";
+import { ChoiceSetting } from "../types/ChoiceSetting";
 
 
 
@@ -11,21 +11,15 @@ export class RadioSettingBox extends SettingBox<string> {
     public constructor(theSetting: Setting<string>) {
         super(theSetting)
 
-        this.registerOptions();
-
-    }
-
-    private registerOptions() {
-        const options: Set<string> = (this.getSetting() as MultipleChoiceSetting).getOptionNames();
-
+        const options: Set<string> = (this.getSetting() as ChoiceSetting).getOptionNames();
         let i: number = 0;
         options.forEach((option: string) => {
             this.optionsIDMap.set(option, this.getSetting().getId() + 'option_' + i);
             i++;
-        })
-
+        });
 
     }
+
 
     public createLeft(): string {
         return `
@@ -52,7 +46,7 @@ export class RadioSettingBox extends SettingBox<string> {
 
     private getInputOptions(): string {
         let s: string = '';
-        const setting: MultipleChoiceSetting = this.getSetting() as MultipleChoiceSetting;
+        const setting: ChoiceSetting = this.getSetting() as ChoiceSetting;
 
         this.optionsIDMap.forEach((id: string, optionName: string) => {
             s += `
@@ -81,6 +75,32 @@ export class RadioSettingBox extends SettingBox<string> {
             changeEvents.push({ id: id, attribute: 'checked', value: newValue === optionName })
         });
         return changeEvents;
+    }
+
+    public getStyle(): string {
+        return `
+            input[type='radio'] {
+                margin: 0;
+                padding: 0;
+            }
+
+            input[type='radio']:after {
+                width: 15px;
+                height: 15px;
+                border-radius: 15px;
+                left: -1px;
+                position: relative;
+                background-color: #6a6a6a;
+                content: '';
+                display: inline-block;
+                visibility: visible;
+                transition: 0.2s;
+            }
+
+            input[type='radio']:checked:after {
+                background-color: var(--accent-color);
+            }
+        `
     }
 
 

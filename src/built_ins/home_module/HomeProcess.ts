@@ -5,7 +5,7 @@ import { StringSetting } from "../../module_builder/settings/types/StringSetting
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 import { RangeSetting } from "../../module_builder/settings/types/RangeSetting";
-import { MultipleChoiceSetting } from "../../module_builder/settings/types/MultipleChoiceSetting";
+import { ChoiceSetting } from "../../module_builder/settings/types/ChoiceSetting";
 
 
 
@@ -143,13 +143,26 @@ export class HomeProcess extends Process {
 				.setDefault(5)
 				.setDescription("number with a range"),
 			
-			new MultipleChoiceSetting(this)
+			new ChoiceSetting(this)
 				.addOption("Option 1")
 				.addOption('Option 2')
 				.addOption('Option 3')
 				.setName('Test Multiple Choice Setting')
 				.setDescription('Testing the multiple choice setting')
 				.setDefault('Option 1'),
+			
+			new ChoiceSetting(this)
+				.addOptions("Apples", "Grapes", "Bananas", "Peaches", "Pineapples", "Strawberry", "Raspberry")
+				.setName('Fruit Question')
+				.setDescription('Choose your favorite fruit.')
+				.setDefault('Strawberry'),
+
+			new ChoiceSetting(this)
+				.useDropdown()
+				.addOptions("Apples", "Grapes", "Bananas", "Peaches", "Pineapples", "Strawberry", "Raspberry")
+				.setName('Fruit Question dropdown question')
+				.setDescription('Choose your favorite fruit but as a dropdown.')
+				.setDefault('Strawberry'),
 			
 			
 

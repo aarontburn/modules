@@ -66,13 +66,9 @@ export class SettingsProcess extends Process {
             };
 
             settingsList.forEach((setting: Setting<unknown>) => {
-                const settingBox: SettingBox<unknown> = setting.getUIComponent();
                 const settingInfo: any = {
                     moduleInfo: setting.parentModule.getModuleInfo(),
                     settingId: setting.getId(),
-                    inputTypeAndId: settingBox.getInputIdAndType(),
-                    ui: settingBox.getUI(),
-                    style: settingBox.getStyle(),
                 };
                 list.settings.push(settingInfo);
             });
@@ -93,7 +89,6 @@ export class SettingsProcess extends Process {
                 const settingBox: SettingBox<unknown> = setting.getUIComponent();
                 settingBox.getInputIdAndType().forEach((group: InputElement) => {
                     const id: string = group.id;
-                    console.log(id)
                     if (id === settingId) { // found the modified setting
                         if (newValue === undefined) {
                             setting.resetToDefault();
@@ -144,7 +139,7 @@ export class SettingsProcess extends Process {
                             settingId: setting.getId(),
                             inputTypeAndId: settingBox.getInputIdAndType(),
                             ui: settingBox.getUI(),
-                            style: settingBox.getStyle(),
+                            style: [settingBox.constructor.name + 'Styles', settingBox.getStyle()],
                         };
                         list.settings.push(settingInfo);
                     });
