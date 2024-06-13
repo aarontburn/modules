@@ -3,7 +3,11 @@ import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
 import { ChoiceSetting } from "../types/ChoiceSetting";
 
 
-
+/**
+ *  Setting UI to handle selection input. The user will be presented with multiple options,
+ * 
+ *  @author
+ */
 export class RadioSettingBox extends SettingBox<string> {
 
     private readonly optionsIDMap: Map<string, string> = new Map();
@@ -14,7 +18,7 @@ export class RadioSettingBox extends SettingBox<string> {
         const options: Set<string> = (this.getSetting() as ChoiceSetting).getOptionNames();
         let i: number = 0;
         options.forEach((option: string) => {
-            this.optionsIDMap.set(option, this.getSetting().getId() + 'option_' + i);
+            this.optionsIDMap.set(option, this.getSetting().getID() + 'option_' + i);
             i++;
         });
 
@@ -53,7 +57,7 @@ export class RadioSettingBox extends SettingBox<string> {
                 <input type="radio" id="${id}" name="${this.getSetting().getName()}" 
                     value="${optionName}" ${setting.getValue() === optionName ? 'checked' : ''}>
 
-                <label for="${id}">${optionName}</label>
+                <label class='radio-label' for="${id}">${optionName}</label>
                 \n
             `
         });
@@ -79,6 +83,12 @@ export class RadioSettingBox extends SettingBox<string> {
 
     public getStyle(): string {
         return `
+            .radio-label {
+                margin-left: 10px;
+                margin-right: 25px;
+                font-size: 18px;
+            }
+
             input[type='radio'] {
                 margin: 0;
                 padding: 0;

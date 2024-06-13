@@ -3,6 +3,11 @@ import { Process } from "../../Process";
 import { SettingBox } from "../../SettingBox";
 import { StringSettingBox } from "../ui_components/StringSettingBox";
 
+/**
+ *  Setting to hold string input.
+ * 
+ *  @author aarontburn 
+ */
 export class StringSetting extends Setting<string> {
 
     public constructor(theModule: Process) {

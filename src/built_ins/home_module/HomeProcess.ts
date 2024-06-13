@@ -1,10 +1,9 @@
 import { Setting } from "../../module_builder/Setting";
 import { Process } from "../../module_builder/Process";
-import { NumericSetting } from "../../module_builder/settings/types/NumericSetting";
+import { NumberSetting } from "../../module_builder/settings/types/NumberSetting";
 import { StringSetting } from "../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
-import { RangeSetting } from "../../module_builder/settings/types/RangeSetting";
 import { ChoiceSetting } from "../../module_builder/settings/types/ChoiceSetting";
 
 
@@ -77,7 +76,7 @@ export class HomeProcess extends Process {
 		const formattedFullDate: string = fullDate.replace(/,/g, this.createSpan(','));
 		const formattedMilitaryTime: string = militaryTime.replace(/:/g, this.createSpan(":"))
 
-		this.notifyObservers("update-clock", formattedFullDate, formattedAbbreviatedDate, formattedStandardTime, formattedMilitaryTime);
+		this.sendToRenderer("update-clock", formattedFullDate, formattedAbbreviatedDate, formattedStandardTime, formattedMilitaryTime);
 
 		if (repeat) {
 			this.clockTimeout = setTimeout(() => this.updateDateAndTime(true), 1000);
@@ -86,90 +85,51 @@ export class HomeProcess extends Process {
 
 	public registerSettings(): Setting<unknown>[] {
 		return [
-			new NumericSetting(this)
+			new NumberSetting(this)
+				.setMin(0)
 				.setName("Full Date Font Size (1)")
 				.setDescription(
 					"Adjusts the font size of the full date display (e.g. Sunday, January 1st, 2023)."
 				)
-				.setID("full_date_fs")
+				.setAccessID("full_date_fs")
 				.setDefault(40.0),
 
-			new NumericSetting(this)
+			new NumberSetting(this)
+				.setMin(0)
 				.setName("Abbreviated Date Font Size (2)")
 				.setDescription(
 					"Adjusts the font size of the abbreviated date display (e.g. 1/01/2023)."
 				)
-				.setID("abbr_date_fs")
+				.setAccessID("abbr_date_fs")
 				.setDefault(30.0),
 
-			new NumericSetting(this)
+			new NumberSetting(this)
+				.setMin(0)
 				.setName("Standard Time Font Size (3)")
 				.setDescription(
 					"Adjusts the font size of the standard time display (e.g. 11:59:59 PM)."
 				)
-				.setID('standard_time_fs')
+				.setAccessID('standard_time_fs')
 				.setDefault(90.0),
 
-			new NumericSetting(this)
+			new NumberSetting(this)
+				.setMin(0)
 				.setName("Military Time Font Size (4)")
 				.setDescription(
 					"Adjusts the font size of the military time display (e.g. 23:59:49)."
 				)
-				.setID('military_time_fs')
+				.setAccessID('military_time_fs')
 				.setDefault(30.0),
 
 			new StringSetting(this)
 				.setName("Display Order")
 				.setDescription("Adjusts the order of the time/date displays.")
 				.setDefault("12 34")
-				.setID("display_order")
+				.setAccessID("display_order")
 				.setValidator((o) => {
 					const s: string = o.toString();
-					return s == "" || s.match("^(?!.*(\\d).*\\1)[1-4\\s]+$") ? s : null;
-				}),
-				
-			new RangeSetting(this)
-				.setRange(5, 50)
-				.setStep(5)
-				.setName("Test Range")
-				.setDefault(30)
-				.setDescription("Test range slider"),
-
-			new RangeSetting(this)
-				.setRange(5, 50)
-				.setStep(5)
-				.setName("Test Range w/ long name")
-				.setDefault(30)
-				.setDescription("Test range slider with a much longer description"),
-			
-			new NumericSetting(this)
-				.setRange(3, 72)
-				.setName("Ranged Number (3 - 72)")
-				.setDefault(5)
-				.setDescription("number with a range"),
-			
-			new ChoiceSetting(this)
-				.addOption("Option 1")
-				.addOption('Option 2')
-				.addOption('Option 3')
-				.setName('Test Multiple Choice Setting')
-				.setDescription('Testing the multiple choice setting')
-				.setDefault('Option 1'),
-			
-			new ChoiceSetting(this)
-				.addOptions("Apples", "Grapes", "Bananas", "Peaches", "Pineapples", "Strawberry", "Raspberry")
-				.setName('Fruit Question')
-				.setDescription('Choose your favorite fruit.')
-				.setDefault('Strawberry'),
-
-			new ChoiceSetting(this)
-				.useDropdown()
-				.addOptions("Apples", "Grapes", "Bananas", "Peaches", "Pineapples", "Strawberry", "Raspberry")
-				.setName('Fruit Question dropdown question')
-				.setDescription('Choose your favorite fruit but as a dropdown.')
-				.setDefault('Strawberry'),
-			
-			
+					return s === "" || s.match("^(?!.*(\\d).*\\1)[1-4\\s]+$") ? s : null;
+				})
 
 		];
 	}
@@ -187,12 +147,12 @@ export class HomeProcess extends Process {
 		const order: string = this.getSettings().getSetting("display_order").getValue() as string
 
 
-		this.notifyObservers('font-sizes', sizes);
-		this.notifyObservers('display-order', order);
+		this.sendToRenderer('font-sizes', sizes);
+		this.sendToRenderer('display-order', order);
 
 	}
 
-	public receiveIPCEvent(eventType: string, data: any[]): void {
+	public handleEvent(eventType: string, data: any[]): void {
 		switch (eventType) {
 			case "init": {
 				this.initialize();

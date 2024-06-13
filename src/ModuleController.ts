@@ -20,11 +20,12 @@ export class ModuleController implements IPCSource {
     private static isDev = false;
 
     private readonly ipc: Electron.IpcMain;
-    private readonly modulesByName = new Map<string, Process>();
+    private readonly modulesByName: Map<string, Process> = new Map();
     private readonly activeModules: Process[] = [];
     private readonly settingsModule: SettingsProcess = new SettingsProcess(ipcCallback);
 
     private window: BrowserWindow;
+    private currentDisplayedModule: Process;
 
     public static isDevelopmentMode(): boolean {
         return this.isDev;
@@ -80,7 +81,7 @@ export class ModuleController implements IPCSource {
     private init(): void {
         const map: Map<string, string> = new Map<string, string>();
         this.activeModules.forEach((module: Process) => {
-            map.set(module.getModuleName(), module.getHtmlPath());
+            map.set(module.getName(), module.getHTMLPath());
         });
         ipcCallback.notifyRenderer(this, 'load-modules', map);
         this.swapLayouts(HomeProcess.MODULE_NAME);
@@ -103,7 +104,7 @@ export class ModuleController implements IPCSource {
         this.activeModules.forEach((module: Process) => {
             console.log("Registering " + module.getIPCSource() + "-process");
             this.ipc.on(module.getIPCSource() + "-process", (_, eventType: string, data: any[]) => {
-                this.modulesByName.get(module.getModuleName()).receiveIPCEvent(eventType, data);
+                this.modulesByName.get(module.getName()).handleEvent(eventType, data);
             })
         });
     }
@@ -116,7 +117,9 @@ export class ModuleController implements IPCSource {
 
     private swapLayouts(moduleName: string): void {
         const module: Process = this.modulesByName.get(moduleName);
-        module.onGuiShown();
+        this.currentDisplayedModule?.onGUIHidden()
+        module.onGUIShown();
+        this.currentDisplayedModule = module;
         ipcCallback.notifyRenderer(this, 'swap-modules', moduleName);
     }
 
@@ -166,7 +169,7 @@ export class ModuleController implements IPCSource {
 
 
     private addModule(module: Process): void {
-        this.modulesByName.set(module.getModuleName(), module);
+        this.modulesByName.set(module.getName(), module);
         this.activeModules.push(module);
     }
 

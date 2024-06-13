@@ -1,7 +1,12 @@
 import { Setting } from "../../Setting";
-import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
+import { ChangeEvent, InputElement } from "../../SettingBox";
 import { NumberSettingBox } from "./NumberSettingBox";
 
+/**
+ *  Range setting UI. Will render as a slider.
+ * 
+ *  @author aarontburn 
+ */
 export class RangeSettingBox extends NumberSettingBox {
 
     private min: number = 0;
@@ -13,6 +18,7 @@ export class RangeSettingBox extends NumberSettingBox {
     }
 
     public createRight(): string {
+
         return `
             <div class="right-component">
                 <div style="display: flex; flex-wrap: wrap">
@@ -23,7 +29,7 @@ export class RangeSettingBox extends NumberSettingBox {
                 <input type="range" 
                     style='width: 500px;'
                     min="${this.min}" max="${this.max}" step='${this.step}' 
-                    id="${this.getSetting().getId()}_slider" value='${this.getSetting().getValue()}'>
+                    id="${this.getSetting().getID()}_slider" value='${this.getSetting().getValue()}'>
             </div>
         `;
     }
@@ -43,15 +49,15 @@ export class RangeSettingBox extends NumberSettingBox {
 
     public getInputIdAndType(): InputElement[] {
         return [
-            { id: this.getSetting().getId(), inputType: 'number' },
-            { id: this.getSetting().getId() + "_slider", inputType: "range" }
+            { id: this.getSetting().getID(), inputType: 'number' },
+            { id: this.getSetting().getID() + "_slider", inputType: "range" }
         ];
     }
 
     public onChange(newValue: any): ChangeEvent[] {
         return [
-            { id: this.getSetting().getId(), attribute: 'value', value: newValue },
-            { id: this.getSetting().getId() + "_slider", attribute: 'value', value: newValue }
+            { id: this.getSetting().getID(), attribute: 'value', value: newValue },
+            { id: this.getSetting().getID() + "_slider", attribute: 'value', value: newValue }
         ];
     }
 

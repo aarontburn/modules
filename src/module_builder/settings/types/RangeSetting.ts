@@ -1,17 +1,18 @@
 import { Process } from "../../Process";
 import { SettingBox } from "../../SettingBox";
 import { RangeSettingBox } from "../ui_components/RangeSettingBox";
-import { NumericSetting } from "./NumericSetting";
+import { NumberSetting } from "./NumberSetting";
 
 /**
- *  Similar to the functionalities of the @see NumericSetting, this will render as a 
+ *  Similar to the functionalities of the @see NumberSetting, this will render as a 
  *      slider.
  * 
  *  The default range is [0, 100], and the default step is 1. 
  * 
  *  @author aarontburn
  */
-export class RangeSetting extends NumericSetting {
+export class RangeSetting extends NumberSetting {
+
     private readonly defaultMin: number = 0;
     private readonly defaultMax: number = 100;
     private step: number = 1;
@@ -35,13 +36,13 @@ export class RangeSetting extends NumericSetting {
     public setRange(min: number, max: number): RangeSetting {
         super.setRange(min, max);
 
-        super.reinitUI();
+        super.reInitUI();
         return this;
     }
 
     public setStep(step: number): RangeSetting {
         this.step = step;
-        super.reinitUI()
+        super.reInitUI()
         return this;
     }
 

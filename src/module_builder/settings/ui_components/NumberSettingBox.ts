@@ -1,5 +1,5 @@
 import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
-import { NumericSetting } from "../types/NumericSetting";
+import { NumberSetting } from "../types/NumberSetting";
 
 
 /**
@@ -10,14 +10,25 @@ import { NumericSetting } from "../types/NumericSetting";
 export class NumberSettingBox extends SettingBox<number> {
 
     public createLeft(): string {
-        const range: { min: number, max: number } = (this.getSetting() as NumericSetting).getRange();
+        const range: { min: number, max: number } = (this.getSetting() as NumberSetting).getRange();
+
+        let rangeText: string;
+        if (range !== undefined) {
+            if (range.min === undefined && range.max !== undefined) {
+                rangeText = '≤ ' + range.max
+            } else if (range.min !== undefined && range.max === undefined) {
+                rangeText = '≥ ' + range.min
+            } else if (range.min !== undefined && range.max !== undefined) {
+                rangeText = `${range.min} - ${range.max}`
+            }
+        }
 
         return `
             <div class="left-component">
                 <input type="number" style="width: 110px; text-align: center;"
-                    id="${this.getSetting().getId()}" value='${this.getSetting().getValue()}'>
-                ${range !== undefined
-                ? `<p>(${range.min} - ${range.max})</p>`
+                    id="${this.getSetting().getID()}" value='${this.getSetting().getValue()}'>
+                ${rangeText !== undefined
+                ? `<p>${rangeText}</p>`
                 : ''
             }
             </div>
@@ -25,11 +36,11 @@ export class NumberSettingBox extends SettingBox<number> {
     }
 
     public getInputIdAndType(): InputElement[] {
-        return [{ id: this.getSetting().getId(), inputType: 'number' }];
+        return [{ id: this.getSetting().getID(), inputType: 'number' }];
     }
 
     public onChange(newValue: any): ChangeEvent[] {
-        return [{ id: this.getSetting().getId(), attribute: 'value', value: newValue }];
+        return [{ id: this.getSetting().getID(), attribute: 'value', value: newValue }];
     }
 
 

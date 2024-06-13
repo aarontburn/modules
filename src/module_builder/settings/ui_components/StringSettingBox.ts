@@ -17,17 +17,17 @@ export class StringSettingBox extends SettingBox<string> {
                 </div>
 
                 <input type="text" style="width: 500px; box-sizing: border-box; padding-left: 15px; margin-top: 5px;" 
-                    value="${this.getSetting().getValue()}" id="${this.getSetting().getId()}">
+                    value="${this.getSetting().getValue()}" id="${this.getSetting().getID()}">
             </div>
         `;
     }
 
     public getInputIdAndType(): InputElement[] {
-        return [{ id: this.getSetting().getId(), inputType: 'text' }];
+        return [{ id: this.getSetting().getID(), inputType: 'text' }];
     }
 
     public onChange(newValue: any): ChangeEvent[] {
-        return [{ id: this.getSetting().getId(), attribute: 'value', value: newValue }];
+        return [{ id: this.getSetting().getID(), attribute: 'value', value: newValue }];
     }
 
 

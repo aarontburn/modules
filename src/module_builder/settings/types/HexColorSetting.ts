@@ -10,17 +10,17 @@ import { ColorSettingBox } from "../ui_components/ColorSettingBox";
  */
 export class HexColorSetting extends Setting<string> {
 
-    public constructor(theModule: Process) {
-        super(theModule);
+    public constructor(module: Process) {
+        super(module);
     }
 
 
-    public validateInput(theInput: any): string | null {
-        if (theInput == null) {
+    public validateInput(input: any): string | null {
+        if (input == null) {
             return null;
         }
 
-        const s: string = theInput.toString();
+        const s: string = input.toString();
         return s.match("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$") ? s : null;
 
     }

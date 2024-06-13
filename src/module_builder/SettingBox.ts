@@ -34,14 +34,27 @@ export interface ChangeEvent {
  * 
  *      @see InputElement
  *      This function needs to return an array of InputElement objects.
- *          @param id: The ID of the input element
+ *          @param id: The ID of the input element.
  *          @param inputType: The input type of the input element (e.g. 'text', 'checkbox', 'number', etc.)
+ *          @param returnValue: An optional parameter to indicate a fixed return value. If the setting is
+ *              modified, this value will be sent back to the process.
  * 
- *      Rules:
- *      a: Use 'this.getSetting().getId() + <IDENTIFIER>' to ensure unique identifiers. 
+ *      Use 'this.getSetting().getId() + <IDENTIFIER>' to ensure unique identifiers. 
  * 
  * 3. @see onChange(newValue):
+ *      When the setting is modified from the process, it will pass the new value
+ *          through the {@link onChange} function. This function is to correctly map
+ *          what should change in the renderer.
+ * 
+ *      For example, the ColorSettingBox has two input elements: a text input, and
+ *          a color selector. When the color is modified in the process, it needs to 
+ *          modify both the color selector and the text input to reflect this change.
+ * 
  *      @see ChangeEvent
+ *      This function needs to return an array of ChangeEvent objects.
+ *          @param id: The ID of the input element.
+ *          @param attribute: The attribute to modify.
+ *          @param value: The value to set the attribute to.
  *      
  * 
  */
@@ -54,7 +67,7 @@ export abstract class SettingBox<T> {
 
     public constructor(theSetting: Setting<T>) {
         this.setting = theSetting;
-        this.resetID = 'reset-button_' + this.setting.getId()
+        this.resetID = 'reset-button_' + this.setting.getID()
     }
 
     public getUI(): string {
@@ -76,7 +89,7 @@ export abstract class SettingBox<T> {
     public createLeft(): string {
         return `
             <div class="left-component" style="display: inline-block;">
-                <input id="${this.setting.getId()}" type="text" value='${this.setting.getValue()}'>
+                <input id="${this.setting.getID()}" type="text" value='${this.setting.getValue()}'>
             </div>
         `;
     }
@@ -111,7 +124,7 @@ export abstract class SettingBox<T> {
      */
     public getInputIdAndType(): InputElement[] {
         return [
-            { id: this.setting.getId(), inputType: "text" }
+            { id: this.setting.getID(), inputType: "text" }
         ];
     }
 
@@ -124,7 +137,7 @@ export abstract class SettingBox<T> {
      */
     public onChange(newValue: any): ChangeEvent[] {
         return [
-            { id: this.setting.getId(), attribute: 'value', value: newValue }
+            { id: this.setting.getID(), attribute: 'value', value: newValue }
         ]
     }
 

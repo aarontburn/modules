@@ -13,21 +13,21 @@ import { BooleanSettingBox } from "../ui_components/BooleanSettingBox";
  */
 export class BooleanSetting extends Setting<boolean> {
 
-    public constructor(theModule: Process) {
-        super(theModule);
+    public constructor(module: Process) {
+        super(module);
     }
 
 
-    public validateInput(theInput: any): boolean | null {
-        if (theInput == null) {
+    public validateInput(input: any): boolean | null {
+        if (input == null) {
             return null;
         }
 
-        if (typeof theInput == "boolean") {
-            return theInput;
+        if (typeof input == "boolean") {
+            return input;
         }
 
-        const s: string = theInput.toString().toLocaleLowerCase();
+        const s: string = input.toString().toLocaleLowerCase();
 
         if (s == "true") {
             return true;

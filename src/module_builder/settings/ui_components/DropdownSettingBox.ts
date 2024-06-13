@@ -3,14 +3,15 @@ import { InputElement, SettingBox } from "../../SettingBox";
 import { ChoiceSetting } from "../types/ChoiceSetting";
 
 
-
+/**
+ *  Alternative SettingBox to the radio buttons to hold choice input.
+ * 
+ *  @author aarontburn 
+ */
 export class DropdownSettingBox extends SettingBox<string> {
-
-    // private readonly optionsIDMap: Map<string, string> = new Map();
 
     public constructor(theSetting: Setting<string>) {
         super(theSetting)
-
     }
 
 
@@ -29,7 +30,7 @@ export class DropdownSettingBox extends SettingBox<string> {
                 </div>
 
                 <div class='select'>
-                    <select id=${this.getSetting().getId()}>
+                    <select id=${this.getSetting().getID()}>
                         ${this.getInputOptions()}
                     </select>
                 </div>
@@ -55,7 +56,7 @@ export class DropdownSettingBox extends SettingBox<string> {
 
 
     public getInputIdAndType(): InputElement[] {
-        return [{ id: this.getSetting().getId(), inputType: "select" }];
+        return [{ id: this.getSetting().getID(), inputType: "select" }];
     }
 
     public getStyle(): string {

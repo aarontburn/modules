@@ -65,6 +65,8 @@
     color: var(--off-white);
     height: 40px;
     accent-color: var(--accent-color);
+    transition: 0.2s;
+
 }
 
 input:focus {
@@ -82,14 +84,6 @@ input[type='range'] {
     height: 15px;
     width: 100%;
 }
-
-
-label {
-    margin-left: 10px;
-    margin-right: 25px;
-    font-size: 18px;
-}
-
 
 
 .setting h1 {
