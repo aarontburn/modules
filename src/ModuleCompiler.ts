@@ -19,9 +19,9 @@ export class ModuleCompiler {
 
 
 
-    public static async loadPluginsFromStorage(ipcCallback: IPCCallback): Promise<Process[]> {
+    public static async loadPluginsFromStorage(ipcCallback: IPCCallback, forceReload: boolean = false): Promise<Process[]> {
         await StorageHandler.createDirectories();
-        await this.compileAndCopy();
+        await this.compileAndCopy(forceReload);
 
         const externalModules: Process[] = [];
 
@@ -99,7 +99,7 @@ export class ModuleCompiler {
 
     }
 
-    private static async compileAndCopy() {
+    private static async compileAndCopy(forceReload: boolean = false) {
         try {
             const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IO_OPTIONS);
 
@@ -111,8 +111,8 @@ export class ModuleCompiler {
                 const builtDirectory: string = this.COMPILED_MODULES_PATH + folder.name;
                 const moduleFolderPath: string = `${folder.path}${folder.name}`;
 
-                const doCompileModule: boolean = !(await this.checkModuleInfo(moduleFolderPath, builtDirectory))
-                if (doCompileModule) {
+                const skipModuleCompile: boolean = !(await this.checkModuleInfo(moduleFolderPath, builtDirectory))
+                if (!forceReload && skipModuleCompile) {
                     console.log("Skipping compiling of " + folder.name + "; no changes detected.");
                     continue;
                 }

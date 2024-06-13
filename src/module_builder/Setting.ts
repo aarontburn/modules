@@ -4,10 +4,11 @@ import { SettingBox } from "./SettingBox";
 export abstract class Setting<T> {
 
     public readonly parentModule: Process;
-    public readonly settingId: string = this.generateRandomId()
+    public readonly settingId: string = this.generateRandomId();
 
     public settingName: string;
     public settingDescription: string;
+    public id: string;
 
     public inputValidator: (theInput: any) => T;
 
@@ -80,6 +81,17 @@ export abstract class Setting<T> {
         return this;
     }
 
+    public setID(theID: string): Setting<T> {
+        this.id = theID;
+        return this;
+    }
+
+    public getID(): string {
+        return this.id ? this.id : this.settingName;
+    }
+
+
+
     /**
      * Sets the default value of this setting. This is a required field.
      *
@@ -119,7 +131,7 @@ export abstract class Setting<T> {
      *
      * @return The name of this setting.
      */
-    public getSettingName(): string {
+    public getName(): string {
         return this.settingName;
     }
 

@@ -32,7 +32,7 @@ export class RadioSettingBox extends SettingBox<string> {
         const html: string = `
             <div class="right-component">
                 <div style="display: flex; flex-wrap: wrap">
-                    <h1><span id='${this.resetID}'>↩</span> ${this.getSetting().getSettingName()}</h1>
+                    <h1><span id='${this.resetID}'>↩</span> ${this.getSetting().getName()}</h1>
                     <p style="align-self: flex-end; padding-left: 24px;">${this.getSetting().getDescription()}</p>
                 </div>
 
@@ -50,7 +50,7 @@ export class RadioSettingBox extends SettingBox<string> {
 
         this.optionsIDMap.forEach((id: string, optionName: string) => {
             s += `
-                <input type="radio" id="${id}" name="${this.getSetting().getSettingName()}" 
+                <input type="radio" id="${id}" name="${this.getSetting().getName()}" 
                     value="${optionName}" ${setting.getValue() === optionName ? 'checked' : ''}>
 
                 <label for="${id}">${optionName}</label>

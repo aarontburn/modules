@@ -52,22 +52,29 @@ export class ModuleController implements IPCSource {
 
     private checkSettings(): void {
         for (const module of this.activeModules) {
-            const settingsMap: Map<string, any> = StorageHandler.readSettingsFromModuleStorage(module);
-
-            const moduleSettings: ModuleSettings = module.getSettings();
-            settingsMap.forEach((settingValue: any, settingName: string) => {
-                const setting: Setting<unknown> = moduleSettings.getSettingByName(settingName);
-                if (setting === undefined) {
-                    console.log("WARNING: Invalid setting name: '" + settingName + "' found.");
-                } else {
-                    setting.setValue(settingValue);
-                }
-            });
-
-            StorageHandler.writeModuleSettingsToStorage(module);
-            this.settingsModule.addModuleSetting(module.getSettings());
+            if (module === this.settingsModule) {
+                continue
+            }
+            this.checkModuleSettings(module);
         }
 
+    }
+
+    private checkModuleSettings(module: Process) {
+        const settingsMap: Map<string, any> = StorageHandler.readSettingsFromModuleStorage(module);
+
+        const moduleSettings: ModuleSettings = module.getSettings();
+        settingsMap.forEach((settingValue: any, settingName: string) => {
+            const setting: Setting<unknown> = moduleSettings.getSetting(settingName);
+            if (setting === undefined) {
+                console.log("WARNING: Invalid setting name: '" + settingName + "' found.");
+            } else {
+                setting.setValue(settingValue);
+            }
+        });
+
+        StorageHandler.writeModuleSettingsToStorage(module);
+        this.settingsModule.addModuleSetting(module.getSettings());
     }
 
     private init(): void {
@@ -135,7 +142,21 @@ export class ModuleController implements IPCSource {
 
         this.addModule(new HomeProcess(ipcCallback));
         this.addModule(this.settingsModule);
-        await ModuleCompiler.loadPluginsFromStorage(ipcCallback)
+
+
+        this.checkModuleSettings(this.settingsModule);
+
+        const forceReload: boolean = this.settingsModule
+            .getSettings()
+            .getSetting("force_reload")
+            .getValue() as boolean;
+
+
+        console.log("Force Reload: " + forceReload)
+
+
+        await ModuleCompiler
+            .loadPluginsFromStorage(ipcCallback, forceReload)
             .then((modules: Process[]) => {
                 modules.forEach(module => {
                     this.addModule(module);

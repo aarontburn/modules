@@ -88,7 +88,7 @@ export abstract class SettingBox<T> {
     public createRight(): string {
         return `
             <div class="right-component" style="display: inline-block;">
-                <h1><span id='${this.resetID}'>↩</span> ${this.setting.getSettingName()}</h1>
+                <h1><span id='${this.resetID}'>↩</span> ${this.setting.getName()}</h1>
                 <p>${this.setting.getDescription()}</p>
             </div>
         `;

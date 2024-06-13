@@ -7,6 +7,7 @@ import { HexColorSetting } from "../../module_builder/settings/types/HexColorSet
 import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 import { shell } from 'electron';
+import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
 
 export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
@@ -35,23 +36,26 @@ export class SettingsProcess extends Process {
         return [
             new HexColorSetting(this)
                 .setName("Accent Color")
+                .setID("accent_color")
+                .setDescription("Changes the color of various elements.")
                 .setDefault("#2290B5"),
+                
+
+            new BooleanSetting(this)
+                .setName("Force Reload Modules at Launch")
+                .setDescription("Always recompile modules at launch. Will result in a slower boot.")
+                .setID("force_reload")
+                .setDefault(false),
         ];
     }
 
     public refreshSettings(): void {
-
-        this.notifyObservers("refresh-settings", this.getSettings().getSettingByName("Accent Color").getValue());
+        this.notifyObservers("refresh-settings", this.getSettings().getSetting("accent_color").getValue());
 
     }
 
     public initialize(): void {
         super.initialize();
-
-        // Swap settings so General settings is the first one to appear.
-        const temp: ModuleSettings = this.moduleSettingsList[0];
-        this.moduleSettingsList[0] = this.moduleSettingsList[1];
-        this.moduleSettingsList[1] = temp;
 
 
         const settings: any[] = [];

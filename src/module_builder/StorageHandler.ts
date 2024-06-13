@@ -29,7 +29,7 @@ export class StorageHandler {
         const settingMap: Map<string, any> = new Map();
 
         theModule.getSettings().getSettingsList().forEach((setting: Setting<unknown>) => {
-            settingMap.set(setting.getSettingName(), setting.getValue());
+            settingMap.set(setting.getName(), setting.getValue());
         })
 
         this.writeToModuleStorage(theModule, theModule.getSettingsFileName(), JSON.stringify(Object.fromEntries(settingMap)));
