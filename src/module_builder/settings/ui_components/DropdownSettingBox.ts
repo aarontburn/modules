@@ -80,7 +80,7 @@ export class DropdownSettingBox extends SettingBox<string> {
             .select {
                 position: relative;
                 display: flex;
-                width: 20em;
+                width: 500px;
                 height: 2.5em;
                 border-radius: .25em;
                 overflow: hidden;

@@ -20,4 +20,5 @@ export class StringSetting extends Setting<string> {
         return new StringSettingBox(this);
     }
 
+
 }
