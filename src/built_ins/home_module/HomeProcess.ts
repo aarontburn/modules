@@ -129,7 +129,24 @@ export class HomeProcess extends Process {
 				.setValidator((o) => {
 					const s: string = o.toString();
 					return s === "" || s.match("^(?!.*(\\d).*\\1)[1-4\\s]+$") ? s : null;
-				})
+				}),
+
+			new NumberSetting(this)
+				.useRangeSliderUI()
+				.setRange(3, 75)
+				.setStep(4)
+				.setName("New Slider")
+				.setDescription('New slider without an extra setting')
+				.setDefault(25),
+
+			new NumberSetting(this)
+				.useIncrementableUI()
+				.setRange(25, 100)
+				.setStep(5)
+				.setName("Increment Number")
+				.setDescription('New number without an extra setting')
+				.setDefault(25)
+			
 
 		];
 	}

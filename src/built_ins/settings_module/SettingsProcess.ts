@@ -8,6 +8,7 @@ import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
 import { shell } from 'electron';
 import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
+import { NumberSetting } from "../../module_builder/settings/types/NumberSetting";
 
 export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
@@ -39,18 +40,31 @@ export class SettingsProcess extends Process {
                 .setAccessID("accent_color")
                 .setDescription("Changes the color of various elements.")
                 .setDefault("#2290B5"),
-                
 
             new BooleanSetting(this)
                 .setName("Force Reload Modules at Launch")
                 .setDescription("Always recompile modules at launch. Will result in a slower boot.")
                 .setAccessID("force_reload")
                 .setDefault(false),
+
+            new NumberSetting(this)
+                .useIncrementableUI()
+                .setRange(25, 300)
+                .setStep(25)
+                .setName("Zoom Level")
+                .setDefault(100)
+                .setAccessID('zoom'),
+
+            
         ];
     }
 
     public refreshSettings(): void {
-        this.sendToRenderer("refresh-settings", this.getSettings().getSetting("accent_color").getValue());
+
+        this.sendToRenderer("refresh-settings", 
+            this.getSettings().getSetting("accent_color").getValue());
+
+        this.sendToRenderer('zoom-changed', this.getSettings().getSetting('zoom').getValue());
 
     }
 

@@ -47,10 +47,12 @@
                 for (const group of event) {
                     const element: any = document.getElementById(group.id);
                     element[group.attribute] = group.value
-
                 }
-
-
+                break;
+            }
+            case 'zoom-changed': {
+                const newZoom: number = data[0];
+                // webFrame.setZoomLevel(newZoom / 100)
                 break;
             }
             case "refresh-settings": {
@@ -119,7 +121,8 @@
         ['color', 'value'],
         ['date', 'value'],
         ['range', 'value'],
-        ['select', 'value']
+        ['select', 'value'],
+        ['click', 'value'], 
     ]);
 
     const keyBlacklist: string[] = [
@@ -215,6 +218,13 @@
                 const element: HTMLElement = document.getElementById(id);
 
                 switch (inputType) {
+                    case 'click': {
+                        element.addEventListener('click', () => {
+                            sendToProcess("setting-modified", id, returnValue ? returnValue : (element as any)[attribute]);
+                        })
+                        break;
+                    }
+
                     case 'number':
                     case 'text': {
                         element.addEventListener('keyup', (event: KeyboardEvent) => {

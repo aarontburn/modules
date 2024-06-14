@@ -37,6 +37,7 @@ export class ModuleController implements IPCSource {
         }
 
         this.ipc = ipcHandler;
+
     }
 
     public getIPCSource(): string {
@@ -98,6 +99,10 @@ export class ModuleController implements IPCSource {
                     this.swapLayouts(data[0]);
                     break;
                 }
+                case 'zoom-level': {
+
+                    break;
+                }
             }
         });
 
@@ -137,7 +142,6 @@ export class ModuleController implements IPCSource {
         });
         this.window.loadFile(path.join(__dirname, "./view/index.html"));
         IPCHandler.construct(this.window, this.ipc);
-
     }
 
     private async registerModules(): Promise<void> {

@@ -7,8 +7,14 @@ export interface IIPC {
         Electron.IpcRenderer
 }
 
+export interface WindowZoom {
+    setZoom: (zoomLevel: number) => void,
+    onZoomChanged: (callback: (event: any, zoomDirection: string) => void) => void
+}
+
 declare global {
     interface Window {
-        ipc: IIPC
+        ipc: IIPC,
+        zoom: WindowZoom
     }
 }
