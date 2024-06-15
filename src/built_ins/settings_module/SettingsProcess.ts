@@ -58,8 +58,6 @@ export class SettingsProcess extends Process {
                 .setDescription("Always recompile modules at launch. Will result in a slower boot.")
                 .setAccessID("force_reload")
                 .setDefault(false),
-
-
         ];
     }
 
@@ -110,7 +108,6 @@ export class SettingsProcess extends Process {
                         } else {
                             setting.setValue(newValue);
                         }
-                        console.log("Final setting value: " + setting.getValue())
                         setting.getParentModule().refreshSettings(setting);
                         const update: ChangeEvent[] = settingBox.onChange(setting.getValue());
                         StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
@@ -175,7 +172,6 @@ export class SettingsProcess extends Process {
             }
 
             case "setting-modified": {
-                console.log(data)
                 const elementId: string = data[0];
                 const elementValue: string = data[1];
                 this.onSettingChange(elementId, elementValue);

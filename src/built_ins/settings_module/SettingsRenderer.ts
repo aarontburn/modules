@@ -170,8 +170,10 @@
         tab.settings.forEach((settingInfo: any) => {
             if (typeof settingInfo === 'string') {
                 const headerHTML: string = `
-                    <p class='header'>${settingInfo}</p>
-                    <hr style='margin:0;' />
+                    <div class='section'>
+                        <p>${settingInfo}</p>
+                    </div>
+
                 `
                 settingsList.insertAdjacentHTML('beforeend', headerHTML);
                 return;
