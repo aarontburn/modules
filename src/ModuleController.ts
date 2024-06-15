@@ -101,10 +101,6 @@ export class ModuleController implements IPCSource {
                     this.swapVisibleModule(data[0]);
                     break;
                 }
-                case 'zoom-level': {
-
-                    break;
-                }
             }
         });
 
@@ -112,7 +108,7 @@ export class ModuleController implements IPCSource {
             console.log("Registering " + module.getIPCSource() + "-process");
             this.ipc.on(module.getIPCSource() + "-process", (_, eventType: string, data: any[]) => {
                 this.modulesByName.get(module.getName()).handleEvent(eventType, data);
-            })
+            });
         });
     }
 
@@ -126,7 +122,7 @@ export class ModuleController implements IPCSource {
 
         const module: Process = this.modulesByName.get(moduleName);
         if (module === this.currentDisplayedModule) {
-            return; // If the module is the same, dont swap
+            return; // If the module is the same, don't swap
         }
 
         this.currentDisplayedModule?.onGUIHidden()
@@ -167,7 +163,7 @@ export class ModuleController implements IPCSource {
             .getValue() as boolean;
 
 
-        console.log("Force Reload: " + forceReload)
+        console.log("Force Reload: " + forceReload);
 
 
         await ModuleCompiler
@@ -181,6 +177,28 @@ export class ModuleController implements IPCSource {
 
 
     private addModule(module: Process): void {
+        const map: Map<string, Process> = new Map();
+        for (const process of Array.from(this.modulesByName.values())) {
+            if (map.has(process.getIPCSource())) {
+                throw new Error("FATAL: Modules with duplicate IPC source names have been found. Source: " + process.getIPCSource());
+            }
+            map.set(process.getIPCSource(), process);
+        }
+
+        if (this.modulesByName.has(module.getName())) {
+            console.error("WARNING: Duplicate modules have been found with the name: " + module.getName());
+            console.error('Skipping the duplicate.');
+            return;
+        }
+
+        const existingIPCProcess: Process = map.get(module.getIPCSource());
+        if (existingIPCProcess !== undefined) {
+            console.error("WARNING: Modules with duplicate IPCSource names have been found.");
+            console.error(`IPC Source: ${module.getIPCSource()} | Registered Module: ${existingIPCProcess.getName()} | New Module: ${module.getName()}`);
+            return;
+        }
+
+
         this.modulesByName.set(module.getName(), module);
         this.activeModules.push(module);
     }

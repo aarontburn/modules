@@ -28,14 +28,11 @@ export class SettingsProcess extends Process {
         this.setModuleInfo({
             moduleName: "General",
             author: "aarontburn",
-            version: "1.0.0",
             description: "General settings.",
-            buildVersion: 1,
-            platforms: []
-        })
+        });
     }
 
-    public registerSettings(): (Setting<unknown> | string)[] {
+    public _registerSettings(): (Setting<unknown> | string)[] {
         return [
             "Display",
             new HexColorSetting(this)
@@ -61,20 +58,19 @@ export class SettingsProcess extends Process {
         ];
     }
 
+
     public refreshSettings(modifiedSetting?: Setting<unknown>): void {
         if (modifiedSetting?.getAccessID() === 'zoom') {
-            const zoom: number = modifiedSetting.getValue() as number
-            this.window.webContents.setZoomFactor(zoom / 100)
+            const zoom: number = modifiedSetting.getValue() as number;
+            this.window.webContents.setZoomFactor(zoom / 100);
+
+        } else if (modifiedSetting?.getAccessID() === 'accent_color') {
+            this.sendToRenderer("refresh-settings", modifiedSetting.getValue());
         }
-
-        this.sendToRenderer("refresh-settings",
-            this.getSettings().getSetting("accent_color").getValue());
-
     }
 
     public initialize(): void {
         super.initialize();
-
 
         const settings: any[] = [];
         for (const moduleSettings of this.moduleSettingsList) {
@@ -86,7 +82,7 @@ export class SettingsProcess extends Process {
             };
 
             settings.push(list);
-            moduleSettings.getModule().refreshSettings();
+            moduleSettings.getModule().refreshAllSettings();
         }
 
         // this.refreshSettings();

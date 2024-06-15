@@ -128,7 +128,7 @@ export class NumberSetting extends Setting<number> {
     }
 
 
-    public validateInput(input: any): number | null {
+    public _validateInput(input: any): number | null {
         let value: number;
 
         if (input === 'increase') {

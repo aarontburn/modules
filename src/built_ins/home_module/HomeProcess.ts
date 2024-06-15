@@ -83,7 +83,7 @@ export class HomeProcess extends Process {
 		}
 	}
 
-	public registerSettings(): (Setting<unknown> | string)[] {
+	public _registerSettings(): (Setting<unknown> | string)[] {
 		return [
 			'Date/Time',
 			new NumberSetting(this)

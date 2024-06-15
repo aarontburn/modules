@@ -20,7 +20,7 @@ export class ModuleCompiler {
 
 
     public static async loadPluginsFromStorage(ipcCallback: IPCCallback, forceReload: boolean = false): Promise<Process[]> {
-        await StorageHandler.createDirectories();
+        await StorageHandler._createDirectories();
         await this.compileAndCopy(forceReload);
 
         const externalModules: Process[] = [];
