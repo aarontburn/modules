@@ -10,13 +10,13 @@ export class IPCHandler {
     private constructor() {
     }
 
-    public static construct(theWindow: BrowserWindow, theIpc: Electron.IpcMain) {
-        this.ipc = theIpc;
-        this.window = theWindow;
+    public static construct(window: BrowserWindow, ipc: Electron.IpcMain) {
+        this.ipc = ipc;
+        this.window = window;
     }
 
     private static checkInit() {
-        if (this.ipc == undefined || this.window == undefined) {
+        if (this.ipc === undefined || this.window === undefined) {
             throw new Error("IPC and/or BrowserWindow are undefined.")
         }
     }
@@ -50,7 +50,7 @@ export class IPCHandler {
             eventType: string,
             data: object[]) => void): void {
 
-        this.checkInit()
+        this.checkInit();
         this.ipc.on(source, func);
     }
 

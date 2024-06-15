@@ -166,7 +166,7 @@ export abstract class Process implements IPCSource {
     /**
      *  Abstract function to register settings for this module.
      */
-    public abstract registerSettings(): Setting<unknown>[];
+    public abstract registerSettings(): (Setting<unknown> | string)[];
 
 
     /**
@@ -175,7 +175,7 @@ export abstract class Process implements IPCSource {
      * 
      *  For an example on how to use this, see {@link HomeProcess}
      */
-    public abstract refreshSettings(): void;
+    public abstract refreshSettings(modifiedSetting?: Setting<unknown>): void;
 
     /**
      *  @private

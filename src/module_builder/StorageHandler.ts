@@ -42,7 +42,7 @@ export class StorageHandler {
     public static writeModuleSettingsToStorage(module: Process): void {
         const settingMap: Map<string, any> = new Map();
 
-        module.getSettings().getSettingsList().forEach((setting: Setting<unknown>) => {
+        module.getSettings().getSettings().forEach((setting: Setting<unknown>) => {
             settingMap.set(setting.getName(), setting.getValue());
         })
 

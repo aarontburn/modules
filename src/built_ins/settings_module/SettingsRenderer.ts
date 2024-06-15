@@ -7,13 +7,13 @@
         buildVersion: number,
         platforms: string[]
     }
-    
+
     interface InputElement {
         id: string,
         inputType: string,
         returnValue?: any
     }
-    
+
     interface ChangeEvent {
         id: string,
         attribute: string,
@@ -48,11 +48,6 @@
                     const element: any = document.getElementById(group.id);
                     element[group.attribute] = group.value
                 }
-                break;
-            }
-            case 'zoom-changed': {
-                const newZoom: number = data[0];
-                // webFrame.setZoomLevel(newZoom / 100)
                 break;
             }
             case "refresh-settings": {
@@ -122,7 +117,7 @@
         ['date', 'value'],
         ['range', 'value'],
         ['select', 'value'],
-        ['click', 'value'], 
+        ['click', 'value'],
     ]);
 
     const keyBlacklist: string[] = [
@@ -150,11 +145,8 @@
                     inner.push(`<p><span>${toSentenceCase(key)}: </span><a href=${value}>${value}</a><p/>`);
                     continue;
                 }
-
-
                 inner.push(`<p><span>${toSentenceCase(key)}:</span> ${value}</p>`);
             }
-
             return inner.reduce((acc, html) => acc += html + "\n", '');
         }
 
@@ -176,6 +168,15 @@
         }
 
         tab.settings.forEach((settingInfo: any) => {
+            if (typeof settingInfo === 'string') {
+                const headerHTML: string = `
+                    <p class='header'>${settingInfo}</p>
+                    <hr style='margin:0;' />
+                `
+                settingsList.insertAdjacentHTML('beforeend', headerHTML);
+                return;
+            }
+
             const settingId: string = settingInfo.settingId;
             const inputTypeAndId: InputElement[] = settingInfo.inputTypeAndId;
             const html: string = settingInfo.ui;

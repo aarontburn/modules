@@ -6,7 +6,7 @@ import { ChangeEvent, InputElement, SettingBox } from "../../module_builder/Sett
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
-import { shell } from 'electron';
+import { BrowserWindow, shell } from 'electron';
 import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
 import { NumberSetting } from "../../module_builder/settings/types/NumberSetting";
 
@@ -15,12 +15,14 @@ export class SettingsProcess extends Process {
     private static HTML_PATH: string = path.join(__dirname, "./SettingsHTML.html");
 
     private moduleSettingsList: ModuleSettings[] = [];
+    private window: BrowserWindow;
 
-    public constructor(ipcCallback: IPCCallback) {
+    public constructor(ipcCallback: IPCCallback, window: BrowserWindow) {
         super(
             SettingsProcess.MODULE_NAME,
             SettingsProcess.HTML_PATH,
             ipcCallback);
+        this.window = window;
 
         this.getSettings().setName("General");
         this.setModuleInfo({
@@ -33,38 +35,42 @@ export class SettingsProcess extends Process {
         })
     }
 
-    public registerSettings(): Setting<unknown>[] {
+    public registerSettings(): (Setting<unknown> | string)[] {
         return [
+            "Display",
             new HexColorSetting(this)
                 .setName("Accent Color")
                 .setAccessID("accent_color")
                 .setDescription("Changes the color of various elements.")
                 .setDefault("#2290B5"),
 
+            new NumberSetting(this)
+                .useIncrementableUI()
+                .setRange(25, 300)
+                .setStep(10)
+                .setName("Zoom Level")
+                .setDefault(100)
+                .setAccessID('zoom'),
+
+            "Developer",
             new BooleanSetting(this)
                 .setName("Force Reload Modules at Launch")
                 .setDescription("Always recompile modules at launch. Will result in a slower boot.")
                 .setAccessID("force_reload")
                 .setDefault(false),
 
-            new NumberSetting(this)
-                .useIncrementableUI()
-                .setRange(25, 300)
-                .setStep(25)
-                .setName("Zoom Level")
-                .setDefault(100)
-                .setAccessID('zoom'),
 
-            
         ];
     }
 
-    public refreshSettings(): void {
+    public refreshSettings(modifiedSetting?: Setting<unknown>): void {
+        if (modifiedSetting?.getAccessID() === 'zoom') {
+            const zoom: number = modifiedSetting.getValue() as number
+            this.window.webContents.setZoomFactor(zoom / 100)
+        }
 
-        this.sendToRenderer("refresh-settings", 
+        this.sendToRenderer("refresh-settings",
             this.getSettings().getSetting("accent_color").getValue());
-
-        this.sendToRenderer('zoom-changed', this.getSettings().getSetting('zoom').getValue());
 
     }
 
@@ -75,21 +81,12 @@ export class SettingsProcess extends Process {
         const settings: any[] = [];
         for (const moduleSettings of this.moduleSettingsList) {
             const moduleName: string = moduleSettings.getName();
-            const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
 
-            const list: any = {
+            const list: { module: string, moduleInfo: any } = {
                 module: moduleName,
                 moduleInfo: moduleSettings.getModule().getModuleInfo(),
-                settings: []
             };
 
-            settingsList.forEach((setting: Setting<unknown>) => {
-                const settingInfo: any = {
-                    moduleInfo: setting.parentModule.getModuleInfo(),
-                    settingId: setting.getID(),
-                };
-                list.settings.push(settingInfo);
-            });
             settings.push(list);
             moduleSettings.getModule().refreshSettings();
         }
@@ -101,7 +98,7 @@ export class SettingsProcess extends Process {
     // TODO: Restructure stuff 
     private onSettingChange(settingId: string, newValue?: any): void {
         for (const moduleSettings of this.moduleSettingsList) {
-            const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
+            const settingsList: Setting<unknown>[] = moduleSettings.getSettings();
 
             settingsList.forEach((setting: Setting<unknown>) => {
                 const settingBox: SettingBox<unknown> = setting.getUIComponent();
@@ -114,7 +111,7 @@ export class SettingsProcess extends Process {
                             setting.setValue(newValue);
                         }
                         console.log("Final setting value: " + setting.getValue())
-                        setting.getParentModule().refreshSettings();
+                        setting.getParentModule().refreshSettings(setting);
                         const update: ChangeEvent[] = settingBox.onChange(setting.getValue());
                         StorageHandler.writeModuleSettingsToStorage(setting.getParentModule());
                         this.sendToRenderer("setting-modified", update);
@@ -144,14 +141,20 @@ export class SettingsProcess extends Process {
                         continue;
                     }
 
-                    const settingsList: Setting<unknown>[] = moduleSettings.getSettingsList();
+                    const settingsList: (Setting<unknown> | string)[] = moduleSettings.getSettingsAndHeaders();
                     const list: any = {
                         module: moduleName,
                         moduleInfo: moduleSettings.getModule().getModuleInfo(),
                         settings: []
                     };
 
-                    settingsList.forEach((setting: Setting<unknown>) => {
+                    settingsList.forEach((s: (Setting<unknown> | string)) => {
+                        if (typeof s === 'string') {
+                            list.settings.push(s);
+                            return;
+                        }
+
+                        const setting: Setting<unknown> = s as Setting<unknown>;
                         const settingBox: SettingBox<unknown> = setting.getUIComponent();
                         const settingInfo: any = {
                             settingId: setting.getID(),

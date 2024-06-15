@@ -22,8 +22,8 @@ export class ModuleController implements IPCSource {
     private readonly ipc: Electron.IpcMain;
     private readonly modulesByName: Map<string, Process> = new Map();
     private readonly activeModules: Process[] = [];
-    private readonly settingsModule: SettingsProcess = new SettingsProcess(ipcCallback);
 
+    private settingsModule: SettingsProcess;
     private window: BrowserWindow;
     private currentDisplayedModule: Process;
 
@@ -45,10 +45,12 @@ export class ModuleController implements IPCSource {
     }
 
     public start(): void {
+        this.createBrowserWindow();
+        this.settingsModule = new SettingsProcess(ipcCallback, this.window);
         this.registerModules().then(() => {
             this.checkSettings();
-            this.createAndShow();
             this.attachIPCHandler();
+            this.window.show();
         });
     }
 
@@ -80,12 +82,12 @@ export class ModuleController implements IPCSource {
     }
 
     private init(): void {
-        const map: Map<string, string> = new Map<string, string>();
+        const map: Map<string, string> = new Map();
         this.activeModules.forEach((module: Process) => {
             map.set(module.getName(), module.getHTMLPath());
         });
         ipcCallback.notifyRenderer(this, 'load-modules', map);
-        this.swapLayouts(HomeProcess.MODULE_NAME);
+        this.swapVisibleModule(HomeProcess.MODULE_NAME);
     }
 
     private attachIPCHandler(): void {
@@ -96,7 +98,7 @@ export class ModuleController implements IPCSource {
                     break;
                 }
                 case "swap-modules": {
-                    this.swapLayouts(data[0]);
+                    this.swapVisibleModule(data[0]);
                     break;
                 }
                 case 'zoom-level': {
@@ -120,8 +122,13 @@ export class ModuleController implements IPCSource {
         });
     }
 
-    private swapLayouts(moduleName: string): void {
+    private swapVisibleModule(moduleName: string): void {
+
         const module: Process = this.modulesByName.get(moduleName);
+        if (module === this.currentDisplayedModule) {
+            return; // If the module is the same, dont swap
+        }
+
         this.currentDisplayedModule?.onGUIHidden()
         module.onGUIShown();
         this.currentDisplayedModule = module;
@@ -129,8 +136,9 @@ export class ModuleController implements IPCSource {
     }
 
 
-    private createAndShow(): void {
+    private createBrowserWindow(): void {
         this.window = new BrowserWindow({
+            show: false,
             height: WINDOW_DIMENSION.height,
             width: WINDOW_DIMENSION.width,
             webPreferences: {
