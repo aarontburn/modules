@@ -5,6 +5,8 @@ import ts from 'typescript';
 import { IPCCallback } from './module_builder/IPCObjects';
 import { ModuleInfo, Process } from './module_builder/Process';
 import { StorageHandler } from './module_builder/StorageHandler';
+import * as yauzl from 'yauzl-promise';
+import { pipeline } from 'stream/promises';
 
 
 export class ModuleCompiler {
@@ -99,16 +101,50 @@ export class ModuleCompiler {
 
     }
 
-    private static async compileAndCopy(forceReload: boolean = false) {
-        try {
-            const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IO_OPTIONS);
+    private static TEMP_ARCHIVE_PATH = this.EXTERNAL_MODULES_PATH + '/temp/';
+    
+    private static async unarchive() {
+        const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IO_OPTIONS);
+        fs.rmSync(this.TEMP_ARCHIVE_PATH, { recursive: true, force: true });
+        await fs.promises.mkdir(this.TEMP_ARCHIVE_PATH, {recursive: true});
 
+        for (const folder of files) {
+            const unarchiveDirectory: string = this.TEMP_ARCHIVE_PATH + folder.name.substring(0, folder.name.length - 4);
+
+            if (folder.name.split(".").at(-1) === 'zip') {
+
+                const zip: yauzl.ZipFile = await yauzl.open(folder.path + folder.name);
+                await fs.promises.mkdir(unarchiveDirectory, { recursive: true });
+
+                try {
+                    for await (const entry of zip) {
+                        if (entry.filename.endsWith('/')) {
+                            await fs.promises.mkdir(`${unarchiveDirectory}/${entry.filename}`);
+                        } else {
+                            const readStream = await entry.openReadStream();
+                            const writeStream = fs.createWriteStream(`${unarchiveDirectory}/${entry.filename}`);
+                            await pipeline(readStream, writeStream);
+                        }
+                    }
+                } finally {
+                    await zip.close();
+                }
+            }
+        }
+    }
+
+    private static async compileAndCopy(forceReload: boolean = false) {
+        await this.unarchive();
+
+        try {
+            const files: fs.Dirent[] = await fs.promises.readdir(this.TEMP_ARCHIVE_PATH, this.IO_OPTIONS);
             for (const folder of files) {
+                const builtDirectory: string = this.COMPILED_MODULES_PATH + folder.name;
+
                 if (!folder.isDirectory()) {
                     continue;
                 }
 
-                const builtDirectory: string = this.COMPILED_MODULES_PATH + folder.name;
                 const moduleFolderPath: string = `${folder.path}${folder.name}`;
 
                 const skipModuleCompile: boolean = !(await this.checkModuleInfo(moduleFolderPath, builtDirectory))
@@ -160,6 +196,7 @@ export class ModuleCompiler {
             console.error("Error:", error);
         }
 
+        fs.rmSync(this.TEMP_ARCHIVE_PATH, { recursive: true, force: true });
     }
 
 
