@@ -32,7 +32,7 @@ export class SettingsProcess extends Process {
         });
     }
 
-    public _registerSettings(): (Setting<unknown> | string)[] {
+    public registerSettings(): (Setting<unknown> | string)[] {
         return [
             "Display",
             new HexColorSetting(this)

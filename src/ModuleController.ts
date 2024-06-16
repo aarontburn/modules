@@ -27,6 +27,9 @@ export class ModuleController implements IPCSource {
     private window: BrowserWindow;
     private currentDisplayedModule: Process;
 
+    private initReady: boolean = false;
+    private rendererReady: boolean = false;
+
     public static isDevelopmentMode(): boolean {
         return this.isDev;
     }
@@ -47,9 +50,16 @@ export class ModuleController implements IPCSource {
     public start(): void {
         this.createBrowserWindow();
         this.settingsModule = new SettingsProcess(ipcCallback, this.window);
+
+        this.attachIPCHandler();
         this.registerModules().then(() => {
+            if (this.rendererReady) {
+                this.init();
+            } else {
+                this.initReady = true;
+            }
+
             this.checkSettings();
-            this.attachIPCHandler();
             this.window.show();
         });
     }
@@ -57,7 +67,7 @@ export class ModuleController implements IPCSource {
     private checkSettings(): void {
         for (const module of this.activeModules) {
             if (module === this.settingsModule) {
-                continue
+                continue;
             }
             this.checkModuleSettings(module);
         }
@@ -88,13 +98,24 @@ export class ModuleController implements IPCSource {
         });
         ipcCallback.notifyRenderer(this, 'load-modules', map);
         this.swapVisibleModule(HomeProcess.MODULE_NAME);
+
+        this.activeModules.forEach((module: Process) => {
+            console.log("Registering " + module.getIPCSource() + "-process");
+            this.ipc.on(module.getIPCSource() + "-process", (_, eventType: string, data: any[]) => {
+                this.modulesByName.get(module.getName()).handleEvent(eventType, data);
+            });
+        });
     }
 
     private attachIPCHandler(): void {
         IPCHandler.createHandler(this, (_, eventType: string, data: any[]) => {
             switch (eventType) {
                 case "renderer-init": {
-                    this.init();
+                    if (this.initReady) {
+                        this.init();
+                    } else {
+                        this.rendererReady = true; 
+                    }
                     break;
                 }
                 case "swap-modules": {
@@ -102,13 +123,6 @@ export class ModuleController implements IPCSource {
                     break;
                 }
             }
-        });
-
-        this.activeModules.forEach((module: Process) => {
-            console.log("Registering " + module.getIPCSource() + "-process");
-            this.ipc.on(module.getIPCSource() + "-process", (_, eventType: string, data: any[]) => {
-                this.modulesByName.get(module.getName()).handleEvent(eventType, data);
-            });
         });
     }
 
@@ -119,7 +133,6 @@ export class ModuleController implements IPCSource {
     }
 
     private swapVisibleModule(moduleName: string): void {
-
         const module: Process = this.modulesByName.get(moduleName);
         if (module === this.currentDisplayedModule) {
             return; // If the module is the same, don't swap

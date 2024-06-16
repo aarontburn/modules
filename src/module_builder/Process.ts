@@ -89,7 +89,7 @@ export abstract class Process implements IPCSource {
         this._htmlPath = htmlPath;
         this._ipcCallback = ipcCallback;
 
-        this._moduleSettings.addSettings(this._registerSettings());
+        this._moduleSettings.addSettings(this.registerSettings());
     }
 
     /**
@@ -168,7 +168,7 @@ export abstract class Process implements IPCSource {
      * 
      *  This should not be called externally.
      */
-    public abstract _registerSettings(): (Setting<unknown> | string)[];
+    public abstract registerSettings(): (Setting<unknown> | string)[];
 
 
     /**
@@ -216,7 +216,7 @@ export abstract class Process implements IPCSource {
      *  Lifecycle function that is called before the application exits.
      */
     public stop(): void {
-        // Do nothing by default
+        // Do nothing by default.
     }
 
     /**
