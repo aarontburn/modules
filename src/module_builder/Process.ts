@@ -243,6 +243,7 @@ export abstract class Process implements IPCSource {
     public abstract handleEvent(eventType: string, data: any[]): void
 
 
+
     /**
      *  Send an event to the renderer.
      * 
