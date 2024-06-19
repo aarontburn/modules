@@ -1,14 +1,16 @@
 import { Setting } from "../../module_builder/Setting";
-import { Process, ModuleInfo } from "../../module_builder/Process";
+import { Process } from "../../module_builder/Process";
 import * as path from "path";
 import { ModuleSettings } from "../../module_builder/ModuleSettings";
 import { ChangeEvent, InputElement, SettingBox } from "../../module_builder/SettingBox";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../module_builder/StorageHandler";
 import { IPCCallback } from "../../module_builder/IPCObjects";
-import { BrowserWindow, shell } from 'electron';
+import { BrowserWindow, OpenDialogOptions, app, dialog, shell } from 'electron';
 import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
 import { NumberSetting } from "../../module_builder/settings/types/NumberSetting";
+import { ModuleCompiler } from "../../ModuleCompiler";
+
 
 export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
@@ -42,7 +44,6 @@ export class SettingsProcess extends Process {
                 .setDefault("#2290B5"),
 
             new NumberSetting(this)
-                .useIncrementableUI()
                 .setRange(25, 300)
                 .setStep(10)
                 .setName("Zoom Level")
@@ -116,11 +117,45 @@ export class SettingsProcess extends Process {
 
     }
 
+    private importModuleArchive() {
+        const options: OpenDialogOptions = {
+            properties: ['openFile'],
+            filters: [{ name: 'Module Archive File', extensions: ['zip', 'tar'] }]
+        };
+
+        dialog.showOpenDialog(options).then(async (response) => {
+            if (response.canceled) {
+                return;
+            }
+            const filePath: string = response.filePaths[0];
+            const successful: boolean = await ModuleCompiler.importPluginArchive(filePath);
+
+            if (successful) {
+                this.sendToRenderer('import-success');
+                console.log("Successfully copied " + filePath + ". Restart required.");
+            } else {
+                this.sendToRenderer('import-error');
+                console.log("Error copying " + filePath + ".");
+            }
+
+        });
+    }
+
 
     public handleEvent(eventType: string, data: any[]): void {
         switch (eventType) {
             case "settings-init": {
                 this.initialize();
+                break;
+            }
+
+            case 'import-module': {
+                this.importModuleArchive();
+                break;
+            }
+            case 'restart-now': {
+                app.relaunch();
+                app.exit(); 
                 break;
             }
 

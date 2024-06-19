@@ -10,7 +10,6 @@ import { pipeline } from 'stream/promises';
 
 
 export class ModuleCompiler {
-
     private static readonly PATH: string = app.getPath("home") + "/.modules/";
     private static readonly EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
     private static readonly COMPILED_MODULES_PATH: string = this.PATH + "/built/"
@@ -19,7 +18,16 @@ export class ModuleCompiler {
         withFileTypes: true
     }
 
-
+    public static async importPluginArchive(filePath: string): Promise<boolean> {
+        const folderName: string = filePath.split("\\").at(-1);
+        try {
+            await fs.promises.copyFile(filePath, `${this.EXTERNAL_MODULES_PATH}/${folderName}`);
+            return true;
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
+    }
 
     public static async loadPluginsFromStorage(ipcCallback: IPCCallback, forceReload: boolean = false): Promise<Process[]> {
         await StorageHandler._createDirectories();

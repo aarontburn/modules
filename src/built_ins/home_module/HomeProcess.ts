@@ -87,6 +87,7 @@ export class HomeProcess extends Process {
 		return [
 			'Date/Time',
 			new NumberSetting(this)
+				.setStep(5)
 				.setMin(0)
 				.setName("Full Date Font Size (1)")
 				.setDescription(
@@ -96,6 +97,7 @@ export class HomeProcess extends Process {
 				.setDefault(40.0),
 
 			new NumberSetting(this)
+				.setStep(5)
 				.setMin(0)
 				.setName("Abbreviated Date Font Size (2)")
 				.setDescription(
@@ -105,6 +107,7 @@ export class HomeProcess extends Process {
 				.setDefault(30.0),
 
 			new NumberSetting(this)
+				.setStep(5)
 				.setMin(0)
 				.setName("Standard Time Font Size (3)")
 				.setDescription(
@@ -114,6 +117,7 @@ export class HomeProcess extends Process {
 				.setDefault(90.0),
 
 			new NumberSetting(this)
+				.setStep(5)
 				.setMin(0)
 				.setName("Military Time Font Size (4)")
 				.setDescription(
@@ -131,24 +135,6 @@ export class HomeProcess extends Process {
 					const s: string = o.toString();
 					return s === "" || s.match("^(?!.*(\\d).*\\1)[1-4\\s]+$") ? s : null;
 				}),
-
-			new NumberSetting(this)
-				.useRangeSliderUI()
-				.setRange(3, 75)
-				.setStep(4)
-				.setName("New Slider")
-				.setDescription('New slider without an extra setting')
-				.setDefault(25),
-
-			new NumberSetting(this)
-				.useIncrementableUI()
-				.setRange(25, 100)
-				.setStep(5)
-				.setName("Increment Number")
-				.setDescription('New number without an extra setting')
-				.setDefault(25)
-			
-
 		];
 	}
 

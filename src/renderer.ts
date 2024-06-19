@@ -2,7 +2,6 @@
     const PROCESS: string = "main-process";
     const RENDERER: string = "main-renderer";
 
-    console.log("initializing renderer")
     window.ipc.send(PROCESS, "renderer-init"); // let main know that renderer is booted
 
     const IFRAME_DEFAULT_STYLE: string = "height: 100%; width: 100%;";
