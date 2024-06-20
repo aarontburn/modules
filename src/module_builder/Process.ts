@@ -77,6 +77,8 @@ export abstract class Process implements IPCSource {
      */
     public _htmlPath: string;
 
+    public _moduleID: string;
+
     /**
      *  Entry point.
      * 
@@ -84,7 +86,8 @@ export abstract class Process implements IPCSource {
      *  @param htmlPath     The path to the HTML frontend.
      *  @param ipcCallback  The IPC callback function.
      */
-    public constructor(moduleName: string, htmlPath: string, ipcCallback: IPCCallback) {
+    public constructor(moduleID: string, moduleName: string, htmlPath: string, ipcCallback: IPCCallback) {
+        this._moduleID = moduleID;
         this._moduleName = moduleName;
         this._htmlPath = htmlPath;
         this._ipcCallback = ipcCallback;
@@ -97,9 +100,8 @@ export abstract class Process implements IPCSource {
      *      returns the name of the module, in lowercase. 
      */
     public getIPCSource(): string {
-        return this._moduleName.toLowerCase();
+        return this._moduleID.toLowerCase();
     }
-
 
     /**
      *  @returns the name of the module.

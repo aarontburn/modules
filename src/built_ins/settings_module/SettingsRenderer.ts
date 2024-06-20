@@ -20,15 +20,12 @@
         value: any
     }
 
-    const MODULE_NAME = "Settings"
-    const MODULE_PROCESS_NAME = MODULE_NAME.toLowerCase() + "-process";
-    const MODULE_RENDERER_NAME = MODULE_NAME.toLowerCase() + "-renderer"
+    const MODULE_ID = "built_ins.settings";
     const sendToProcess = (eventType: string, ...data: any): void => {
-        window.parent.ipc.send(MODULE_PROCESS_NAME.toLowerCase(), eventType, ...data);
+        window.parent.ipc.send(MODULE_ID.toLowerCase(), eventType, ...data);
     }
 
     sendToProcess("settings-init");
-
 
     let currentlySelectedTab: HTMLElement = undefined;
 
@@ -41,9 +38,10 @@
     });
 
 
-    window.parent.ipc.on(MODULE_RENDERER_NAME, (_, eventType: string, ...data: any[]) => {
+    window.parent.ipc.on(MODULE_ID, (_, eventType: string, ...data: any[]) => {
         switch (eventType) {
             case "populate-settings-list": {
+                console.log(data)
                 populateSettings(data[0]);
                 break;
             }

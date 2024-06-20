@@ -4,12 +4,12 @@ import { NumberSetting } from "../../module_builder/settings/types/NumberSetting
 import { StringSetting } from "../../module_builder/settings/types/StringSetting";
 import * as path from "path";
 import { IPCCallback } from "../../module_builder/IPCObjects";
-import { ChoiceSetting } from "../../module_builder/settings/types/ChoiceSetting";
 
 
 
 export class HomeProcess extends Process {
 	public static MODULE_NAME: string = "Home";
+	public static MODULE_ID: string = 'built_ins.home';
 
 	private static HTML_PATH: string = path.join(__dirname, "./HomeHTML.html");
 
@@ -31,6 +31,7 @@ export class HomeProcess extends Process {
 
 	public constructor(ipcCallback: IPCCallback) {
 		super(
+			HomeProcess.MODULE_ID,
 			HomeProcess.MODULE_NAME,
 			HomeProcess.HTML_PATH,
 			ipcCallback);
@@ -60,12 +61,12 @@ export class HomeProcess extends Process {
 		clearTimeout(this.clockTimeout);
 	}
 
-	private createSpan(text: string) {
+	private createSpan(text: string): string {
 		return `<span style='color: var(--accent-color)'>${text}</span>`;
 	}
 
 	public updateDateAndTime(repeat: boolean): void {
-		this.requestExternal('settings', 'test').then(console.log)
+		// this.requestExternal('built_ins.settings', 'test').then(console.log)
 
 		const date: Date = new Date();
 		const standardTime: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.STANDARD_TIME_FORMAT);

@@ -17,8 +17,7 @@ export class ModuleController implements IPCSource {
     private static isDev = false;
 
     private readonly ipc: Electron.IpcMain;
-    private readonly modulesByName: Map<string, Process> = new Map();
-    private readonly activeModules: Process[] = [];
+    private readonly modulesByIPCSource: Map<string, Process> = new Map();
 
     private settingsModule: SettingsProcess;
     private window: BrowserWindow;
@@ -28,7 +27,7 @@ export class ModuleController implements IPCSource {
     private rendererReady: boolean = false;
 
     private ipcCallback: IPCCallback;
-    
+
 
     public static isDevelopmentMode(): boolean {
         return this.isDev;
@@ -43,14 +42,14 @@ export class ModuleController implements IPCSource {
     }
 
     public getIPCSource(): string {
-        return "main";
+        return "built_ins.main";
     }
 
     public start(): void {
         this.createBrowserWindow();
         this.settingsModule = new SettingsProcess(this.ipcCallback, this.window);
 
-        this.attachIPCHandler();
+        this.handleMainEvents();
         this.registerModules().then(() => {
             if (this.rendererReady) {
                 this.init();
@@ -64,12 +63,12 @@ export class ModuleController implements IPCSource {
     }
 
     private checkSettings(): void {
-        for (const module of this.activeModules) {
+        this.modulesByIPCSource.forEach((module: Process, _) => {
             if (module === this.settingsModule) {
-                continue;
+                return;
             }
             this.checkModuleSettings(module);
-        }
+        });
 
     }
 
@@ -91,29 +90,26 @@ export class ModuleController implements IPCSource {
     }
 
     private init(): void {
-        const map: Map<string, string> = new Map();
-        this.activeModules.forEach((module: Process) => {
-            map.set(module.getName(), module.getHTMLPath());
+        const data: any[] = [];
+        this.modulesByIPCSource.forEach((module: Process, _) => {
+            data.push({
+                moduleName: module.getName(), 
+                moduleID: module.getIPCSource(),
+                htmlPath: module.getHTMLPath()
+            })
         });
-        this.ipcCallback.notifyRenderer(this, 'load-modules', map);
-        this.swapVisibleModule(HomeProcess.MODULE_NAME);
-
-        this.activeModules.forEach((module: Process) => {
-            console.log("Registering " + module.getIPCSource() + "-process");
-            this.ipc.on(module.getIPCSource() + "-process", (_, eventType: string, ...data: any[]) => {
-                this.modulesByName.get(module.getName()).handleEvent(eventType, ...data);
-            });
-        });
+        this.ipcCallback.notifyRenderer(this, 'load-modules', data);
+        this.swapVisibleModule(HomeProcess.MODULE_ID);
     }
 
-    private attachIPCHandler(): void {
-        this.ipc.on(this.getIPCSource() + "-process", (_, eventType: string, data: any[]) => {
+    private handleMainEvents(): void {
+        this.ipc.on(this.getIPCSource(), (_, eventType: string, data: any[]) => {
             switch (eventType) {
                 case "renderer-init": {
                     if (this.initReady) {
                         this.init();
                     } else {
-                        this.rendererReady = true; 
+                        this.rendererReady = true;
                     }
                     break;
                 }
@@ -127,13 +123,13 @@ export class ModuleController implements IPCSource {
     }
 
     public stop(): void {
-        this.activeModules.forEach((module: Process) => {
+        this.modulesByIPCSource.forEach((module: Process, _) => {
             module.stop();
         });
     }
 
-    private swapVisibleModule(moduleName: string): void {
-        const module: Process = this.modulesByName.get(moduleName);
+    private swapVisibleModule(moduleID: string): void {
+        const module: Process = this.modulesByIPCSource.get(moduleID);
         if (module === this.currentDisplayedModule) {
             return; // If the module is the same, don't swap
         }
@@ -141,7 +137,7 @@ export class ModuleController implements IPCSource {
         this.currentDisplayedModule?.onGUIHidden()
         module.onGUIShown();
         this.currentDisplayedModule = module;
-        this.ipcCallback.notifyRenderer(this, 'swap-modules', moduleName);
+        this.ipcCallback.notifyRenderer(this, 'swap-modules', moduleID);
     }
 
 
@@ -162,21 +158,20 @@ export class ModuleController implements IPCSource {
 
         this.ipcCallback = {
             notifyRenderer: (target: IPCSource, eventType: string, ...data: any[]) => {
-                this.window.webContents.send(target.getIPCSource() + "-renderer", eventType, ...data);
+                this.window.webContents.send(target.getIPCSource(), eventType, ...data);
             },
             requestExternalModule: this.handleInterModuleCommunication.bind(this)
         }
     }
 
     private async handleInterModuleCommunication(target: string, eventType: string, ...data: any[]) {
-        const formattedTarget: string = target.toLowerCase().trim();
-        for (const module of this.activeModules) {
-            if (module.getIPCSource() === formattedTarget) {
-                const response = await module.handleExternal(eventType, data);
-                return response;
-            }
+        const targetModule: Process = this.modulesByIPCSource.get(target);
+        if (targetModule === undefined) {
+            // throw new Error("Could not find " + target);
+            return null
         }
-        throw new Error("Could not find " + target);
+        const response = await targetModule.handleExternal(eventType, data);
+        return response;
     }
 
     private async registerModules(): Promise<void> {
@@ -184,7 +179,6 @@ export class ModuleController implements IPCSource {
 
         this.addModule(new HomeProcess(this.ipcCallback));
         this.addModule(this.settingsModule);
-
 
         this.checkModuleSettings(this.settingsModule);
 
@@ -209,18 +203,6 @@ export class ModuleController implements IPCSource {
 
     private addModule(module: Process): void {
         const map: Map<string, Process> = new Map();
-        for (const process of Array.from(this.modulesByName.values())) {
-            if (map.has(process.getIPCSource())) {
-                throw new Error("FATAL: Modules with duplicate IPC source names have been found. Source: " + process.getIPCSource());
-            }
-            map.set(process.getIPCSource(), process);
-        }
-
-        if (this.modulesByName.has(module.getName())) {
-            console.error("WARNING: Duplicate modules have been found with the name: " + module.getName());
-            console.error('Skipping the duplicate.');
-            return;
-        }
 
         const existingIPCProcess: Process = map.get(module.getIPCSource());
         if (existingIPCProcess !== undefined) {
@@ -229,12 +211,13 @@ export class ModuleController implements IPCSource {
             return;
         }
 
+        console.log("Registering " + module.getIPCSource());
 
-        this.modulesByName.set(module.getName(), module);
-        this.activeModules.push(module);
+        this.modulesByIPCSource.set(module.getIPCSource(), module);
+
+        this.ipc.on(module.getIPCSource(), (_, eventType: string, ...data: any[]) => {
+            module.handleEvent(eventType, ...data);
+        });
     }
-
-
-
 
 }

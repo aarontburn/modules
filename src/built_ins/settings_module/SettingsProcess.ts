@@ -14,6 +14,8 @@ import { ModuleCompiler } from "../../ModuleCompiler";
 
 export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
+    public static MODULE_ID: string = 'built_ins.settings';
+
     private static HTML_PATH: string = path.join(__dirname, "./SettingsHTML.html");
 
     private moduleSettingsList: ModuleSettings[] = [];
@@ -21,6 +23,7 @@ export class SettingsProcess extends Process {
 
     public constructor(ipcCallback: IPCCallback, window: BrowserWindow) {
         super(
+            SettingsProcess.MODULE_ID,
             SettingsProcess.MODULE_NAME,
             SettingsProcess.HTML_PATH,
             ipcCallback);
@@ -61,11 +64,11 @@ export class SettingsProcess extends Process {
 
     public async handleExternal(eventType: string, ...data: any[]): Promise<any> {
         switch (eventType) {
-			case 'test': {
+            case 'test': {
                 return 'hello';
-				break;
-			}
-		}
+                break;
+            }
+        }
     }
 
 
@@ -164,7 +167,7 @@ export class SettingsProcess extends Process {
             }
             case 'restart-now': {
                 app.relaunch();
-                app.exit(); 
+                app.exit();
                 break;
             }
 
