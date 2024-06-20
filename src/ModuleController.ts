@@ -40,8 +40,6 @@ export class ModuleController implements IPCSource {
         }
 
         this.ipc = ipcHandler;
-
-
     }
 
     public getIPCSource(): string {
@@ -102,8 +100,8 @@ export class ModuleController implements IPCSource {
 
         this.activeModules.forEach((module: Process) => {
             console.log("Registering " + module.getIPCSource() + "-process");
-            this.ipc.on(module.getIPCSource() + "-process", (_, eventType: string, data: any[]) => {
-                this.modulesByName.get(module.getName()).handleEvent(eventType, data);
+            this.ipc.on(module.getIPCSource() + "-process", (_, eventType: string, ...data: any[]) => {
+                this.modulesByName.get(module.getName()).handleEvent(eventType, ...data);
             });
         });
     }
@@ -165,8 +163,20 @@ export class ModuleController implements IPCSource {
         this.ipcCallback = {
             notifyRenderer: (target: IPCSource, eventType: string, ...data: any[]) => {
                 this.window.webContents.send(target.getIPCSource() + "-renderer", eventType, ...data);
+            },
+            requestExternalModule: this.handleInterModuleCommunication.bind(this)
+        }
+    }
+
+    private async handleInterModuleCommunication(target: string, eventType: string, ...data: any[]) {
+        const formattedTarget: string = target.toLowerCase().trim();
+        for (const module of this.activeModules) {
+            if (module.getIPCSource() === formattedTarget) {
+                const response = await module.handleExternal(eventType, data);
+                return response;
             }
         }
+        throw new Error("Could not find " + target);
     }
 
     private async registerModules(): Promise<void> {

@@ -65,6 +65,8 @@ export class HomeProcess extends Process {
 	}
 
 	public updateDateAndTime(repeat: boolean): void {
+		this.requestExternal('settings', 'test').then(console.log)
+
 		const date: Date = new Date();
 		const standardTime: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.STANDARD_TIME_FORMAT);
 		const militaryTime: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.MILITARY_TIME_FORMAT);
@@ -141,6 +143,7 @@ export class HomeProcess extends Process {
 
 	private static DATE_TIME_IDS: string[] = ['full_date_fs', 'abbr_date_fs', 'standard_time_fs', 'military_time_fs'];	
 	
+
 	public refreshSettings(modifiedSetting?: Setting<unknown>): void {
 		if (HomeProcess.DATE_TIME_IDS.includes(modifiedSetting?.getAccessID())) {
 			const sizes: object = {

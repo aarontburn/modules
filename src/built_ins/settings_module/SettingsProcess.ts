@@ -59,6 +59,15 @@ export class SettingsProcess extends Process {
         ];
     }
 
+    public async handleExternal(eventType: string, ...data: any[]): Promise<any> {
+        switch (eventType) {
+			case 'test': {
+                return 'hello';
+				break;
+			}
+		}
+    }
+
 
     public refreshSettings(modifiedSetting?: Setting<unknown>): void {
         if (modifiedSetting?.getAccessID() === 'zoom') {
