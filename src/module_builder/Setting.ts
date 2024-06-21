@@ -10,7 +10,7 @@ export abstract class Setting<T> {
     public description: string;
     public accessID: string;
 
-    public inputValidator: (theInput: any) => T;
+    public inputValidator: (input: any) => T;
 
     public defaultValue: T;
     public currentValue: T;
@@ -244,7 +244,7 @@ export abstract class Setting<T> {
      *  @return itself.
      *  @throws {Error} if the input validator is already defined.
      */
-    public setValidator(inputValidator: (theInput: any) => T): Setting<T> {
+    public setValidator(inputValidator: (input: any) => T): Setting<T> {
         if (this.inputValidator !== undefined) {
             throw new Error("Cannot redefine input validator for " + this.name);
         }

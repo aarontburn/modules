@@ -64,8 +64,8 @@ export abstract class SettingBox<T> {
 
     public readonly setting: Setting<T>;
 
-    public constructor(theSetting: Setting<T>) {
-        this.setting = theSetting;
+    public constructor(setting: Setting<T>) {
+        this.setting = setting;
         this.resetID = 'reset-button_' + this.setting.getID()
     }
 

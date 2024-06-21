@@ -9,7 +9,7 @@ import { IPCCallback } from "../../module_builder/IPCObjects";
 
 export class HomeProcess extends Process {
 	public static MODULE_NAME: string = "Home";
-	public static MODULE_ID: string = 'built_ins.home';
+	public static MODULE_ID: string = 'built_ins.Home';
 
 	private static HTML_PATH: string = path.join(__dirname, "./HomeHTML.html");
 
@@ -66,8 +66,6 @@ export class HomeProcess extends Process {
 	}
 
 	public updateDateAndTime(repeat: boolean): void {
-		// this.requestExternal('built_ins.settings', 'test').then(console.log)
-
 		const date: Date = new Date();
 		const standardTime: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.STANDARD_TIME_FORMAT);
 		const militaryTime: string = date.toLocaleString(HomeProcess.LOCALE, HomeProcess.MILITARY_TIME_FORMAT);

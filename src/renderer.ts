@@ -1,10 +1,10 @@
 (() => {
-    const MODULE_ID = 'built_ins.main';
+    const MODULE_ID = 'built_ins.Main';
     const sendToProcess = (eventType: string, ...data: any): void => {
-        window.ipc.send(MODULE_ID.toLowerCase(), eventType, ...data);
+        window.ipc.send(MODULE_ID, eventType, ...data);
     }
 
-    sendToProcess("renderer-init"); // let main know that renderer is booted
+    sendToProcess("renderer-init");
 
     const IFRAME_DEFAULT_STYLE: string = "height: 100%; width: 100%;";
 

@@ -75,9 +75,15 @@ export abstract class Process implements IPCSource {
      * 
      *  The path to the HTML.
      */
-    public _htmlPath: string;
+    public readonly _htmlPath: string;
 
-    public _moduleID: string;
+    /**
+     *  @private
+     *  @see getIPCSource
+     * 
+     *  The ID of this module.
+     */
+    public readonly _moduleID: string;
 
     /**
      *  Entry point.
@@ -97,10 +103,10 @@ export abstract class Process implements IPCSource {
 
     /**
      *  @returns the name of the IPC source. By default,
-     *      returns the name of the module, in lowercase. 
+     *      returns the module ID. This should not be modified.
      */
     public getIPCSource(): string {
-        return this._moduleID.toLowerCase();
+        return this._moduleID;
     }
 
     /**
@@ -246,7 +252,6 @@ export abstract class Process implements IPCSource {
 
 
 
-
     /**
      *  Send an event to the renderer.
      * 
@@ -261,17 +266,16 @@ export abstract class Process implements IPCSource {
 
 
     
-    public async handleExternal(eventType: string, ...data: any[]): Promise<any> {
-        console.log(`[${this._moduleName}]: External module requested data.'`);
+    public async handleExternal(source: IPCSource, eventType: string, ...data: any[]): Promise<any> {
+        console.log(`[${this._moduleName}]: External module, '${source.getIPCSource()}' requested data.'`);
         console.log(`\tWith event type of: ${eventType}`);
         console.log(`\tAnd data:`);
         console.log(data);
         return null;
-        // callback(null);
     }
 
     public async requestExternal(target: string, eventType: string, ...data: any[]): Promise<any> {
-        return this._ipcCallback.requestExternalModule(target, eventType, data);
+        return this._ipcCallback.requestExternalModule(this, target, eventType, data);
     } 
 
 

@@ -20,9 +20,9 @@
         value: any
     }
 
-    const MODULE_ID = "built_ins.settings";
+    const MODULE_ID = "built_ins.Settings";
     const sendToProcess = (eventType: string, ...data: any): void => {
-        window.parent.ipc.send(MODULE_ID.toLowerCase(), eventType, ...data);
+        window.parent.ipc.send(MODULE_ID, eventType, ...data);
     }
 
     sendToProcess("settings-init");
@@ -154,7 +154,7 @@
                     continue;
                 }
 
-                if (key.toUpperCase() === "LINK") {
+                if (key.toLowerCase() === "link") {
                     inner.push(`<p><span>${toSentenceCase(key)}: </span><a href=${value}>${value}</a><p/>`);
                     continue;
                 }

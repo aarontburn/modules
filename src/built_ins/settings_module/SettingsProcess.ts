@@ -14,7 +14,7 @@ import { ModuleCompiler } from "../../ModuleCompiler";
 
 export class SettingsProcess extends Process {
     public static MODULE_NAME: string = "Settings";
-    public static MODULE_ID: string = 'built_ins.settings';
+    public static MODULE_ID: string = 'built_ins.Settings';
 
     private static HTML_PATH: string = path.join(__dirname, "./SettingsHTML.html");
 
@@ -61,16 +61,6 @@ export class SettingsProcess extends Process {
                 .setDefault(false),
         ];
     }
-
-    public async handleExternal(eventType: string, ...data: any[]): Promise<any> {
-        switch (eventType) {
-            case 'test': {
-                return 'hello';
-                break;
-            }
-        }
-    }
-
 
     public refreshSettings(modifiedSetting?: Setting<unknown>): void {
         if (modifiedSetting?.getAccessID() === 'zoom') {

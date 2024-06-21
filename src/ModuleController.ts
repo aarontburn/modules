@@ -42,7 +42,7 @@ export class ModuleController implements IPCSource {
     }
 
     public getIPCSource(): string {
-        return "built_ins.main";
+        return "built_ins.Main";
     }
 
     public start(): void {
@@ -134,7 +134,7 @@ export class ModuleController implements IPCSource {
             return; // If the module is the same, don't swap
         }
 
-        this.currentDisplayedModule?.onGUIHidden()
+        this.currentDisplayedModule?.onGUIHidden();
         module.onGUIShown();
         this.currentDisplayedModule = module;
         this.ipcCallback.notifyRenderer(this, 'swap-modules', moduleID);
@@ -160,17 +160,17 @@ export class ModuleController implements IPCSource {
             notifyRenderer: (target: IPCSource, eventType: string, ...data: any[]) => {
                 this.window.webContents.send(target.getIPCSource(), eventType, ...data);
             },
-            requestExternalModule: this.handleInterModuleCommunication.bind(this)
+            requestExternalModule: this.handleInterModuleCommunication.bind(this) // Not sure if the binding is required
         }
     }
 
-    private async handleInterModuleCommunication(target: string, eventType: string, ...data: any[]) {
-        const targetModule: Process = this.modulesByIPCSource.get(target);
+    private async handleInterModuleCommunication(source: IPCSource, targetModuleID: string, eventType: string, ...data: any[]) {
+        const targetModule: Process = this.modulesByIPCSource.get(targetModuleID);
         if (targetModule === undefined) {
-            // throw new Error("Could not find " + target);
-            return null
+            console.error(`Module '${source.getIPCSource()}' attempted to access '${targetModuleID}', but no such module exists.`);
+            return undefined;
         }
-        const response = await targetModule.handleExternal(eventType, data);
+        const response = await targetModule.handleExternal(source, eventType, data);
         return response;
     }
 
@@ -206,12 +206,12 @@ export class ModuleController implements IPCSource {
 
         const existingIPCProcess: Process = map.get(module.getIPCSource());
         if (existingIPCProcess !== undefined) {
-            console.error("WARNING: Modules with duplicate IPCSource names have been found.");
-            console.error(`IPC Source: ${module.getIPCSource()} | Registered Module: ${existingIPCProcess.getName()} | New Module: ${module.getName()}`);
+            console.error("WARNING: Modules with duplicate IDs have been found.");
+            console.error(`ID: ${module.getIPCSource()} | Registered Module: ${existingIPCProcess.getName()} | New Module: ${module.getName()}`);
             return;
         }
 
-        console.log("Registering " + module.getIPCSource());
+        console.log("\tRegistering " + module.getIPCSource());
 
         this.modulesByIPCSource.set(module.getIPCSource(), module);
 

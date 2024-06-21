@@ -1,8 +1,8 @@
 (() => {
-    const MODULE_ID: string = "built_ins.home";
+    const MODULE_ID: string = "built_ins.Home";
 
     const sendToProcess = (eventType: string, ...data: any): void => {
-        window.parent.ipc.send(MODULE_ID.toLowerCase(), eventType, ...data);
+        window.parent.ipc.send(MODULE_ID, eventType, ...data);
     }
 
     sendToProcess("init");
