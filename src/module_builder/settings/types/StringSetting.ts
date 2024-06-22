@@ -15,7 +15,7 @@ export class StringSetting extends Setting<string> {
     }
 
 
-    public _validateInput(input: any): string | null {
+    public validateInput(input: any): string | null {
         const s: string = input.toString();
         return s == "" ? null : s;
 

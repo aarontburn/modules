@@ -168,7 +168,7 @@ export class ModuleController implements IPCSource {
         const targetModule: Process = this.modulesByIPCSource.get(targetModuleID);
         if (targetModule === undefined) {
             console.error(`Module '${source.getIPCSource()}' attempted to access '${targetModuleID}', but no such module exists.`);
-            return undefined;
+            return new Error(`No module with ID of ${source.getIPCSource()} found.`);
         }
         const response = await targetModule.handleExternal(source, eventType, data);
         return response;

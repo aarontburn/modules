@@ -24,8 +24,6 @@ export class NumberSetting extends Setting<number> {
      */
     private max: number = undefined;
 
-
-
     private step: number = 1;
 
     private useSlider: boolean = false;
@@ -128,7 +126,7 @@ export class NumberSetting extends Setting<number> {
     }
 
 
-    public _validateInput(input: any): number | null {
+    public validateInput(input: any): number | null {
         let value: number;
 
         if (input === 'increase') {

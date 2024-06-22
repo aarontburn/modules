@@ -13,13 +13,13 @@ import { ModuleCompiler } from "../../ModuleCompiler";
 
 
 export class SettingsProcess extends Process {
-    public static MODULE_NAME: string = "Settings";
-    public static MODULE_ID: string = 'built_ins.Settings';
+    public static readonly MODULE_NAME: string = "Settings";
+    public static readonly MODULE_ID: string = 'built_ins.Settings';
 
-    private static HTML_PATH: string = path.join(__dirname, "./SettingsHTML.html");
+    private static readonly HTML_PATH: string = path.join(__dirname, "./SettingsHTML.html");
 
-    private moduleSettingsList: ModuleSettings[] = [];
-    private window: BrowserWindow;
+    private readonly moduleSettingsList: ModuleSettings[] = [];
+    private readonly window: BrowserWindow;
 
     public constructor(ipcCallback: IPCCallback, window: BrowserWindow) {
         super(
