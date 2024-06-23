@@ -10,7 +10,7 @@ import { pipeline } from 'stream/promises';
 
 
 export class ModuleCompiler {
-    private static readonly PATH: string = app.getPath("home") + "/.modules/";
+    private static readonly PATH: string = app.getPath("home") + !process.argv.includes('--dev') ? "/.modules/" : '/.modules_dev/';
     private static readonly EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
     private static readonly COMPILED_MODULES_PATH: string = this.PATH + "/built/"
     private static readonly IO_OPTIONS: { encoding: BufferEncoding, withFileTypes: true } = {
@@ -53,7 +53,7 @@ export class ModuleCompiler {
                         const module: any = require(subFile.path + "/" + subFile.name);
 
                         const m: Process = new module[Object.keys(module)[0]](ipcCallback);
-                        m.setModuleInfo(moduleInfo)
+                        m.setModuleInfo(moduleInfo);
                         externalModules.push(m);
                     }
                 }
@@ -65,7 +65,7 @@ export class ModuleCompiler {
             console.error(err);
         }
 
-        return externalModules
+        return externalModules;
     }
 
     private static async getModuleInfo(path: string): Promise<ModuleInfo | null | undefined> {
@@ -73,11 +73,11 @@ export class ModuleCompiler {
             return JSON.parse((await fs.promises.readFile(path)).toString());
         } catch (err) {
             if (err.code === 'ENOENT') { // File doesn't exist
-                return undefined
+                return undefined;
             }
             console.error(err);
         }
-        return null
+        return null;
     }
 
     private static async checkModuleInfo(externalPath: string, builtPath: string): Promise<boolean> {
@@ -102,10 +102,10 @@ export class ModuleCompiler {
 
         for (const [key, value] of Object.entries(moduleInfo)) {
             if (builtModuleInfo[key].toString() !== value.toString()) {
-                return true
+                return true;
             }
         }
-        return false
+        return false;
 
     }
 

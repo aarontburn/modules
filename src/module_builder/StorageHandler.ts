@@ -4,7 +4,7 @@ import { Process } from "./Process";
 import { Setting } from "./Setting";
 
 export class StorageHandler {
-    private static readonly PATH: string = app.getPath("home") + "/.modules/";
+    private static readonly PATH: string = app.getPath("home") + (!process.argv.includes('--dev') ? "/.modules/" : '/.modules_dev/');
     private static readonly STORAGE_PATH: string = this.PATH + "/storage/";
     private static readonly EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
     private static readonly COMPILED_MODULES_PATH: string = this.PATH + "/built/"
@@ -13,6 +13,7 @@ export class StorageHandler {
      *  Creates necessary directories. Should not be called by any module.
      */
     public static async _createDirectories(): Promise<void> {
+        await fs.promises.mkdir(this.PATH, { recursive: true })
         await fs.promises.mkdir(this.STORAGE_PATH, { recursive: true })
         await fs.promises.mkdir(this.EXTERNAL_MODULES_PATH, { recursive: true })
         await fs.promises.mkdir(this.COMPILED_MODULES_PATH, { recursive: true })
