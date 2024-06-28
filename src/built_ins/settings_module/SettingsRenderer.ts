@@ -37,6 +37,11 @@
         sendToProcess('import-module');
     });
 
+    const manageButton: HTMLElement = document.getElementById('manage-button');
+    manageButton.addEventListener('click', () => {
+        swapTabs('manage');
+    });
+
 
     window.parent.ipc.on(MODULE_ID, (_, eventType: string, ...data: any[]) => {
         switch (eventType) {
@@ -83,6 +88,7 @@
 
             case "swap-tab": {
                 swapTabs(data[0]);
+
                 break;
             }
         }
@@ -140,6 +146,26 @@
 
 
     function swapTabs(tab: any): void {
+        // Clear existing settings
+        const removeNodes: Node[] = [];
+        settingsList.childNodes.forEach((node: HTMLElement) => {
+            if (node.id !== 'manage-module') {
+                removeNodes.push(node);
+            } else {
+                node.hidden = true;
+            }
+        });
+
+        removeNodes.forEach((node) => {
+            settingsList.removeChild(node)
+        });
+
+        if (tab === 'manage') {
+            /* requestFromProcess('name').then(openManageScreen) */
+            openManageScreen();
+            return;
+        }
+
         function getModuleInfoHTML(moduleInfo: any): string {
             const toSentenceCase = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
             const inner: string[] = [];
@@ -163,11 +189,6 @@
             return inner.reduce((acc, html) => acc += html + "\n", '');
         }
 
-
-        // Clear existing settings
-        while (settingsList.firstChild) {
-            settingsList.removeChild(settingsList.firstChild);
-        }
 
         const moduleInfo: ModuleInfo = tab.moduleInfo;
 
@@ -284,6 +305,24 @@
         `
 
         settingsList.insertAdjacentHTML("beforeend", spacerHTML);
+    }
+
+    function openManageScreen(): void {
+        const screen: HTMLElement = document.getElementById("manage-module");
+        screen.hidden = false;
+
+        const html: string = `
+            <div class="installed-module">
+                <p>unbuilt-module.zip</p>
+
+                <div style="margin-right: auto;"></div>
+
+                <p style="color: red; margin-right: 30px">Remove</p>
+                <p style="margin-right: 5px;">Settings</p>
+            </div>
+        `;
+
+        screen.insertAdjacentHTML('beforeend', html);
     }
 
     function openRestartPopup(): void {

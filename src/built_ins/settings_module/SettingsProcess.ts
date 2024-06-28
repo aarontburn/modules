@@ -49,7 +49,7 @@ export class SettingsProcess extends Process {
             new NumberSetting(this)
                 .setRange(25, 300)
                 .setStep(10)
-                .setName("Zoom Level")
+                .setName("Zoom Level (%)")
                 .setDefault(100)
                 .setAccessID('zoom'),
 
