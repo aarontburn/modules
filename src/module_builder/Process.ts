@@ -251,14 +251,6 @@ export abstract class Process implements IPCSource {
     public abstract handleEvent(eventType: string, ...data: any[]): void | Promise<any>
 
 
-    // public /*abstract*/ handleInvocation(eventType: string, ...data: any[]): Promise<any> {
-    //     console.log("Invocation for " + this.getIPCSource())
-    //     console.log("\tWith eventType: " + eventType);
-
-    //     return null;
-    // }
-
-
     /**
      *  Send an event to the renderer.
      * 

@@ -49,7 +49,6 @@
         sendToProcess('manage-modules').then(data => {
             swapTabs('manage');
             openManageScreen(data);
-
         });
     });
 

@@ -13,10 +13,12 @@ export class StorageHandler {
      *  Creates necessary directories. Should not be called by any module.
      */
     public static async _createDirectories(): Promise<void> {
-        await fs.promises.mkdir(this.PATH, { recursive: true })
-        await fs.promises.mkdir(this.STORAGE_PATH, { recursive: true })
-        await fs.promises.mkdir(this.EXTERNAL_MODULES_PATH, { recursive: true })
-        await fs.promises.mkdir(this.COMPILED_MODULES_PATH, { recursive: true })
+        await Promise.all([
+            fs.promises.mkdir(this.PATH, { recursive: true }),
+            fs.promises.mkdir(this.STORAGE_PATH, { recursive: true }),
+            fs.promises.mkdir(this.EXTERNAL_MODULES_PATH, { recursive: true }),
+            fs.promises.mkdir(this.COMPILED_MODULES_PATH, { recursive: true })
+        ]);
     }
 
     /**

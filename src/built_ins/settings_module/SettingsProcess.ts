@@ -148,9 +148,9 @@ export class SettingsProcess extends Process {
         const out: any[] = [];
 
         files.forEach(file => {
-            const extention: string = path.extname(file.name);
+            const extension: string = path.extname(file.name);
 
-            if (extention === '.zip') {
+            if (extension === '.zip') {
                 out.push(file.name);
             }
         })
@@ -176,10 +176,11 @@ export class SettingsProcess extends Process {
                 const fileName: string = data[0];
 
                 const result = fs.promises.rm(`${StorageHandler.EXTERNAL_MODULES_PATH}/${fileName}`);
+                console.log("Removing " + fileName);
                 if (result === undefined) {
-                    
+                    return Promise.resolve(true);
                 }
-                break;
+                return Promise.resolve(false);
             }
 
             case 'restart-now': {

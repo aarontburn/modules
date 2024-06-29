@@ -80,7 +80,25 @@ export class ModuleCompiler {
         return null;
     }
 
+    /**
+     *  Checks if a module should be recompiled.
+     * 
+     *  @param externalPath 
+     *  @param builtPath 
+     *  @returns true if the module should be recompiled.
+     *  @returns false if the module should NOT be recompiled.
+     */
     private static async checkModuleInfo(externalPath: string, builtPath: string): Promise<boolean> {
+        const builtModuleInfo: any = await this.getModuleInfo(builtPath + "/moduleinfo.json");
+        if (!builtModuleInfo) {
+            if (builtModuleInfo === undefined) {
+                console.log(`WARNING: ${builtPath} does not contain 'moduleinfo.json'.`);
+            }
+            return true;
+        }
+
+
+
         const moduleInfo: any = await this.getModuleInfo(externalPath + "/moduleinfo.json");
 
         if (!moduleInfo) {
@@ -89,16 +107,6 @@ export class ModuleCompiler {
             }
             return true;
         }
-
-        const builtModuleInfo: any = await this.getModuleInfo(builtPath + "/moduleinfo.json");
-
-        if (!builtModuleInfo) {
-            if (builtModuleInfo === undefined) {
-                console.log(`WARNING: ${builtPath} does not contain 'moduleinfo.json'.`);
-            }
-            return true;
-        }
-
 
         for (const [key, value] of Object.entries(moduleInfo)) {
             if (builtModuleInfo[key].toString() !== value.toString()) {
@@ -110,11 +118,11 @@ export class ModuleCompiler {
     }
 
     private static TEMP_ARCHIVE_PATH = this.EXTERNAL_MODULES_PATH + '/temp/';
-    
+
     private static async unarchive() {
         const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IO_OPTIONS);
         fs.rmSync(this.TEMP_ARCHIVE_PATH, { recursive: true, force: true });
-        await fs.promises.mkdir(this.TEMP_ARCHIVE_PATH, {recursive: true});
+        await fs.promises.mkdir(this.TEMP_ARCHIVE_PATH, { recursive: true });
 
         for (const folder of files) {
             const unarchiveDirectory: string = this.TEMP_ARCHIVE_PATH + folder.name.substring(0, folder.name.length - 4);
@@ -144,6 +152,20 @@ export class ModuleCompiler {
     private static async compileAndCopy(forceReload: boolean = false) {
         await this.unarchive();
 
+        let [compiledModules, moduleArchives]: string[][] = await Promise.all([
+            fs.promises.readdir(this.COMPILED_MODULES_PATH),
+            fs.promises.readdir(this.EXTERNAL_MODULES_PATH)
+        ]);
+
+        moduleArchives = moduleArchives.map(file => file.split('.').at(-2)).filter(f => f !== undefined && f !== 'temp');
+
+        const foldersToRemove: string[] = moduleArchives.length === 0
+            ? compiledModules
+            : compiledModules.filter((value) => !moduleArchives.includes(value));
+
+        // remove folders
+
+
         try {
             const files: fs.Dirent[] = await fs.promises.readdir(this.TEMP_ARCHIVE_PATH, this.IO_OPTIONS);
             for (const folder of files) {
@@ -155,11 +177,15 @@ export class ModuleCompiler {
 
                 const moduleFolderPath: string = `${folder.path}${folder.name}`;
 
-                const skipModuleCompile: boolean = !(await this.checkModuleInfo(moduleFolderPath, builtDirectory))
-                if (!forceReload && skipModuleCompile) {
+                const skipCompile: boolean = !(await this.checkModuleInfo(moduleFolderPath, builtDirectory))
+
+                if (!forceReload && skipCompile) {
                     console.log("Skipping compiling of " + folder.name + "; no changes detected.");
                     continue;
                 }
+
+                console.log("Removing " + builtDirectory);
+                await fs.promises.rm(builtDirectory, { force: true, recursive: true });
 
                 const subFiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IO_OPTIONS);
 
