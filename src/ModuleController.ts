@@ -103,7 +103,7 @@ export class ModuleController implements IPCSource {
     }
 
     private handleMainEvents(): void {
-        this.ipc.on(this.getIPCSource(), (_, eventType: string, data: any[]) => {
+        this.ipc.handle(this.getIPCSource(), (_, eventType: string, data: any[]) => {
             switch (eventType) {
                 case "renderer-init": {
                     if (this.initReady) {
@@ -203,21 +203,26 @@ export class ModuleController implements IPCSource {
 
     private addModule(module: Process): void {
         const map: Map<string, Process> = new Map();
+        const moduleID: string = module.getIPCSource();
 
-        const existingIPCProcess: Process = map.get(module.getIPCSource());
+        const existingIPCProcess: Process = map.get(moduleID);
         if (existingIPCProcess !== undefined) {
             console.error("WARNING: Modules with duplicate IDs have been found.");
-            console.error(`ID: ${module.getIPCSource()} | Registered Module: ${existingIPCProcess.getName()} | New Module: ${module.getName()}`);
+            console.error(`ID: ${moduleID} | Registered Module: ${existingIPCProcess.getName()} | New Module: ${module.getName()}`);
             return;
         }
 
-        console.log("\tRegistering " + module.getIPCSource());
+        console.log("\tRegistering " + moduleID);
 
-        this.modulesByIPCSource.set(module.getIPCSource(), module);
+        this.modulesByIPCSource.set(moduleID, module);
 
-        this.ipc.on(module.getIPCSource(), (_, eventType: string, ...data: any[]) => {
-            module.handleEvent(eventType, ...data);
+        this.ipc.handle(moduleID, (_, eventType: string, ...data: any[]) => {
+            return module.handleEvent(eventType, ...data);
         });
+
+        // this.ipc.handle(module.getIPCSource(), (_, eventType: string, ...data: any[]) => {
+        //     return module.handleInvocation(eventType, data);
+        // }); 
     }
 
 }

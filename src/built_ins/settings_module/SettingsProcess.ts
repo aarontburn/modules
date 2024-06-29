@@ -1,6 +1,7 @@
 import { Setting } from "../../module_builder/Setting";
 import { Process } from "../../module_builder/Process";
 import * as path from "path";
+import * as fs from 'fs';
 import { ModuleSettings } from "../../module_builder/ModuleSettings";
 import { ChangeEvent, InputElement, SettingBox } from "../../module_builder/SettingBox";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
@@ -119,32 +120,46 @@ export class SettingsProcess extends Process {
 
     }
 
-    private importModuleArchive() {
+    private async importModuleArchive(): Promise<boolean> {
         const options: OpenDialogOptions = {
             properties: ['openFile'],
             filters: [{ name: 'Module Archive File', extensions: ['zip', 'tar'] }]
         };
 
-        dialog.showOpenDialog(options).then(async (response) => {
-            if (response.canceled) {
-                return;
-            }
-            const filePath: string = response.filePaths[0];
-            const successful: boolean = await ModuleCompiler.importPluginArchive(filePath);
+        const response = await dialog.showOpenDialog(options);
+        if (response.canceled) {
+            return undefined;
+        }
+        const filePath: string = response.filePaths[0];
+        const successful: boolean = await ModuleCompiler.importPluginArchive(filePath);
 
-            if (successful) {
-                this.sendToRenderer('import-success');
-                console.log("Successfully copied " + filePath + ". Restart required.");
-            } else {
-                this.sendToRenderer('import-error');
-                console.log("Error copying " + filePath + ".");
-            }
+        if (successful) {
+            console.log("Successfully copied " + filePath + ". Restart required.");
+            return true;
+        }
+        console.log("Error copying " + filePath + ".");
+        return false;
+    }
 
-        });
+    private async getImportedModules() {
+        const files: fs.Dirent[] = await fs.promises.readdir(StorageHandler.EXTERNAL_MODULES_PATH, { withFileTypes: true });
+        // const compiledFiles: fs.Dirent[] = await fs.promises.readdir(StorageHandler.COMPILED_MODULES_PATH, { withFileTypes: true });
+
+        const out: any[] = [];
+
+        files.forEach(file => {
+            const extention: string = path.extname(file.name);
+
+            if (extention === '.zip') {
+                out.push(file.name);
+            }
+        })
+
+        return out;
     }
 
 
-    public handleEvent(eventType: string, data: any[]): void {
+    public handleEvent(eventType: string, data: any[]): void | Promise<any> {
         switch (eventType) {
             case "settings-init": {
                 this.initialize();
@@ -152,9 +167,21 @@ export class SettingsProcess extends Process {
             }
 
             case 'import-module': {
-                this.importModuleArchive();
+                return this.importModuleArchive();
+            }
+            case 'manage-modules': {
+                return this.getImportedModules();
+            }
+            case 'remove-module': {
+                const fileName: string = data[0];
+
+                const result = fs.promises.rm(`${StorageHandler.EXTERNAL_MODULES_PATH}/${fileName}`);
+                if (result === undefined) {
+                    
+                }
                 break;
             }
+
             case 'restart-now': {
                 app.relaunch();
                 app.exit();
@@ -194,11 +221,7 @@ export class SettingsProcess extends Process {
                         };
                         list.settings.push(settingInfo);
                     });
-
-
-                    this.sendToRenderer('swap-tab', list);
-
-
+                    return list;
                 }
 
                 break;

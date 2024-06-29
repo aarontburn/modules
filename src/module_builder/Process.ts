@@ -248,8 +248,15 @@ export abstract class Process implements IPCSource {
      *  @param eventType The name of the event
      *  @param data The data sent from the renderer.
      */
-    public abstract handleEvent(eventType: string, ...data: any[]): void
+    public abstract handleEvent(eventType: string, ...data: any[]): void | Promise<any>
 
+
+    // public /*abstract*/ handleInvocation(eventType: string, ...data: any[]): Promise<any> {
+    //     console.log("Invocation for " + this.getIPCSource())
+    //     console.log("\tWith eventType: " + eventType);
+
+    //     return null;
+    // }
 
 
     /**
@@ -265,7 +272,8 @@ export abstract class Process implements IPCSource {
 
 
 
-    
+
+
     public async handleExternal(source: IPCSource, eventType: string, ...data: any[]): Promise<any> {
         console.log(`[${this._moduleName}]: External module, '${source.getIPCSource()}' requested data.'`);
         console.log(`\tWith event type of: ${eventType}`);
@@ -276,7 +284,7 @@ export abstract class Process implements IPCSource {
 
     public async requestExternal(target: string, eventType: string, ...data: any[]): Promise<any> {
         return this._ipcCallback.requestExternalModule(this, target, eventType, data);
-    } 
+    }
 
 
 }

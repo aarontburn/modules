@@ -21,8 +21,8 @@
     }
 
     const MODULE_ID = "built_ins.Settings";
-    const sendToProcess = (eventType: string, ...data: any): void => {
-        window.parent.ipc.send(MODULE_ID, eventType, ...data);
+    const sendToProcess = (eventType: string, ...data: any): Promise<any> => {
+        return window.parent.ipc.send(MODULE_ID, eventType, ...data);
     }
 
     sendToProcess("settings-init");
@@ -34,28 +34,30 @@
 
     const importButton: HTMLElement = document.getElementById('import-button');
     importButton.addEventListener('click', () => {
-        sendToProcess('import-module');
+        sendToProcess('import-module').then(successful => {
+            if (successful) {
+                openRestartPopup();
+            } else {
+                console.log("Error importing module.");
+            }
+
+        })
     });
 
     const manageButton: HTMLElement = document.getElementById('manage-button');
     manageButton.addEventListener('click', () => {
-        swapTabs('manage');
+        sendToProcess('manage-modules').then(data => {
+            swapTabs('manage');
+            openManageScreen(data);
+
+        });
     });
 
 
     window.parent.ipc.on(MODULE_ID, (_, eventType: string, ...data: any[]) => {
         switch (eventType) {
             case "populate-settings-list": {
-                console.log(data)
                 populateSettings(data[0]);
-                break;
-            }
-            case 'import-success': {
-                openRestartPopup();
-                break;
-            }
-            case 'import-error': {
-
                 break;
             }
             case "setting-modified": {
@@ -86,11 +88,6 @@
                 break;
             }
 
-            case "swap-tab": {
-                swapTabs(data[0]);
-
-                break;
-            }
         }
     });
 
@@ -111,7 +108,9 @@
                 currentlySelectedTab = groupElement;
                 currentlySelectedTab.setAttribute("style", "color: var(--accent-color);")
 
-                sendToProcess('swap-settings-tab', moduleName);
+                sendToProcess('swap-settings-tab', moduleName).then((data) => {
+                    swapTabs(data);
+                });
             });
 
             if (firstModule === undefined) {
@@ -161,8 +160,6 @@
         });
 
         if (tab === 'manage') {
-            /* requestFromProcess('name').then(openManageScreen) */
-            openManageScreen();
             return;
         }
 
@@ -307,22 +304,35 @@
         settingsList.insertAdjacentHTML("beforeend", spacerHTML);
     }
 
-    function openManageScreen(): void {
+    function openManageScreen(data: string[]): void {
         const screen: HTMLElement = document.getElementById("manage-module");
         screen.hidden = false;
 
-        const html: string = `
-            <div class="installed-module">
-                <p>unbuilt-module.zip</p>
+        data.forEach(fileName => {
+            const div: HTMLDivElement = document.createElement('div');
+            div.className = 'installed-module';
+            div.innerHTML = `
+                <p>${fileName}</p>
 
                 <div style="margin-right: auto;"></div>
 
-                <p style="color: red; margin-right: 30px">Remove</p>
-                <p style="margin-right: 5px;">Settings</p>
-            </div>
-        `;
+                <p class='remove-module-button' style="color: red; margin-right: 30px">Remove</p>
+                <p class='open-module-settings' style="margin-right: 5px;">Settings</p>
+            `;
 
-        screen.insertAdjacentHTML('beforeend', html);
+            div.querySelector('.remove-module-button').addEventListener('click', () => {
+                console.log('removing ' + fileName);
+                sendToProcess('remove-module', fileName);
+            });
+
+            div.querySelector('.open-module-settings').addEventListener('click', () => {
+                console.log('settings for ' + fileName);
+            });
+
+            screen.insertAdjacentElement('beforeend', div);
+        })
+
+
     }
 
     function openRestartPopup(): void {
