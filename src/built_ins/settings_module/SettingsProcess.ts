@@ -123,10 +123,10 @@ export class SettingsProcess extends Process {
     private async importModuleArchive(): Promise<boolean> {
         const options: OpenDialogOptions = {
             properties: ['openFile'],
-            filters: [{ name: 'Module Archive File', extensions: ['zip', 'tar'] }]
+            filters: [{ name: 'Module Archive File (.zip, .tar)', extensions: ['zip', 'tar'] }]
         };
 
-        const response = await dialog.showOpenDialog(options);
+        const response: Electron.OpenDialogReturnValue = await dialog.showOpenDialog(options);
         if (response.canceled) {
             return undefined;
         }
@@ -141,11 +141,11 @@ export class SettingsProcess extends Process {
         return false;
     }
 
-    private async getImportedModules() {
+    private async getImportedModules(): Promise<string[]> {
         const files: fs.Dirent[] = await fs.promises.readdir(StorageHandler.EXTERNAL_MODULES_PATH, { withFileTypes: true });
         // const compiledFiles: fs.Dirent[] = await fs.promises.readdir(StorageHandler.COMPILED_MODULES_PATH, { withFileTypes: true });
 
-        const out: any[] = [];
+        const out: string[] = [];
 
         files.forEach(file => {
             const extension: string = path.extname(file.name);
@@ -159,7 +159,7 @@ export class SettingsProcess extends Process {
     }
 
 
-    public handleEvent(eventType: string, data: any[]): void | Promise<any> {
+    public async handleEvent(eventType: string, data: any[]): Promise<any> {
         switch (eventType) {
             case "settings-init": {
                 this.initialize();
@@ -175,7 +175,7 @@ export class SettingsProcess extends Process {
             case 'remove-module': {
                 const fileName: string = data[0];
 
-                const result = fs.promises.rm(`${StorageHandler.EXTERNAL_MODULES_PATH}/${fileName}`);
+                const result = await fs.promises.rm(`${StorageHandler.EXTERNAL_MODULES_PATH}/${fileName}`);
                 console.log("Removing " + fileName);
                 if (result === undefined) {
                     return Promise.resolve(true);

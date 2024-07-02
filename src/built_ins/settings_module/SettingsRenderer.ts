@@ -303,9 +303,17 @@
         settingsList.insertAdjacentHTML("beforeend", spacerHTML);
     }
 
+
+    const screen: HTMLElement = document.getElementById("manage-module");
+    const list: HTMLElement = document.getElementById('installed-modules-list');
+
     function openManageScreen(data: string[]): void {
-        const screen: HTMLElement = document.getElementById("manage-module");
         screen.hidden = false;
+
+        // Clear list
+        while (list.firstChild) {
+            list.removeChild(list.lastChild);
+        }
 
         data.forEach(fileName => {
             const div: HTMLDivElement = document.createElement('div');
@@ -319,20 +327,78 @@
                 <p class='open-module-settings' style="margin-right: 5px;">Settings</p>
             `;
 
-            div.querySelector('.remove-module-button').addEventListener('click', () => {
-                console.log('removing ' + fileName);
-                sendToProcess('remove-module', fileName);
+
+            div.querySelector('.remove-module-button').addEventListener('click', async () => {
+                const proceed: boolean = await openConfirmModuleDeletionPopup();
+                if (proceed) {
+                    sendToProcess('remove-module', fileName).then(successful => {
+                        if (successful) {
+                            console.log('Removed ' + fileName);
+                        } else {
+                            console.log('Failed to remove ' + fileName);
+                        }
+
+                        sendToProcess('manage-modules').then(openManageScreen);
+                    });
+                }
             });
 
             div.querySelector('.open-module-settings').addEventListener('click', () => {
                 console.log('settings for ' + fileName);
             });
 
-            screen.insertAdjacentElement('beforeend', div);
+            list.insertAdjacentElement('beforeend', div);
         })
-
-
     }
+
+    async function openPopup(
+        html: string,
+        rejectID: string = 'dialog-cancel',
+        resolveID: string = 'dialog-proceed'): Promise<boolean> {
+
+        return new Promise((resolve) => {
+            const div: HTMLElement = document.createElement("div");
+            div.classList.add('overlay');
+            div.innerHTML = html;
+            document.body.prepend(div);
+
+            div.addEventListener('click', (event) => {
+                if ((event.target as HTMLElement).className.includes('overlay')) {
+                    div.remove();
+                    resolve(false);
+                }
+            });
+
+            div.querySelector(`#${rejectID}`)?.addEventListener('click', () => {
+                div.remove();
+                resolve(false);
+            });
+
+            div.querySelector(`#${resolveID}`)?.addEventListener('click', () => {
+                div.remove();
+                resolve(true);
+            });
+        });
+    }
+
+    function openConfirmModuleDeletionPopup(): Promise<boolean> {
+        const html: string = `
+            <div class='dialog'>
+                <h3 class='disable-highlight'>Are you sure you want to delete this module?</h3>
+                <h4>Your data will be saved.<h4/>
+                <h4 style="padding-top: 10px;" class='disable-highlight'>Proceed?</h4>
+
+                <div style="display: flex; justify-content: space-between; margin: 0px 15px; margin-top: 15px;">
+                    <h3 class='disable-highlight' id='dialog-cancel'>Cancel</h3>
+                    <h3 class='disable-highlight' id='dialog-proceed'>Restart</h3>
+                </div>
+            </div>
+        `;
+
+        return openPopup(html);
+    }
+
+
 
     function openRestartPopup(): void {
         const html: string = `
@@ -348,24 +414,12 @@
             </div>
         `;
 
-        const div: HTMLElement = document.createElement("div");
-        div.classList.add('overlay');
-        div.innerHTML = html;
-
-        document.body.prepend(div);
-
-        div.addEventListener('click', (event) => {
-            if ((event.target as HTMLElement).className.includes('overlay')) {
-                div.remove();
-            };
+        openPopup(html).then((proceed: boolean) => {
+            if (proceed) {
+                sendToProcess("restart-now");
+            }
         });
 
-        div.querySelector('#dialog-cancel').addEventListener('click', () => div.remove());
-
-        div.querySelector('#dialog-proceed').addEventListener('click', () => {
-            sendToProcess("restart-now");
-            div.remove();
-        });
     }
 
     function openLinkPopup(link: string): void {
@@ -382,24 +436,10 @@
             </div>
         `
 
-        const div: HTMLElement = document.createElement("div");
-        div.classList.add('overlay');
-        div.innerHTML = html;
-
-        document.body.prepend(div);
-
-
-        div.addEventListener('click', (event) => {
-            if ((event.target as HTMLElement).className.includes('overlay')) {
-                div.remove();
-            };
-        });
-
-        div.querySelector('#dialog-cancel').addEventListener('click', () => div.remove());
-
-        div.querySelector('#dialog-proceed').addEventListener('click', () => {
-            sendToProcess("open-link", link);
-            div.remove();
+        openPopup(html).then((proceed: boolean) => {
+            if (proceed) {
+                sendToProcess("open-link", link);
+            }
         });
 
     }

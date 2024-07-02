@@ -77,7 +77,7 @@ export class ModuleCompiler {
             }
             console.error(err);
         }
-        return null;
+        return undefined;
     }
 
     /**
@@ -117,7 +117,7 @@ export class ModuleCompiler {
 
     }
 
-    private static TEMP_ARCHIVE_PATH = this.EXTERNAL_MODULES_PATH + '/temp/';
+    private static TEMP_ARCHIVE_PATH: string = this.EXTERNAL_MODULES_PATH + '/temp/';
 
     private static async unarchive() {
         const files: fs.Dirent[] = await fs.promises.readdir(this.EXTERNAL_MODULES_PATH, this.IO_OPTIONS);
@@ -157,13 +157,19 @@ export class ModuleCompiler {
             fs.promises.readdir(this.EXTERNAL_MODULES_PATH)
         ]);
 
-        moduleArchives = moduleArchives.map(file => file.split('.').at(-2)).filter(f => f !== undefined && f !== 'temp');
+        moduleArchives = moduleArchives.map(file => file.split('.').at(-2)).filter(f => f && f !== 'temp');
 
         const foldersToRemove: string[] = moduleArchives.length === 0
             ? compiledModules
             : compiledModules.filter((value) => !moduleArchives.includes(value));
 
-        // remove folders
+        await Promise.all(
+            foldersToRemove.map(folderName => {
+                const folderPath: string = this.COMPILED_MODULES_PATH + "/" + folderName;
+                console.log(`Removing '${folderPath}'`);
+                return fs.promises.rm(folderPath, { force: true, recursive: true });
+            })
+        );
 
 
         try {
