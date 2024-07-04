@@ -1,5 +1,5 @@
 import { Setting } from "../../module_builder/Setting";
-import { Process } from "../../module_builder/Process";
+import { ModuleInfo, Process } from "../../module_builder/Process";
 import * as path from "path";
 import * as fs from 'fs';
 import { ModuleSettings } from "../../module_builder/ModuleSettings";
@@ -22,6 +22,8 @@ export class SettingsProcess extends Process {
     private readonly moduleSettingsList: ModuleSettings[] = [];
     private readonly window: BrowserWindow;
 
+    private readonly deletedModules: string[] = [];
+
     public constructor(ipcCallback: IPCCallback, window: BrowserWindow) {
         super(
             SettingsProcess.MODULE_ID,
@@ -36,6 +38,7 @@ export class SettingsProcess extends Process {
             author: "aarontburn",
             description: "General settings.",
         });
+
     }
 
     public registerSettings(): (Setting<unknown> | string)[] {
@@ -56,11 +59,59 @@ export class SettingsProcess extends Process {
 
             "Developer",
             new BooleanSetting(this)
+                .setName('Developer Mode')
+                .setAccessID('dev_mode')
+                .setDefault(false),
+
+            new BooleanSetting(this)
                 .setName("Force Reload Modules at Launch")
                 .setDescription("Always recompile modules at launch. Will result in a slower boot.")
                 .setAccessID("force_reload")
                 .setDefault(false),
         ];
+    }
+
+    public registerInternalSettings(): Setting<unknown>[] {
+        return [
+            new BooleanSetting(this)
+                .setName("Window Maximized")
+                .setDefault(false)
+                .setAccessID('window_maximized'),
+
+            new NumberSetting(this)
+                .setName('Window Width')
+                .setDefault(1920)
+                .setAccessID("window_width"),
+
+            new NumberSetting(this)
+                .setName('Window Height')
+                .setDefault(1080)
+                .setAccessID('window_height'),
+
+            new NumberSetting(this)
+                .setName('Window X')
+                .setDefault(50)
+                .setAccessID('window_x'),
+
+            new NumberSetting(this)
+                .setName('Window Y')
+                .setDefault(50)
+                .setAccessID('window_y'),
+        ];
+    }
+
+    public stop(): void {
+        // Save window dimensions
+        const isWindowMaximized: boolean = this.window.isMaximized();
+        const bounds: { width: number, height: number, x: number, y: number } = this.window.getBounds();
+
+        this.getSettings().getSetting('window_maximized').setValue(isWindowMaximized);
+        this.getSettings().getSetting('window_width').setValue(bounds.width);
+        this.getSettings().getSetting('window_height').setValue(bounds.height);
+        this.getSettings().getSetting('window_x').setValue(bounds.x);
+        this.getSettings().getSetting('window_y').setValue(bounds.y);
+
+        StorageHandler.writeModuleSettingsToStorage(this);
     }
 
     public refreshSettings(modifiedSetting?: Setting<unknown>): void {
@@ -70,11 +121,16 @@ export class SettingsProcess extends Process {
 
         } else if (modifiedSetting?.getAccessID() === 'accent_color') {
             this.sendToRenderer("refresh-settings", modifiedSetting.getValue());
+
+        } else if (modifiedSetting?.getAccessID() === 'dev_mode') {
+            this.sendToRenderer("is-dev", modifiedSetting.getValue());
         }
     }
 
     public initialize(): void {
         super.initialize();
+
+        this.sendToRenderer("is-dev", this.getSettings().getSetting('dev_mode').getValue());
 
         const settings: any[] = [];
         for (const moduleSettings of this.moduleSettingsList) {
@@ -89,7 +145,6 @@ export class SettingsProcess extends Process {
             moduleSettings.getModule().refreshAllSettings();
         }
 
-        // this.refreshSettings();
         this.sendToRenderer("populate-settings-list", settings);
     }
 
@@ -141,19 +196,24 @@ export class SettingsProcess extends Process {
         return false;
     }
 
-    private async getImportedModules(): Promise<string[]> {
+    private async getImportedModules(): Promise<{ name: string, deleted: boolean }[]> {
         const files: fs.Dirent[] = await fs.promises.readdir(StorageHandler.EXTERNAL_MODULES_PATH, { withFileTypes: true });
         // const compiledFiles: fs.Dirent[] = await fs.promises.readdir(StorageHandler.COMPILED_MODULES_PATH, { withFileTypes: true });
 
-        const out: string[] = [];
+        const map: Map<string, boolean> = new Map();
+
+        this.deletedModules.forEach(name => map.set(name, true))
 
         files.forEach(file => {
             const extension: string = path.extname(file.name);
 
             if (extension === '.zip') {
-                out.push(file.name);
+                map.set(file.name, false);
             }
-        })
+        });
+
+        const out: { name: string, deleted: boolean }[] = [];
+        map.forEach((deleted, name) => out.push({ name: name, deleted: deleted }));
 
         return out;
     }
@@ -178,6 +238,7 @@ export class SettingsProcess extends Process {
                 const result = await fs.promises.rm(`${StorageHandler.EXTERNAL_MODULES_PATH}/${fileName}`);
                 console.log("Removing " + fileName);
                 if (result === undefined) {
+                    this.deletedModules.push(fileName);
                     return Promise.resolve(true);
                 }
                 return Promise.resolve(false);
@@ -200,8 +261,9 @@ export class SettingsProcess extends Process {
                     }
 
                     const settingsList: (Setting<unknown> | string)[] = moduleSettings.getSettingsAndHeaders();
-                    const list: any = {
+                    const list: { module: string, moduleID: string, moduleInfo: ModuleInfo, settings: (Setting<unknown> | string)[] } = {
                         module: moduleName,
+                        moduleID: this.getIPCSource(),
                         moduleInfo: moduleSettings.getModule().getModuleInfo(),
                         settings: []
                     };

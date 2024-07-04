@@ -12,10 +12,22 @@ export class ModuleSettings {
     public readonly settingsMap: Map<string, Setting<unknown>> = new Map();
     public readonly settingsDisplay: (Setting<unknown> | string)[] = [];
     public readonly parentModule: Process;
+
+    public readonly allSettings: Setting<unknown>[] = [];
+
+
     public settingsName: string;
 
     public constructor(module: Process) {
         this.parentModule = module;
+
+        // Bind everything
+        Object.getOwnPropertyNames(ModuleSettings.prototype).forEach((key) => {
+            if (key !== 'constructor') {
+                (this as any)[key] = (this as any)[key].bind(this);
+            }
+        });
+
     }
 
     /**
@@ -25,7 +37,7 @@ export class ModuleSettings {
      *      of the parent module. Only change this if you need to modify how
      *      the name of the settings appears.
      * 
-     *  @see setName(name)
+     *  @see setName
      *  @returns The name of the settings.
      */
     public getName(): string {
@@ -38,15 +50,7 @@ export class ModuleSettings {
      *  @returns An array of all the settings.
      */
     public getSettings(): Setting<unknown>[] {
-        const settingList: Setting<unknown>[] = [];
-
-        for (const s of this.settingsDisplay) {
-            if (s instanceof Setting) {
-                settingList.push(s);
-            }
-        }
-
-        return settingList;
+        return Array.from(new Set(this.settingsMap.values()));
     }
 
     public getSettingsAndHeaders(): (Setting<unknown> | string)[] {
@@ -73,6 +77,7 @@ export class ModuleSettings {
      *  @param setting The setting to add.
      */
     public addSetting(s: Setting<unknown> | string): void {
+
         this.settingsDisplay.push(s);
         if (typeof s === 'string') {
             return;
@@ -98,9 +103,23 @@ export class ModuleSettings {
      *  @param settings The settings to add. 
      */
     public addSettings(settings: (Setting<unknown> | string)[]): void {
-        settings.forEach((setting: Setting<unknown> | string) => {
-            this.addSetting(setting);
-        });
+        settings.forEach(this.addSetting);
+    }
+
+    public addInternalSettings(settings: Setting<unknown>[]): void {
+        settings.forEach(this.addInternalSetting);
+    }
+
+    public addInternalSetting(setting: Setting<unknown>): void {
+        const settingID: string = setting.getAccessID();
+        const settingName: string = setting.getName();
+
+        if (settingID === settingName) { // No ID was set, or they used the same ID as the setting name.
+            this.settingsMap.set(settingID, setting);
+            return;
+        }
+        this.settingsMap.set(settingID, setting);
+        this.settingsMap.set(settingName, setting);
     }
 
     /**
@@ -112,6 +131,8 @@ export class ModuleSettings {
     public getSetting(name: string): Setting<unknown> | undefined {
         return this.settingsMap.get(name);
     }
+
+
 
     /**
      *  @returns A reference to the parent module.

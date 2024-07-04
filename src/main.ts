@@ -16,9 +16,9 @@ app.whenReady().then(() => {
     });
 });
 
+
 app.on("window-all-closed", () => {
     if (process.platform !== "darwin") {
-        guiHandler.stop();
         app.quit();
     }
 });

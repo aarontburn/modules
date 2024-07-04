@@ -20,14 +20,24 @@
         value: any
     }
 
-    const MODULE_ID = "built_ins.Settings";
+    interface TabInfo {
+        module: string,
+        moduleID: string,
+        moduleInfo: ModuleInfo,
+        settings: any[]
+    }
+
+    const MODULE_ID: string = "built_ins.Settings";
     const sendToProcess = (eventType: string, ...data: any): Promise<any> => {
         return window.parent.ipc.send(MODULE_ID, eventType, ...data);
     }
 
     sendToProcess("settings-init");
 
-    let currentlySelectedTab: HTMLElement = undefined;
+    let isDeveloperMode: boolean = false;
+
+    let selectedTabElement: HTMLElement = undefined;
+    let selectedTabInfo: TabInfo = undefined;
 
     const moduleList: HTMLElement = document.getElementById("left-list");
     const settingsList: HTMLElement = document.getElementById("right");
@@ -41,7 +51,7 @@
                 console.log("Error importing module.");
             }
 
-        })
+        });
     });
 
     const manageButton: HTMLElement = document.getElementById('manage-button');
@@ -55,6 +65,15 @@
 
     window.parent.ipc.on(MODULE_ID, (_, eventType: string, ...data: any[]) => {
         switch (eventType) {
+            case 'is-dev': {
+                isDeveloperMode = data[0] as boolean;
+
+                const element: HTMLElement = document.getElementById('moduleID');
+                if (element) {
+                    element.hidden = !isDeveloperMode;
+                }
+                break;
+            }
             case "populate-settings-list": {
                 populateSettings(data[0]);
                 break;
@@ -98,18 +117,17 @@
 
             // Setting group click button
             const groupElement: HTMLElement = document.createElement("p");
-            groupElement.className = 'setting-group'
+            groupElement.className = 'setting-group';
             groupElement.innerText = moduleName;
             groupElement.addEventListener("click", () => {
-                if (currentlySelectedTab !== undefined) {
-                    currentlySelectedTab.style.color = "";
+                if (selectedTabElement !== undefined) {
+                    selectedTabElement.style.color = "";
                 }
-                currentlySelectedTab = groupElement;
-                currentlySelectedTab.setAttribute("style", "color: var(--accent-color);")
 
-                sendToProcess('swap-settings-tab', moduleName).then((data) => {
-                    swapTabs(data);
-                });
+                selectedTabElement = groupElement;
+                selectedTabElement.setAttribute("style", "color: var(--accent-color);");
+
+                sendToProcess('swap-settings-tab', moduleName).then(swapTabs);
             });
 
             if (firstModule === undefined) {
@@ -142,6 +160,15 @@
         'buildVersion', 'build_version',
     ];
 
+    const nonDevWhitelist: string[] = [
+        'moduleName', 'module_name',
+        'description',
+        'link',
+        'author',
+    ];
+
+
+
 
     function swapTabs(tab: any): void {
         // Clear existing settings
@@ -154,18 +181,25 @@
             }
         });
 
-        removeNodes.forEach((node) => {
-            settingsList.removeChild(node)
-        });
+        removeNodes.forEach(node => settingsList.removeChild(node));
 
         if (tab === 'manage') {
+            selectedTabInfo = undefined;
             return;
         }
+
+        const tabInfo: TabInfo = tab;
+        selectedTabInfo = tabInfo;
+
 
         function getModuleInfoHTML(moduleInfo: any): string {
             const toSentenceCase = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
             const inner: string[] = [];
-            inner.push(`<p style="font-size: 27px; color: var(--accent-color);">${moduleInfo.moduleName || tab.module}</p>`);
+            inner.push(`<p style="font-size: 27px; color: var(--accent-color);">${moduleInfo.moduleName || tabInfo.module}</p>`);
+
+
+            inner.push(`<p id='moduleID' ${!isDeveloperMode ? 'hidden' : ''}><span>Module ID: </span>${tabInfo.moduleID}<p/>`);
+
             for (const key in moduleInfo) {
                 if (keyBlacklist.includes(key)) {
                     continue;
@@ -176,17 +210,28 @@
                     continue;
                 }
 
-                if (key.toLowerCase() === "link") {
-                    inner.push(`<p><span>${toSentenceCase(key)}: </span><a href=${value}>${value}</a><p/>`);
-                    continue;
+                if (!isDeveloperMode) {
+                    if (key.toLowerCase() === "link") {
+                        inner.push(`<p><span>${toSentenceCase(key)}: </span><a href=${value}>${value}</a><p/>`);
+                    } else if (nonDevWhitelist.includes(key)) {
+                        inner.push(`<p><span>${toSentenceCase(key)}:</span> ${value}</p>`);
+                    }
+
+                } else {
+                    if (key.toLowerCase() === "link") {
+                        inner.push(`<p><span>${toSentenceCase(key)}: </span><a href=${value}>${value}</a><p/>`);
+                        continue;
+                    }
+                    inner.push(`<p><span>${toSentenceCase(key)}:</span> ${value}</p>`);
                 }
-                inner.push(`<p><span>${toSentenceCase(key)}:</span> ${value}</p>`);
+
+
             }
             return inner.reduce((acc, html) => acc += html + "\n", '');
         }
 
 
-        const moduleInfo: ModuleInfo = tab.moduleInfo;
+        const moduleInfo: ModuleInfo = tabInfo.moduleInfo;
 
         if (moduleInfo !== undefined) {
             const moduleInfoHTML: string = `
@@ -197,7 +242,7 @@
             settingsList.insertAdjacentHTML("beforeend", moduleInfoHTML);
         }
 
-        tab.settings.forEach((settingInfo: any) => {
+        tabInfo.settings.forEach(settingInfo => {
             if (typeof settingInfo === 'string') {
                 const headerHTML: string = `
                     <div class='section'>
@@ -307,7 +352,7 @@
     const screen: HTMLElement = document.getElementById("manage-module");
     const list: HTMLElement = document.getElementById('installed-modules-list');
 
-    function openManageScreen(data: string[]): void {
+    function openManageScreen(data: { name: string, deleted: boolean }[]): void {
         screen.hidden = false;
 
         // Clear list
@@ -315,27 +360,40 @@
             list.removeChild(list.lastChild);
         }
 
-        data.forEach(fileName => {
+        if (data.length === 0) { // No external modules
+            const html: string = `
+                <p style='margin: 0; margin-left: 15px;'>No external modules found.</p>
+            `;
+            list.insertAdjacentHTML('beforeend', html);
+
+        }
+
+
+        data.forEach(({ name, deleted }) => {
             const div: HTMLDivElement = document.createElement('div');
             div.className = 'installed-module';
             div.innerHTML = `
-                <p>${fileName}</p>
+                ${!deleted
+                    ? `<p>${name}</p>`
+                    : `<p style="font-style: italic; color: grey;"}>${name}</p>`}
 
                 <div style="margin-right: auto;"></div>
 
-                <p class='remove-module-button' style="color: red; margin-right: 30px">Remove</p>
-                <p class='open-module-settings' style="margin-right: 5px;">Settings</p>
+                ${!deleted
+                    ? `<p class='remove-module-button' style="color: red; margin-right: 15px">Remove</p>`
+                    : `<p style="margin-right: 15px; font-style: italic;">Restart Required</p>`}
             `;
 
 
-            div.querySelector('.remove-module-button').addEventListener('click', async () => {
+            div.querySelector('.remove-module-button')?.addEventListener('click', async () => {
                 const proceed: boolean = await openConfirmModuleDeletionPopup();
                 if (proceed) {
-                    sendToProcess('remove-module', fileName).then(successful => {
+                    sendToProcess('remove-module', name).then(successful => {
                         if (successful) {
-                            console.log('Removed ' + fileName);
+                            console.log('Removed ' + name);
+                            openDeletedPopup()
                         } else {
-                            console.log('Failed to remove ' + fileName);
+                            console.log('Failed to remove ' + name);
                         }
 
                         sendToProcess('manage-modules').then(openManageScreen);
@@ -343,12 +401,12 @@
                 }
             });
 
-            div.querySelector('.open-module-settings').addEventListener('click', () => {
-                console.log('settings for ' + fileName);
-            });
+            // div.querySelector('.open-module-settings').addEventListener('click', () => {
+            //     console.log('settings for ' + fileName);
+            // });
 
             list.insertAdjacentElement('beforeend', div);
-        })
+        });
     }
 
     async function openPopup(
@@ -381,16 +439,21 @@
         });
     }
 
+
+    function color(text: string, color: string = 'var(--accent-color)'): string {
+        return `<span style='color: ${color};'>${text}</span>`
+    }
+
     function openConfirmModuleDeletionPopup(): Promise<boolean> {
         const html: string = `
             <div class='dialog'>
-                <h3 class='disable-highlight'>Are you sure you want to delete this module?</h3>
+                <h3 class='disable-highlight'>Are you sure you want to ${color('delete', 'red')} this module?</h3>
                 <h4>Your data will be saved.<h4/>
                 <h4 style="padding-top: 10px;" class='disable-highlight'>Proceed?</h4>
 
                 <div style="display: flex; justify-content: space-between; margin: 0px 15px; margin-top: 15px;">
                     <h3 class='disable-highlight' id='dialog-cancel'>Cancel</h3>
-                    <h3 class='disable-highlight' id='dialog-proceed'>Restart</h3>
+                    <h3 class='disable-highlight' id='dialog-proceed'>Delete</h3>
                 </div>
             </div>
         `;
@@ -398,17 +461,40 @@
         return openPopup(html);
     }
 
+    function openDeletedPopup() {
+        const html: string = `
+            <div class='dialog'>
+                <h3 class='disable-highlight'>${color('Successfully', 'green')} deleted module.</h3>
+                <h4>Restart required for the changes to take effect.<h4/>
+                <h4 style="padding-top: 10px;" class='disable-highlight'>Restart now?</h4>
+
+                <div style="display: flex; justify-content: space-between; margin: 0px 15px; margin-top: 15px;">
+                    <h3 class='disable-highlight' id='dialog-cancel'>Not Now</h3>
+                    <h3 class='disable-highlight' id='dialog-proceed'>Restart</h3>
+                </div>
+            </div>
+        `;
+
+        openPopup(html).then((proceed: boolean) => {
+            if (proceed) {
+                sendToProcess("restart-now");
+            }
+        });
+    }
+
+
+
 
 
     function openRestartPopup(): void {
         const html: string = `
             <div class='dialog'>
-                <h3 class='disable-highlight'>Successfully imported the module.</h3>
+                <h3 class='disable-highlight'>${color('Successfully', 'green')} imported the module.</h3>
                 <h4>You need to restart to finish the setup.<h4/>
                 <h4 style="padding-top: 10px;" class='disable-highlight'>Restart now?</h4>
 
                 <div style="display: flex; justify-content: space-between; margin: 0px 15px; margin-top: 15px;">
-                    <h3 class='disable-highlight' id='dialog-cancel'>Cancel</h3>
+                    <h3 class='disable-highlight' id='dialog-cancel'>Not now</h3>
                     <h3 class='disable-highlight' id='dialog-proceed'>Restart</h3>
                 </div>
             </div>
@@ -425,7 +511,7 @@
     function openLinkPopup(link: string): void {
         const html: string = `
             <div class="dialog">
-                <h3 class='disable-highlight'>You are navigating to an external website.</h3>
+                <h3 class='disable-highlight'>You are navigating to an ${color('external', 'red')} website.</h3>
                 <h4 class='link'>${link}</h4>
                 <h4 style="padding-top: 10px;" class='disable-highlight'>Only visit the site if you trust it.</h4>
 
@@ -461,11 +547,11 @@
                 containerWidth: container.offsetWidth
             };
 
-            document.onmousemove = (e) => {
+            document.onmousemove = (e: MouseEvent) => {
                 const deltaX: number = e.clientX - md.e.clientX
 
-                let newLeftWidth = md.leftWidth + deltaX;
-                let newRightWidth = md.rightWidth - deltaX;
+                let newLeftWidth: number = md.leftWidth + deltaX;
+                let newRightWidth: number = md.rightWidth - deltaX;
 
                 if (newLeftWidth < 0) {
                     newLeftWidth = 0;
@@ -475,8 +561,8 @@
                     newRightWidth = 0;
                 }
 
-                const leftPercent = (newLeftWidth / md.containerWidth) * 100;
-                const rightPercent = (newRightWidth / md.containerWidth) * 100;
+                const leftPercent: number = (newLeftWidth / md.containerWidth) * 100;
+                const rightPercent: number = (newRightWidth / md.containerWidth) * 100;
 
                 left.style.width = leftPercent + "%";
                 right.style.width = rightPercent + "%";

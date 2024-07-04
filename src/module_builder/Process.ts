@@ -99,6 +99,7 @@ export abstract class Process implements IPCSource {
         this._ipcCallback = ipcCallback;
 
         this._moduleSettings.addSettings(this.registerSettings());
+        this._moduleSettings.addInternalSettings(this.registerInternalSettings());
     }
 
     /**
@@ -177,6 +178,16 @@ export abstract class Process implements IPCSource {
      *  This should not be called externally.
      */
     public abstract registerSettings(): (Setting<unknown> | string)[];
+
+
+    /**
+     *  Registers internal settings that will not appear under the settings window.
+     * 
+     *  @returns 
+     */
+    public registerInternalSettings(): Setting<unknown>[] {
+        return [];
+    }
 
 
     /**

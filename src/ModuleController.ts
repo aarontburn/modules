@@ -58,6 +58,19 @@ export class ModuleController implements IPCSource {
             }
 
             this.checkSettings();
+
+            const settings: ModuleSettings = this.settingsModule.getSettings();
+            this.window.setBounds({
+                x: Number(settings.getSetting('window_x').getValue()),
+                y: Number(settings.getSetting('window_y').getValue()),
+                height: Number(settings.getSetting('window_height').getValue()),
+                width: Number(settings.getSetting('window_width').getValue()),
+            });
+
+            if ((settings.getSetting('window_maximized').getValue() as boolean) === true) {
+                this.window.maximize();
+            }
+
             this.window.show();
         });
     }
@@ -93,16 +106,16 @@ export class ModuleController implements IPCSource {
         const data: any[] = [];
         this.modulesByIPCSource.forEach((module: Process, _) => {
             data.push({
-                moduleName: module.getName(), 
+                moduleName: module.getName(),
                 moduleID: module.getIPCSource(),
                 htmlPath: module.getHTMLPath()
-            })
+            });
         });
         this.ipcCallback.notifyRenderer(this, 'load-modules', data);
         this.swapVisibleModule(HomeProcess.MODULE_ID);
     }
 
-    private handleMainEvents(): void {
+    private handleMainEvents(): void | Promise<any> {
         this.ipc.handle(this.getIPCSource(), (_, eventType: string, data: any[]) => {
             switch (eventType) {
                 case "renderer-init": {
@@ -117,9 +130,18 @@ export class ModuleController implements IPCSource {
                     this.swapVisibleModule(data[0]);
                     break;
                 }
+
             }
         });
+    }
 
+    private async handleExternal(source: IPCSource, eventType: string, ...data: any[]): Promise<any> {
+        switch (eventType) {
+            case "get-module-IDs": {
+                return Array.from(this.modulesByIPCSource.keys());
+            }
+
+        }
     }
 
     public stop(): void {
@@ -154,6 +176,11 @@ export class ModuleController implements IPCSource {
             autoHideMenuBar: true
         });
 
+        this.window.on('close', () => {
+            this.stop();
+        })
+
+
         this.window.loadFile(path.join(__dirname, "./view/index.html"));
 
         this.ipcCallback = {
@@ -165,12 +192,17 @@ export class ModuleController implements IPCSource {
     }
 
     private async handleInterModuleCommunication(source: IPCSource, targetModuleID: string, eventType: string, ...data: any[]) {
+        if (targetModuleID === this.getIPCSource()) {
+            return this.handleExternal(source, eventType, ...data);
+        }
+
+
         const targetModule: Process = this.modulesByIPCSource.get(targetModuleID);
         if (targetModule === undefined) {
             console.error(`Module '${source.getIPCSource()}' attempted to access '${targetModuleID}', but no such module exists.`);
             return new Error(`No module with ID of ${source.getIPCSource()} found.`);
         }
-        const response = await targetModule.handleExternal(source, eventType, data);
+        const response = await targetModule.handleExternal(source, eventType, ...data);
         return response;
     }
 
@@ -220,9 +252,6 @@ export class ModuleController implements IPCSource {
             return module.handleEvent(eventType, ...data);
         });
 
-        // this.ipc.handle(module.getIPCSource(), (_, eventType: string, ...data: any[]) => {
-        //     return module.handleInvocation(eventType, data);
-        // }); 
     }
 
 }
