@@ -54,10 +54,11 @@ export class HomeProcess extends Process {
 		this.updateDateAndTime(false);
 
 		this.clockTimeout = setTimeout(() => this.updateDateAndTime(true), 1000 - new Date().getMilliseconds());
+		
 	}
 
-	public stop(): void {
-		super.stop();
+	public onExit(): void {
+		super.onExit();
 		clearTimeout(this.clockTimeout);
 	}
 
@@ -150,7 +151,7 @@ export class HomeProcess extends Process {
 				abbrDate: this.getSettings().getSetting('abbr_date_fs').getValue(),
 				standardTime: this.getSettings().getSetting('standard_time_fs').getValue(),
 				militaryTime: this.getSettings().getSetting('military_time_fs').getValue()
-			}
+			};
 			this.sendToRenderer('font-sizes', sizes);
 		} else if (modifiedSetting?.getAccessID() === 'display_order') {
 			const order: string = this.getSettings().getSetting("display_order").getValue() as string

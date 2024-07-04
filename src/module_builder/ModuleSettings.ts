@@ -13,10 +13,8 @@ export class ModuleSettings {
     public readonly settingsDisplay: (Setting<unknown> | string)[] = [];
     public readonly parentModule: Process;
 
-    public readonly allSettings: Setting<unknown>[] = [];
-
-
     public settingsName: string;
+
 
     public constructor(module: Process) {
         this.parentModule = module;
@@ -29,6 +27,7 @@ export class ModuleSettings {
         });
 
     }
+
 
     /**
      *  Get the name of the module settings. 
@@ -46,6 +45,7 @@ export class ModuleSettings {
             : this.settingsName;
     }
 
+
     /**
      *  @returns An array of all the settings.
      */
@@ -53,9 +53,15 @@ export class ModuleSettings {
         return Array.from(new Set(this.settingsMap.values()));
     }
 
+
+    /**
+     *  Get all display settings and headers.
+     *  @returns An array of both settings and strings.
+     */
     public getSettingsAndHeaders(): (Setting<unknown> | string)[] {
         return this.settingsDisplay;
     }
+
 
     /**
      *  Modify the name of the setting group.
@@ -69,6 +75,7 @@ export class ModuleSettings {
         this.settingsName = name;
     }
 
+
     /**
      *  Adds a setting.
      * 
@@ -77,7 +84,6 @@ export class ModuleSettings {
      *  @param setting The setting to add.
      */
     public addSetting(s: Setting<unknown> | string): void {
-
         this.settingsDisplay.push(s);
         if (typeof s === 'string') {
             return;
@@ -97,6 +103,7 @@ export class ModuleSettings {
         this.settingsMap.set(settingName, setting);
     }
 
+
     /**
      *  Add multiple settings.
      * 
@@ -106,10 +113,26 @@ export class ModuleSettings {
         settings.forEach(this.addSetting);
     }
 
+
+    /**
+     *  Add multiple internal settings.
+     * 
+     *  @see                addInternalSetting
+     *  @param settings     An array of internal settings to add.
+     */
     public addInternalSettings(settings: Setting<unknown>[]): void {
         settings.forEach(this.addInternalSetting);
     }
 
+
+    /**
+     *  Adds an internal setting.
+     *  
+     *  Internal settings do not show up in the settings UI, and thus are only modified
+     *      through code.
+     * 
+     *  @param setting  The internal setting to add.
+     */
     public addInternalSetting(setting: Setting<unknown>): void {
         const settingID: string = setting.getAccessID();
         const settingName: string = setting.getName();
@@ -122,18 +145,18 @@ export class ModuleSettings {
         this.settingsMap.set(settingName, setting);
     }
 
+
     /**
      *  Search for a setting by either name or ID. 
      * 
-     *  @param name The name or ID of the setting
+     *  @param nameOrID The name or ID of the setting
      *  @returns The setting, or undefined if not found.
      */
-    public getSetting(name: string): Setting<unknown> | undefined {
-        return this.settingsMap.get(name);
+    public getSetting(nameOrID: string): Setting<unknown> | undefined {
+        return this.settingsMap.get(nameOrID);
     }
 
-
-
+    
     /**
      *  @returns A reference to the parent module.
      */

@@ -146,7 +146,7 @@ export class ModuleController implements IPCSource {
 
     public stop(): void {
         this.modulesByIPCSource.forEach((module: Process, _) => {
-            module.stop();
+            module.onExit();
         });
     }
 

@@ -6,7 +6,7 @@ import { ModuleSettings } from "../../module_builder/ModuleSettings";
 import { ChangeEvent, InputElement, SettingBox } from "../../module_builder/SettingBox";
 import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
 import { StorageHandler } from "../../module_builder/StorageHandler";
-import { IPCCallback } from "../../module_builder/IPCObjects";
+import { IPCCallback, IPCSource } from "../../module_builder/IPCObjects";
 import { BrowserWindow, OpenDialogOptions, app, dialog, shell } from 'electron';
 import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
 import { NumberSetting } from "../../module_builder/settings/types/NumberSetting";
@@ -23,6 +23,8 @@ export class SettingsProcess extends Process {
     private readonly window: BrowserWindow;
 
     private readonly deletedModules: string[] = [];
+    private readonly devModeSubscribers: ((isDev: boolean) => void)[] = [];  
+
 
     public constructor(ipcCallback: IPCCallback, window: BrowserWindow) {
         super(
@@ -100,7 +102,7 @@ export class SettingsProcess extends Process {
         ];
     }
 
-    public stop(): void {
+    public onExit(): void {
         // Save window dimensions
         const isWindowMaximized: boolean = this.window.isMaximized();
         const bounds: { width: number, height: number, x: number, y: number } = this.window.getBounds();
@@ -114,6 +116,8 @@ export class SettingsProcess extends Process {
         StorageHandler.writeModuleSettingsToStorage(this);
     }
 
+
+
     public refreshSettings(modifiedSetting?: Setting<unknown>): void {
         if (modifiedSetting?.getAccessID() === 'zoom') {
             const zoom: number = modifiedSetting.getValue() as number;
@@ -124,6 +128,26 @@ export class SettingsProcess extends Process {
 
         } else if (modifiedSetting?.getAccessID() === 'dev_mode') {
             this.sendToRenderer("is-dev", modifiedSetting.getValue());
+            this.devModeSubscribers.forEach((callback) => {
+                callback(modifiedSetting.getValue() as boolean);
+            })
+
+        }
+    }
+
+
+    public async handleExternal(source: IPCSource, eventType: string, ...data: any[]): Promise<any> {
+        switch (eventType) {
+            case 'isDeveloperMode': {
+                return this.getSettings().getSetting('dev_mode').getValue() as boolean;
+            }
+            case 'onDevModeChanged': {
+                const callback: (isDev: boolean) => void = data[0];
+                this.devModeSubscribers.push(callback);
+                callback(this.getSettings().getSetting('dev_mode').getValue() as boolean);
+                break;
+            }
+
         }
     }
 
@@ -226,6 +250,17 @@ export class SettingsProcess extends Process {
                 break;
             }
 
+            case 'open-module-folder': {
+                const moduleID: string = data[0];
+                shell.openPath(path.normalize(StorageHandler.STORAGE_PATH + moduleID)).then(result => {
+                    if (result !== '') {
+                        throw new Error('Could not find folder: ' + path.normalize(StorageHandler.STORAGE_PATH + moduleID));
+                    } 
+                });
+
+                break;  
+            }
+
             case 'import-module': {
                 return this.importModuleArchive();
             }
@@ -263,7 +298,7 @@ export class SettingsProcess extends Process {
                     const settingsList: (Setting<unknown> | string)[] = moduleSettings.getSettingsAndHeaders();
                     const list: { module: string, moduleID: string, moduleInfo: ModuleInfo, settings: (Setting<unknown> | string)[] } = {
                         module: moduleName,
-                        moduleID: this.getIPCSource(),
+                        moduleID: moduleSettings.getModule().getIPCSource(),
                         moduleInfo: moduleSettings.getModule().getModuleInfo(),
                         settings: []
                     };

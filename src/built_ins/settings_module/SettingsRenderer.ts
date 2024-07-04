@@ -28,7 +28,7 @@
     }
 
     const MODULE_ID: string = "built_ins.Settings";
-    const sendToProcess = (eventType: string, ...data: any): Promise<any> => {
+    const sendToProcess = (eventType: string, ...data: any[]): Promise<any> => {
         return window.parent.ipc.send(MODULE_ID, eventType, ...data);
     }
 
@@ -37,8 +37,6 @@
     let isDeveloperMode: boolean = false;
 
     let selectedTabElement: HTMLElement = undefined;
-    let selectedTabInfo: TabInfo = undefined;
-
     const moduleList: HTMLElement = document.getElementById("left-list");
     const settingsList: HTMLElement = document.getElementById("right");
 
@@ -170,7 +168,7 @@
 
 
 
-    function swapTabs(tab: any): void {
+    function swapTabs(tab: TabInfo | string): void {
         // Clear existing settings
         const removeNodes: Node[] = [];
         settingsList.childNodes.forEach((node: HTMLElement) => {
@@ -184,20 +182,19 @@
         removeNodes.forEach(node => settingsList.removeChild(node));
 
         if (tab === 'manage') {
-            selectedTabInfo = undefined;
             return;
         }
 
-        const tabInfo: TabInfo = tab;
-        selectedTabInfo = tabInfo;
+        const tabInfo: TabInfo = tab as TabInfo;
 
 
         function getModuleInfoHTML(moduleInfo: any): string {
             const toSentenceCase = (key: string) => key.charAt(0).toUpperCase() + key.slice(1);
             const inner: string[] = [];
+
+
+            inner.push(`<p id='open-folder' class='setting-group' style='float: right; font-size: 25px; margin-top: -12px;'>🗀</p>`)
             inner.push(`<p style="font-size: 27px; color: var(--accent-color);">${moduleInfo.moduleName || tabInfo.module}</p>`);
-
-
             inner.push(`<p id='moduleID' ${!isDeveloperMode ? 'hidden' : ''}><span>Module ID: </span>${tabInfo.moduleID}<p/>`);
 
             for (const key in moduleInfo) {
@@ -240,6 +237,9 @@
                 </div>
             `
             settingsList.insertAdjacentHTML("beforeend", moduleInfoHTML);
+            document.getElementById('open-folder').addEventListener('click', () => {
+                sendToProcess('open-module-folder', tabInfo.moduleID);
+            })
         }
 
         tabInfo.settings.forEach(settingInfo => {
@@ -401,9 +401,6 @@
                 }
             });
 
-            // div.querySelector('.open-module-settings').addEventListener('click', () => {
-            //     console.log('settings for ' + fileName);
-            // });
 
             list.insertAdjacentElement('beforeend', div);
         });
