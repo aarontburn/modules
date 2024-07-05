@@ -6,6 +6,7 @@ Author: [aarontburn](https://github.com/aarontburn)
 **Modules** is a platform designed to simplify the creation, sharing, and installation of Node.js sub-applications, called a *module*. A *module* can be anything; a system volume controller, calendar, alarm; anything that can be created using TypeScript and Node.js, which mean it can quite literally be anything.
 
 ![image](https://github.com/aarontburn/modules/assets/103211131/9c37290c-1368-451f-a272-98ff778165c2)
+
 Doesn't seem like much on its own, right? Let's add a module...
 ![image](https://github.com/aarontburn/modules/assets/103211131/0c56c4ca-6305-43cd-b30e-d913d2dbf982)
 ## Developer Features:
@@ -15,7 +16,7 @@ Doesn't seem like much on its own, right? Let's add a module...
  - Simple, yet effective, API
    - Pre-defined functions and objects are designed to streamline the creation of your module, including:
 	   - Pre-built option UIs 
-	   - 
+	   - Defined application lifecycle functions (`onExit()`, `onGUIShown()`, `onGUIHidden()`)
  - Inter-Module Communication
    - Modules are able to send/receive data from each other.  
  
