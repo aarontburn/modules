@@ -207,7 +207,7 @@ export abstract class Process implements IPCSource {
      * 
      *  For an example on how to use this, see {@link HomeProcess}
      */
-    public abstract refreshSettings(modifiedSetting?: Setting<unknown>): void;
+    public abstract refreshSettings(modifiedSetting: Setting<unknown>): void;
 
 
     /**

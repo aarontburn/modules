@@ -144,8 +144,8 @@ export class HomeProcess extends Process {
 	private static DATE_TIME_IDS: string[] = ['full_date_fs', 'abbr_date_fs', 'standard_time_fs', 'military_time_fs'];
 
 
-	public refreshSettings(modifiedSetting?: Setting<unknown>): void {
-		if (HomeProcess.DATE_TIME_IDS.includes(modifiedSetting?.getAccessID())) {
+	public refreshSettings(modifiedSetting: Setting<unknown>): void {
+		if (HomeProcess.DATE_TIME_IDS.includes(modifiedSetting.getAccessID())) {
 			const sizes: object = {
 				fullDate: this.getSettings().getSetting('full_date_fs').getValue(),
 				abbrDate: this.getSettings().getSetting('abbr_date_fs').getValue(),
@@ -153,7 +153,7 @@ export class HomeProcess extends Process {
 				militaryTime: this.getSettings().getSetting('military_time_fs').getValue()
 			};
 			this.sendToRenderer('font-sizes', sizes);
-		} else if (modifiedSetting?.getAccessID() === 'display_order') {
+		} else if (modifiedSetting.getAccessID() === 'display_order') {
 			const order: string = this.getSettings().getSetting("display_order").getValue() as string
 			this.sendToRenderer('display-order', order);
 		}

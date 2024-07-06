@@ -118,15 +118,15 @@ export class SettingsProcess extends Process {
 
 
 
-    public refreshSettings(modifiedSetting?: Setting<unknown>): void {
-        if (modifiedSetting?.getAccessID() === 'zoom') {
+    public refreshSettings(modifiedSetting: Setting<unknown>): void {
+        if (modifiedSetting.getAccessID() === 'zoom') {
             const zoom: number = modifiedSetting.getValue() as number;
             this.window.webContents.setZoomFactor(zoom / 100);
 
-        } else if (modifiedSetting?.getAccessID() === 'accent_color') {
+        } else if (modifiedSetting.getAccessID() === 'accent_color') {
             this.sendToRenderer("refresh-settings", modifiedSetting.getValue());
 
-        } else if (modifiedSetting?.getAccessID() === 'dev_mode') {
+        } else if (modifiedSetting.getAccessID() === 'dev_mode') {
             this.sendToRenderer("is-dev", modifiedSetting.getValue());
             this.devModeSubscribers.forEach((callback) => {
                 callback(modifiedSetting.getValue() as boolean);
