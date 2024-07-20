@@ -8,7 +8,7 @@ import { ChangeEvent, InputElement, SettingBox } from "../../SettingBox";
  *  @author aarontburn
  */
 export class BooleanSettingBox extends SettingBox<boolean> {
-    private parentSetting: Setting<boolean> = this.getSetting();
+    private readonly parentSetting: Setting<boolean> = this.getSetting();
 
     public createLeft(): string {
         return `

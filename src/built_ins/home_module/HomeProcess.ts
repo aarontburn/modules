@@ -159,7 +159,7 @@ export class HomeProcess extends Process {
 		}
 	}
 
-	public handleEvent(eventType: string, data: any[]): void {
+	public async handleEvent(eventType: string, data: any[]): Promise<any> {
 		switch (eventType) {
 			case "init": {
 				this.initialize();

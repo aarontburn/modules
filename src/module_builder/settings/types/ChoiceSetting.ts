@@ -43,6 +43,7 @@ export class ChoiceSetting extends Setting<string> {
      */
     public useDropdown(): ChoiceSetting {
         this.dropdown = true;
+        this.reInitUI();
         return this;
 
     }
@@ -71,7 +72,7 @@ export class ChoiceSetting extends Setting<string> {
         for (const option of options) {
             this.options.add(option);
         }
-        this.reInitUI()
+        this.reInitUI();
 
         return this;
     }
@@ -84,7 +85,7 @@ export class ChoiceSetting extends Setting<string> {
     }
 
     public validateInput(input: any): string {
-        const s: string = input.toString();
+        const s: string = JSON.stringify(input).replace(/"/g, '');
 
         if (!this.options.has(s)) {
             return null;

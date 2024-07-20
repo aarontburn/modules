@@ -38,12 +38,24 @@ export class NumberSetting extends Setting<number> {
     public useRangeSliderUI(): NumberSetting {
         this.withoutIncrement = false;
         this.useSlider = true;
+
+        if (this.min === undefined) {
+            this.setMin(0);
+        }
+
+        if (this.max === undefined) {
+            this.setMax(100);
+        }
+
+ 
+        this.reInitUI();
         return this;
     }
 
     public useNonIncrementableUI(): NumberSetting {
         this.useSlider = false;
         this.withoutIncrement = true;
+        this.reInitUI();
         return this;
     }
 
@@ -97,14 +109,16 @@ export class NumberSetting extends Setting<number> {
 
         this.min = min;
         this.max = max;
-        super.reInitUI();
         return this;
     }
 
     public setStep(step: number): NumberSetting {
         this.step = step;
-        super.reInitUI()
         return this;
+    }
+
+    public getStep(): number {
+        return this.step;
     }
 
 
@@ -137,14 +151,14 @@ export class NumberSetting extends Setting<number> {
             value = Number(input);
         } else {
             try {
-                const parsedValue: number = parseFloat(String(input));
+                const parsedValue: number = parseFloat(JSON.stringify(input).replace(/"/g, ''));
                 if (!isNaN(parsedValue)) {
                     value = Number(parsedValue)
                 } else {
                     return null;
                 }
             } catch (err) {
-                return null; // could not 
+                return null;
             }
         }
 
@@ -172,22 +186,10 @@ export class NumberSetting extends Setting<number> {
 
     public setUIComponent(): SettingBox<number> {
         if (this.useSlider) {
-            const slider: RangeSettingBox = new RangeSettingBox(this);
-            slider.setInputRange(this.min, this.max);
-            slider.setInputStep(this.step);
-            return slider;
+            return new RangeSettingBox(this);
         } else if (this.withoutIncrement) {
             return new NumberSettingBox(this);
         }
-        const box: IncrementableNumberSettingBox = new IncrementableNumberSettingBox(this);
-        box.setInputRange(this.min, this.max);
-        box.setInputStep(this.step);
-        return box
-
-
-
+        return new IncrementableNumberSettingBox(this);
     }
-
-
-
 }

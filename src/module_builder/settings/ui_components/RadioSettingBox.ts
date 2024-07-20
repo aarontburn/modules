@@ -106,6 +106,7 @@ export class RadioSettingBox extends SettingBox<string> {
                 display: inline-block;
                 visibility: visible;
                 transition: 0.2s;
+                cursor: pointer;
             }
 
             input[type='radio']:checked:after {

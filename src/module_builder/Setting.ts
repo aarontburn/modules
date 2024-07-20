@@ -74,7 +74,7 @@ export abstract class Setting<T> {
      * @throws Error if the name of the setting is already set.
      */
     public setName(name: string): Setting<T> {
-        if (this.name != undefined) {
+        if (this.name !== undefined) {
             throw new Error("Cannot reassign setting name for " + this.name);
         }
         this.name = name;

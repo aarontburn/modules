@@ -19,15 +19,15 @@ export class BooleanSetting extends Setting<boolean> {
 
 
     public validateInput(input: any): boolean | null {
-        if (input == null) {
+        if (input === null) {
             return null;
         }
 
-        if (typeof input == "boolean") {
+        if (typeof input === "boolean") {
             return input;
         }
 
-        const s: string = input.toString().toLowerCase();
+        const s: string = JSON.stringify(input).replace(/"/g, '');
 
         if (s === "true") {
             return true;

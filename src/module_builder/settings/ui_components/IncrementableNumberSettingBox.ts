@@ -11,10 +11,6 @@ import { NumberSettingBox } from "./NumberSettingBox";
  */
 export class IncrementableNumberSettingBox extends NumberSettingBox {
 
-    private min: number = 0;
-    private max: number = 100;
-    private step: number = 1;
-
 
     public constructor(setting: Setting<number>) {
         super(setting);
@@ -57,18 +53,6 @@ export class IncrementableNumberSettingBox extends NumberSettingBox {
 
     
 
-    public setInputRange(min: number = 0, max: number = 100): void {
-        if (min > max) {
-            throw new Error(`Attempted to set a greater min than max. Min: ${min} | Max: ${max}`);
-        }
-
-        this.min = min;
-        this.max = max;
-    }
-
-    public setInputStep(step: number): void {
-        this.step = step;
-    }
 
     public getInputIdAndType(): InputElement[] {
         return [

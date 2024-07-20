@@ -83,7 +83,7 @@ export class ModuleSettings {
      * 
      *  @param setting The setting to add.
      */
-    public addSetting(s: Setting<unknown> | string): void {
+    public _addSetting(s: Setting<unknown> | string): void {
         this.settingsDisplay.push(s);
         if (typeof s === 'string') {
             return;
@@ -109,19 +109,19 @@ export class ModuleSettings {
      * 
      *  @param settings The settings to add. 
      */
-    public addSettings(settings: (Setting<unknown> | string)[]): void {
-        settings.forEach(this.addSetting);
+    public _addSettings(settings: (Setting<unknown> | string)[]): void {
+        settings.forEach(this._addSetting);
     }
 
 
     /**
      *  Add multiple internal settings.
      * 
-     *  @see                addInternalSetting
+     *  @see                _addInternalSetting
      *  @param settings     An array of internal settings to add.
      */
-    public addInternalSettings(settings: Setting<unknown>[]): void {
-        settings.forEach(this.addInternalSetting);
+    public _addInternalSettings(settings: Setting<unknown>[]): void {
+        settings.forEach(this._addInternalSetting);
     }
 
 
@@ -133,7 +133,7 @@ export class ModuleSettings {
      * 
      *  @param setting  The internal setting to add.
      */
-    public addInternalSetting(setting: Setting<unknown>): void {
+    public _addInternalSetting(setting: Setting<unknown>): void {
         const settingID: string = setting.getAccessID();
         const settingName: string = setting.getName();
 

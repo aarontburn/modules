@@ -16,9 +16,8 @@ export class StringSetting extends Setting<string> {
 
 
     public validateInput(input: any): string | null {
-        const s: string = input.toString();
-        return s == "" ? null : s;
-
+        const s: string = JSON.stringify(input).replace(/"/g, '')
+        return s === "" ? null : s;
     }
 
     public setUIComponent(): SettingBox<string> {
