@@ -1,13 +1,13 @@
 import { BrowserWindow } from "electron";
 import * as path from "path";
-import { Process } from "./module_builder/Process";
 import { SettingsProcess } from "./built_ins/settings_module/SettingsProcess";
 import { HomeProcess } from "./built_ins/home_module/HomeProcess";
-import { IPCCallback, IPCSource } from "./module_builder/IPCObjects";
-import { StorageHandler } from "./module_builder/StorageHandler";
-import { ModuleSettings } from "./module_builder/ModuleSettings";
-import { Setting } from "./module_builder/Setting";
 import { ModuleCompiler } from "./ModuleCompiler";
+import { IPCSource, IPCCallback } from "module_builder/dist/IPCObjects";
+import { ModuleSettings } from "module_builder/dist/ModuleSettings";
+import { Process } from "module_builder/dist/Process";
+import { Setting } from "module_builder/dist/Setting";
+import { StorageHandler } from "module_builder/dist/StorageHandler";
 
 const WINDOW_DIMENSION: { width: number, height: number } = { width: 1920, height: 1080 } as const;
 
@@ -84,21 +84,6 @@ export class ModuleController implements IPCSource {
 
     }
 
-    private addConsoleCommands(): void {
-        this.ipcCallback.requestExternalModule(this, "aarontburn.Debug_Console", "addCommandPrefix", {
-            prefix: "installed_modules",
-            documentation: {
-                shortDescription: "Displays all installed module IDs.",
-            },
-            executeCommand: (args: string[] = []) => {
-                console.info(Array.from(this.modulesByIPCSource.keys()))
-            }
-        });
-    }
-
-
-
-
     private init(): void {
         const data: any[] = [];
         this.modulesByIPCSource.forEach((module: Process, _) => {
@@ -110,7 +95,6 @@ export class ModuleController implements IPCSource {
         });
         this.ipcCallback.notifyRenderer(this, 'load-modules', data);
         this.swapVisibleModule(HomeProcess.MODULE_ID);
-        this.addConsoleCommands();
 
     }
 

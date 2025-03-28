@@ -1,15 +1,16 @@
-import { app } from 'electron';
+import * as os from "os";
 import * as fs from 'fs';
 import * as path from 'path';
 import ts from 'typescript';
-import { IPCCallback } from './module_builder/IPCObjects';
-import { ModuleInfo, Process } from './module_builder/Process';
-import { StorageHandler } from './module_builder/StorageHandler';
 import * as yauzl from 'yauzl-promise';
 import { pipeline } from 'stream/promises';
+import { IPCCallback } from "module_builder/dist/IPCObjects";
+import { Process, ModuleInfo } from "module_builder/dist/Process";
+import { StorageHandler } from "module_builder/dist/StorageHandler";
+
 
 export class ModuleCompiler {
-    private static readonly PATH: string = app.getPath("home") + (!process.argv.includes('--dev') ? "/.modules/" : '/.modules_dev/');
+    private static readonly PATH: string = os.homedir() + (!process.argv.includes('--dev') ? "/.modules/" : '/.modules_dev/');
     private static readonly EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
     private static readonly COMPILED_MODULES_PATH: string = this.PATH + "/built/"
     private static readonly IO_OPTIONS: { encoding: BufferEncoding, withFileTypes: true } = {
@@ -196,9 +197,9 @@ export class ModuleCompiler {
                 const viewFolder: string = path.join(__dirname, "/view");
                 const relativeCSSPath: string = path.join(viewFolder, "colors.css");
                 const relativeFontPath: string = path.join(viewFolder, "Yu_Gothic_Light.ttf");
-                await fs.promises.mkdir(builtDirectory + "/module_builder/", { recursive: true })
-                await fs.promises.copyFile(relativeCSSPath, builtDirectory + "/module_builder/colors.css");
-                await fs.promises.copyFile(relativeFontPath, builtDirectory + "/module_builder/Yu_Gothic_Light.ttf");
+                // await fs.promises.mkdir(builtDirectory + "/module_builder/", { recursive: true })
+                await fs.promises.copyFile(relativeCSSPath, builtDirectory + "/node_modules/module_builder/colors.css");
+                await fs.promises.copyFile(relativeFontPath, builtDirectory + "/node_modules/module_builder/Yu_Gothic_Light.ttf");
     
 
             }
@@ -220,17 +221,11 @@ export class ModuleCompiler {
         for (const subFile of subFiles) {
             const fullSubFilePath: string = subFile.path + "/" + subFile.name;
 
-            if (path.extname(subFile.name) === ".ts") {
+            if (path.extname(subFile.name) === ".ts" && !subFile.name.endsWith(".d.ts")) {
                 await this.compile(fullSubFilePath, outputDirectory);
 
             } else if (subFile.isDirectory()) {
-
-                if (subFile.name === "module_builder") {
-                    await this.copyFromProd(__dirname + "/module_builder", `${outputDirectory}/${subFile.name}`);
-                    console.log(`Copied module_builder into ${outputDirectory}`);
-                } else {
-                    await this.compileAndCopyDirectory(readDirectory + "/" + subFile.name, outputDirectory + "/" + subFile.name);
-                }
+                await this.compileAndCopyDirectory(readDirectory + "/" + subFile.name, outputDirectory + "/" + subFile.name);
 
             } else if (path.extname(subFile.name) === ".html") {
                 await this.formatHTML(fullSubFilePath, `${outputDirectory}/${subFile.name}`);
@@ -244,6 +239,7 @@ export class ModuleCompiler {
 
 
     private static async copyFromProd(sourcePath: string, destinationPath: string) {
+        console.log(sourcePath)
         await fs.promises.mkdir(destinationPath, { recursive: true })
 
         const files: string[] = await fs.promises.readdir(sourcePath);
@@ -318,7 +314,7 @@ export class ModuleCompiler {
                     if (href.substring(0, 4) !== "href") {
                         throw new Error("Could not parse css line: " + css);
                     }
-                    const replacedCSS: string = href.replace("../../", "./module_builder/");
+                    const replacedCSS: string = href.replace("../../", "./node_modules/module_builder/");
                     const finalCSS: string = `\t<link rel="stylesheet" ${replacedCSS}">`
                     lines[i + 1] = finalCSS
 

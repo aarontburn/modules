@@ -1,18 +1,14 @@
-import { Setting } from "../../module_builder/Setting";
-import { ModuleInfo, Process } from "../../module_builder/Process";
 import * as path from "path";
 import * as fs from 'fs';
-import { ModuleSettings } from "../../module_builder/ModuleSettings";
-import { ChangeEvent, InputElement, SettingBox } from "../../module_builder/SettingBox";
-import { HexColorSetting } from "../../module_builder/settings/types/HexColorSetting";
-import { StorageHandler } from "../../module_builder/StorageHandler";
-import { IPCCallback, IPCSource } from "../../module_builder/IPCObjects";
 import { BrowserWindow, OpenDialogOptions, app, dialog, shell } from 'electron';
-import { BooleanSetting } from "../../module_builder/settings/types/BooleanSetting";
-import { NumberSetting } from "../../module_builder/settings/types/NumberSetting";
 import { ModuleCompiler } from "../../ModuleCompiler";
-
-
+import { IPCCallback, IPCSource } from "module_builder/dist/IPCObjects";
+import { ModuleSettings } from "module_builder/dist/ModuleSettings";
+import { Process, ModuleInfo } from "module_builder/dist/Process";
+import { Setting } from "module_builder/dist/Setting";
+import { SettingBox, ChangeEvent } from "module_builder/dist/SettingBox";
+import { BooleanSetting, HexColorSetting, NumberSetting } from "module_builder/dist/settings/types";
+import { StorageHandler } from "module_builder/dist/StorageHandler";
 
 export class SettingsProcess extends Process {
     public static readonly MODULE_NAME: string = "Settings";

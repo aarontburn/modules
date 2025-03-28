@@ -1,9 +1,8 @@
-import { Setting } from "../../module_builder/Setting";
-import { Process } from "../../module_builder/Process";
-import { NumberSetting } from "../../module_builder/settings/types/NumberSetting";
-import { StringSetting } from "../../module_builder/settings/types/StringSetting";
+import { IPCCallback } from "module_builder/dist/IPCObjects";
+import { Process } from "module_builder/dist/Process";
+import { Setting } from "module_builder/dist/Setting";
+import { NumberSetting, StringSetting } from "module_builder/dist/settings/types";
 import * as path from "path";
-import { IPCCallback } from "../../module_builder/IPCObjects";
 
 
 
@@ -53,6 +52,7 @@ export class HomeProcess extends Process {
 		// Start clock
 		this.updateDateAndTime(false);
 
+
 		this.clockTimeout = setTimeout(() => this.updateDateAndTime(true), 1000 - new Date().getMilliseconds());
 		
 	}
@@ -84,6 +84,7 @@ export class HomeProcess extends Process {
 			this.clockTimeout = setTimeout(() => this.updateDateAndTime(true), 1000);
 		}
 	}
+	
 
 	public registerSettings(): (Setting<unknown> | string)[] {
 		return [
@@ -144,8 +145,8 @@ export class HomeProcess extends Process {
 	private static DATE_TIME_IDS: string[] = ['full_date_fs', 'abbr_date_fs', 'standard_time_fs', 'military_time_fs'];
 
 
-	public refreshSettings(modifiedSetting: Setting<unknown>): void {
-		if (HomeProcess.DATE_TIME_IDS.includes(modifiedSetting.getAccessID())) {
+	public refreshSettings(modifiedSetting?: Setting<unknown>): void {
+		if (HomeProcess.DATE_TIME_IDS.includes(modifiedSetting?.getAccessID())) {
 			const sizes: object = {
 				fullDate: this.getSettings().getSetting('full_date_fs').getValue(),
 				abbrDate: this.getSettings().getSetting('abbr_date_fs').getValue(),
@@ -153,7 +154,7 @@ export class HomeProcess extends Process {
 				militaryTime: this.getSettings().getSetting('military_time_fs').getValue()
 			};
 			this.sendToRenderer('font-sizes', sizes);
-		} else if (modifiedSetting.getAccessID() === 'display_order') {
+		} else if (modifiedSetting?.getAccessID() === 'display_order') {
 			const order: string = this.getSettings().getSetting("display_order").getValue() as string
 			this.sendToRenderer('display-order', order);
 		}
