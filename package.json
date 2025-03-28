@@ -18,10 +18,10 @@
     "electron": "^28.0.0",
     "electron-builder": "^24.13.3",
     "eslint": "^7.32.0",
-    "module_builder": "github:aarontburn/modules-module-builder#main",
     "typescript": "^4.8.3"
   },
   "dependencies": {
+    "module_builder": "github:aarontburn/modules-module-builder#main",
     "typescript": "^4.8.3",
     "yauzl-promise": "^4.0.0"
   },
