@@ -9,7 +9,7 @@ import { ModuleSettings } from "./module_builder/ModuleSettings";
 import { Setting } from "./module_builder/Setting";
 import { ModuleCompiler } from "./ModuleCompiler";
 
-const WINDOW_DIMENSION: { width: number, height: number } = { width: 1920, height: 1080 };
+const WINDOW_DIMENSION: { width: number, height: number } = { width: 1920, height: 1080 } as const;
 
 
 export class ModuleController implements IPCSource {
@@ -17,7 +17,7 @@ export class ModuleController implements IPCSource {
     private static isDev = false;
 
     private readonly ipc: Electron.IpcMain;
-    private readonly modulesByIPCSource: Map<string, Process> = new Map();
+    private modulesByIPCSource: Map<string, Process> = new Map();
 
     private settingsModule: SettingsProcess;
     private window: BrowserWindow;
@@ -29,6 +29,7 @@ export class ModuleController implements IPCSource {
     private ipcCallback: IPCCallback;
 
 
+
     public static isDevelopmentMode(): boolean {
         return this.isDev;
     }
@@ -37,8 +38,8 @@ export class ModuleController implements IPCSource {
         if (args.includes("--dev")) {
             ModuleController.isDev = true;
         }
-
         this.ipc = ipcHandler;
+
     }
 
     public getIPCSource(): string {
@@ -47,17 +48,16 @@ export class ModuleController implements IPCSource {
 
     public start(): void {
         this.createBrowserWindow();
+        this.handleMainEvents();
+
         this.settingsModule = new SettingsProcess(this.ipcCallback, this.window);
 
-        this.handleMainEvents();
         this.registerModules().then(() => {
             if (this.rendererReady) {
                 this.init();
             } else {
                 this.initReady = true;
             }
-
-            this.checkSettings();
 
             const settings: ModuleSettings = this.settingsModule.getSettings();
             this.window.setBounds({
@@ -73,34 +73,31 @@ export class ModuleController implements IPCSource {
 
             this.window.show();
         });
+
+
+        // Refresh listener
+        setTimeout(() => {
+            this.window.webContents.on("did-finish-load", () => {
+                this.init();
+            });
+        }, 500);
+
     }
 
-    private checkSettings(): void {
-        this.modulesByIPCSource.forEach((module: Process, _) => {
-            if (module === this.settingsModule) {
-                return;
-            }
-            this.checkModuleSettings(module);
-        });
-
-    }
-
-    private checkModuleSettings(module: Process) {
-        const settingsMap: Map<string, any> = StorageHandler.readSettingsFromModuleStorage(module);
-
-        const moduleSettings: ModuleSettings = module.getSettings();
-        settingsMap.forEach((settingValue: any, settingName: string) => {
-            const setting: Setting<unknown> = moduleSettings.getSetting(settingName);
-            if (setting === undefined) {
-                console.log("WARNING: Invalid setting name: '" + settingName + "' found.");
-            } else {
-                setting.setValue(settingValue);
+    private addConsoleCommands(): void {
+        this.ipcCallback.requestExternalModule(this, "aarontburn.Debug_Console", "addCommandPrefix", {
+            prefix: "installed_modules",
+            documentation: {
+                shortDescription: "Displays all installed module IDs.",
+            },
+            executeCommand: (args: string[] = []) => {
+                console.info(Array.from(this.modulesByIPCSource.keys()))
             }
         });
-
-        StorageHandler.writeModuleSettingsToStorage(module);
-        this.settingsModule.addModuleSetting(module.getSettings());
     }
+
+
+
 
     private init(): void {
         const data: any[] = [];
@@ -113,6 +110,8 @@ export class ModuleController implements IPCSource {
         });
         this.ipcCallback.notifyRenderer(this, 'load-modules', data);
         this.swapVisibleModule(HomeProcess.MODULE_ID);
+        this.addConsoleCommands();
+
     }
 
     private handleMainEvents(): void | Promise<any> {
@@ -169,6 +168,7 @@ export class ModuleController implements IPCSource {
             height: WINDOW_DIMENSION.height,
             width: WINDOW_DIMENSION.width,
             webPreferences: {
+                additionalArguments: process.argv,
                 devTools: ModuleController.isDevelopmentMode(),
                 backgroundThrottling: false,
                 preload: path.join(__dirname, "preload.js"),
@@ -189,6 +189,8 @@ export class ModuleController implements IPCSource {
             },
             requestExternalModule: this.handleInterModuleCommunication.bind(this) // Not sure if the binding is required
         }
+
+
     }
 
     private async handleInterModuleCommunication(source: IPCSource, targetModuleID: string, eventType: string, ...data: any[]) {
@@ -212,7 +214,8 @@ export class ModuleController implements IPCSource {
         this.addModule(new HomeProcess(this.ipcCallback));
         this.addModule(this.settingsModule);
 
-        this.checkModuleSettings(this.settingsModule);
+
+        this.settingsModule.addModuleSetting(this.verifyModuleSettings(this.settingsModule));
 
         const forceReload: boolean = this.settingsModule
             .getSettings()
@@ -232,12 +235,10 @@ export class ModuleController implements IPCSource {
             });
     }
 
-
     private addModule(module: Process): void {
-        const map: Map<string, Process> = new Map();
         const moduleID: string = module.getIPCSource();
 
-        const existingIPCProcess: Process = map.get(moduleID);
+        const existingIPCProcess: Process = this.modulesByIPCSource.get(moduleID);
         if (existingIPCProcess !== undefined) {
             console.error("WARNING: Modules with duplicate IDs have been found.");
             console.error(`ID: ${moduleID} | Registered Module: ${existingIPCProcess.getName()} | New Module: ${module.getName()}`);
@@ -251,7 +252,27 @@ export class ModuleController implements IPCSource {
         this.ipc.handle(moduleID, (_, eventType: string, ...data: any[]) => {
             return module.handleEvent(eventType, ...data);
         });
-
+        this.settingsModule.addModuleSetting(this.verifyModuleSettings(module));
     }
+
+    private verifyModuleSettings(module: Process): Process {
+        const settingsMap: Map<string, any> = StorageHandler.readSettingsFromModuleStorage(module);
+
+        const moduleSettings: ModuleSettings = module.getSettings();
+        settingsMap.forEach((settingValue: any, settingName: string) => {
+            const setting: Setting<unknown> = moduleSettings.getSetting(settingName);
+            if (setting === undefined) {
+                console.log("WARNING: Invalid setting name: '" + settingName + "' found.");
+            } else {
+                setting.setValue(settingValue);
+            }
+        });
+
+        StorageHandler.writeModuleSettingsToStorage(module);
+        return module;
+    }
+
+
+
 
 }

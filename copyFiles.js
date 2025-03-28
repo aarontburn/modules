@@ -3,6 +3,14 @@ const path = require("path")
 
 const PWD = path.join(__dirname, 'src');
 
+if (!process.argv.includes("--verbose")) {
+    // Mute all console.log
+    console.log = function (message) {
+        // original.apply(console, arguments);
+    }
+}
+
+
 // These are all the files to copy into the "dist" folder
 const pathsToCopy = [
     PWD + "/view",

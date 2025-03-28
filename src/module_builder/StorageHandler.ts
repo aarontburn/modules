@@ -107,10 +107,15 @@ export class StorageHandler {
             return settingMap;
         }
 
-        const json: any = JSON.parse(contents);
-        for (const settingName in json) {
-            settingMap.set(settingName, json[settingName]);
+        try {
+            const json: any = JSON.parse(contents);
+            for (const settingName in json) {
+                settingMap.set(settingName, json[settingName]);
+            }
+        } catch (err) {
+            console.error("Error parsing JSON for setting: " + module.getName())
         }
+ 
         return settingMap;
     }
 

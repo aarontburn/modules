@@ -12,3 +12,6 @@ contextBridge.exposeInMainWorld('ipc', {
 	}
 });
 
+contextBridge.exposeInMainWorld("common", {
+	args: process.argv
+});

@@ -299,10 +299,10 @@ export abstract class Process implements IPCSource {
      *  @returns            A Promise of the data to return.
      */
     public async handleExternal(source: IPCSource, eventType: string, ...data: any[]): Promise<any> {
-        console.log(`[${this._moduleName}]: External module, '${source.getIPCSource()}' requested data.'`);
-        console.log(`\tWith event type of: ${eventType}`);
-        console.log(`\tAnd data:`);
-        console.log(data);
+        console.warn(`[${this._moduleName}]: External module, '${source.getIPCSource()}' requested data.'`);
+        console.warn(`\tWith event type of: ${eventType}`);
+        console.warn(`\tAnd data:`);
+        console.warn(data);
         return null;
     }
 

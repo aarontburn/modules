@@ -8,7 +8,6 @@ import { StorageHandler } from './module_builder/StorageHandler';
 import * as yauzl from 'yauzl-promise';
 import { pipeline } from 'stream/promises';
 
-
 export class ModuleCompiler {
     private static readonly PATH: string = app.getPath("home") + (!process.argv.includes('--dev') ? "/.modules/" : '/.modules_dev/');
     private static readonly EXTERNAL_MODULES_PATH: string = this.PATH + "/external_modules/"
@@ -24,7 +23,7 @@ export class ModuleCompiler {
             await fs.promises.copyFile(filePath, `${this.EXTERNAL_MODULES_PATH}/${folderName}`);
             return true;
         } catch (err) {
-            console.log(err);
+            console.error(err);
             return false;
         }
     }
@@ -193,43 +192,17 @@ export class ModuleCompiler {
                 console.log("Removing " + builtDirectory);
                 await fs.promises.rm(builtDirectory, { force: true, recursive: true });
 
-                const subFiles: fs.Dirent[] = await fs.promises.readdir(moduleFolderPath, this.IO_OPTIONS);
+                await this.compileAndCopyDirectory(moduleFolderPath, builtDirectory);
+                const viewFolder: string = path.join(__dirname, "/view");
+                const relativeCSSPath: string = path.join(viewFolder, "colors.css");
+                const relativeFontPath: string = path.join(viewFolder, "Yu_Gothic_Light.ttf");
+                await fs.promises.mkdir(builtDirectory + "/module_builder/", { recursive: true })
+                await fs.promises.copyFile(relativeCSSPath, builtDirectory + "/module_builder/colors.css");
+                await fs.promises.copyFile(relativeFontPath, builtDirectory + "/module_builder/Yu_Gothic_Light.ttf");
+    
 
-                await fs.promises.mkdir(builtDirectory, { recursive: true });
-
-                for (const subFile of subFiles) {
-                    const fullSubFilePath: string = subFile.path + "/" + subFile.name;
-
-                    if (path.extname(subFile.name) === ".ts") {
-                        await this.compile(fullSubFilePath, builtDirectory);
-
-                    } else if (subFile.isDirectory()) {
-                        if (subFile.name === "module_builder") {
-                            await this.copyFromProd(__dirname + "/module_builder", `${builtDirectory}/${subFile.name}`);
-                            console.log(`Copied module_builder into ${builtDirectory}`);
-                        } else {
-                            await fs.promises.cp(subFile.path + "/" + subFile.name, `${builtDirectory}/${subFile.name}`, { recursive: true });
-                            console.log(`Copied ${subFile.name} into ${builtDirectory}`);
-                        }
-
-                    } else if (path.extname(subFile.name) === ".html") {
-                        await this.formatHTML(fullSubFilePath, `${builtDirectory}/${subFile.name}`);
-
-                        const viewFolder: string = path.join(__dirname, "/view");
-                        const relativeCSSPath: string = path.join(viewFolder, "colors.css");
-                        const relativeFontPath: string = path.join(viewFolder, "Yu_Gothic_Light.ttf");
-
-                        await fs.promises.mkdir(builtDirectory + "/module_builder/", { recursive: true })
-                        await fs.promises.copyFile(relativeCSSPath, builtDirectory + "/module_builder/colors.css");
-                        await fs.promises.copyFile(relativeFontPath, builtDirectory + "/module_builder/Yu_Gothic_Light.ttf");
-
-
-                    } else {
-                        await fs.promises.copyFile(fullSubFilePath, `${builtDirectory}/${subFile.name}`);
-                    }
-
-                }
             }
+
 
             console.log("All files compiled and copied successfully.");
         } catch (error) {
@@ -237,6 +210,36 @@ export class ModuleCompiler {
         }
 
         fs.rmSync(this.TEMP_ARCHIVE_PATH, { recursive: true, force: true });
+    }
+
+    private static async compileAndCopyDirectory(readDirectory: string, outputDirectory: string) {
+        const subFiles: fs.Dirent[] = await fs.promises.readdir(readDirectory, this.IO_OPTIONS);
+
+        await fs.promises.mkdir(outputDirectory, { recursive: true });
+
+        for (const subFile of subFiles) {
+            const fullSubFilePath: string = subFile.path + "/" + subFile.name;
+
+            if (path.extname(subFile.name) === ".ts") {
+                await this.compile(fullSubFilePath, outputDirectory);
+
+            } else if (subFile.isDirectory()) {
+
+                if (subFile.name === "module_builder") {
+                    await this.copyFromProd(__dirname + "/module_builder", `${outputDirectory}/${subFile.name}`);
+                    console.log(`Copied module_builder into ${outputDirectory}`);
+                } else {
+                    await this.compileAndCopyDirectory(readDirectory + "/" + subFile.name, outputDirectory + "/" + subFile.name);
+                }
+
+            } else if (path.extname(subFile.name) === ".html") {
+                await this.formatHTML(fullSubFilePath, `${outputDirectory}/${subFile.name}`);
+
+            } else {
+                await fs.promises.copyFile(fullSubFilePath, `${outputDirectory}/${subFile.name}`);
+            }
+
+        }
     }
 
 
@@ -300,6 +303,7 @@ export class ModuleCompiler {
 
 
     }
+
 
     private static async formatHTML(htmlPath: string, outputPath: string) {
         const contents: string = (await fs.promises.readFile(htmlPath)).toString();
